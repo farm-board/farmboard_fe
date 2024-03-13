@@ -1,9 +1,10 @@
-import { View, Text, Image, TextInput, TouchableOpacity } from 'react-native'
-import React, { useState } from 'react'
+import { View, Text, Image, TextInput, TouchableOpacity, Alert } from 'react-native'
+import React, { useState, useContext } from 'react'
 import { StatusBar } from 'expo-status-bar';
 import Animated, { FadeIn, FadeInUp, FadeOut, FadeInDown } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
+import { UserContext } from '../contexts/UserContext';
 
 export default function SignupScreen() {
     const [data, setData] = useState({
@@ -14,7 +15,20 @@ export default function SignupScreen() {
     
     const navigation = useNavigation();
 
+    const { setCurrentUser } = useContext(UserContext);
+
     const handleSubmit = () => {
+        if (data.password !== data.password_confirmation) {
+            Alert.alert(
+                "Password Error", // Title of the popup
+                "Passwords do not match!", // Message in the popup
+                [
+                    { text: "OK", onPress: () => console.log("OK Pressed") }
+                ]
+            );
+            return;
+        }
+
         const user = {
             user: {
               email: data.email,
@@ -25,13 +39,12 @@ export default function SignupScreen() {
 
         axios.post('http://localhost:4000/', user)
         .then(response => {
-            console.log(response)
+            setCurrentUser(response.data.data);
             navigation.push('Setup')
         })
         .catch(error => {
             console.log(error);
             console.log(error.message);
-            console.log(error.request);
         })
     }
   return (
