@@ -6,7 +6,6 @@ import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import { UserContext } from '../contexts/UserContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { CommonActions } from '@react-navigation/native';
 
 export default function LoginScreen() {
     const [data, setData] = useState({
@@ -30,16 +29,12 @@ export default function LoginScreen() {
         .then(response => {
             setCurrentUser(response.data.data);
             AsyncStorage.setItem('token', response.headers.authorization);
-        })
-        .then(() => {
-          navigation.dispatch(
-            CommonActions.reset({
-              index: 0,
-              routes: [
-                { name: 'Setup' },
-              ],
-            })
-          );
+            if (response.data.data.role_type === "no_role") {
+                navigation.push('Setup');
+            }
+            else {
+                navigation.push('Home');
+            }
         })
         .catch(error => {
             console.log(error);
@@ -98,8 +93,7 @@ export default function LoginScreen() {
                     <Text>Don't have an account?</Text>
                     <TouchableOpacity onPress={()=> navigation.push('SignUp')}>
                         <Text className="text-sky-600"> Sign Up</Text>
-                    </TouchableOpacity>
-                        
+                    </TouchableOpacity> 
                 </Animated.View>
             </View>
         </View>

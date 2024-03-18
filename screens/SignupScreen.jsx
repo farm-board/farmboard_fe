@@ -5,6 +5,7 @@ import Animated, { FadeIn, FadeInUp, FadeOut, FadeInDown } from 'react-native-re
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import { UserContext } from '../contexts/UserContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function SignupScreen() {
     const [data, setData] = useState({
@@ -15,7 +16,7 @@ export default function SignupScreen() {
     
     const navigation = useNavigation();
 
-    const { setCurrentUser } = useContext(UserContext);
+    const { currentUser, setCurrentUser } = useContext(UserContext);
 
     const handleSubmit = () => {
         if (data.password !== data.password_confirmation) {
@@ -35,12 +36,18 @@ export default function SignupScreen() {
               password: data.password,
               password_confirmation: data.password_confirmation
             }
-          };
+        };
 
         axios.post('http://localhost:4000/', user)
         .then(response => {
             setCurrentUser(response.data.data);
-            navigation.push('Setup')
+            AsyncStorage.setItem('token', response.headers.authorization);
+            if (response.data.data.role_type === "no_role") {
+                navigation.push('Setup');
+            }
+            else {
+                navigation.push('Home');
+            }
         })
         .catch(error => {
             console.log(error);
