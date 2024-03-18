@@ -7,10 +7,11 @@ import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import FarmForm from '../components/farm/FarmForm';
+import EmployeeForm from '../components/employee/EmployeeForm';
 
 
 export default function SetupScreen() {
-  const roleTypes = { 0: "no_role", 1: "farmer", 2: "employee" };
+  const roleTypes = { 0: "no_role", 1: "farm", 2: "employee" };
   const navigation = useNavigation();
   const { setCurrentUser, currentUser, logout, loading } = useContext(UserContext);
 
@@ -54,8 +55,8 @@ export default function SetupScreen() {
     <View className="bg-white h-full w-full">
       <StatusBar style="light" />
       <Image className="h-full w-full absolute" source={require('../assets/images/background.png')} />
-      <View className='h-full w-full flex justify-around pt-40 pb-20'>
-        <View className="flex items-center mx-4 space-y-4 pb-10">
+      <View className='h-full w-full flex justify-around pt-40'>
+        <View className="flex items-center mx-4 space-y-4 pb-5">
             {currentUser.role_type === "no_role" ? 
               <View className="h-full w-full flex items-center pt-60">
                   <Animated.Text entering={FadeInUp.duration(1000).springify()} className="text-black font-bold tracking-wider text-3xl pb-10">
@@ -79,11 +80,16 @@ export default function SetupScreen() {
             <View>
               <FarmForm/>
             </View>
+            : 
+            currentUser.role_type === "employee" ?
+            <View>
+              <EmployeeForm/>
+            </View>
             : null }
         </View>
         <Animated.View entering={FadeInDown.delay(1400).duration(1000).springify()} className="flex items-center mx-4 space-y-4 pt-10">
           <TouchableOpacity
-              className="w-full bg-red-800 p-3 rounded-2xl mb-3" onPress={handleLogout}>
+              className="w-full bg-red-800 p-3 rounded-2xl mb-20" onPress={handleLogout}>
               <Text className="text-xl font-bold text-white text-center">
                   Log Out
               </Text>
