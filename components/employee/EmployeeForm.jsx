@@ -38,7 +38,8 @@ export default function EmployeeForm() {
 
   const onSelectedItemsChange = (selectedItems) => {
     setSelectedItems(selectedItems);
-    setData({...data, skills: selectedItems});
+    const selectedSkills = skills.filter(skill => selectedItems.includes(skill.id)).map(skill => skill.name);
+    setData({...data, skills: selectedSkills});
   }
 
   const navigation = useNavigation();
