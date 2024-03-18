@@ -33,7 +33,7 @@ export default function LoginScreen() {
                 navigation.push('Setup');
             }
             else {
-                navigation.push('Home');
+                navigation.push('Profile');
             }
         })
         .catch(error => {

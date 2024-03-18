@@ -23,7 +23,7 @@ export default function FarmForm() {
     axios.put(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`, { farm: data})
     .then(response => {
       console.log(response.data);
-      navigation.push('Home');
+      navigation.push('Profile');
     })
     .catch(error => {
       console.log('Unable to register user', error);

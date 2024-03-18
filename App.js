@@ -5,6 +5,7 @@ import LoginScreen from './screens/LoginScreen';
 import SignupScreen from './screens/SignupScreen';
 import SetupScreen from './screens/SetupScreen';
 import HomeScreen from './screens/HomeScreen';
+import ProfileScreen from './screens/ProfileScreen';
 import { UserContext, UserProvider } from './contexts/UserContext';
 import { useContext } from 'react';
 
@@ -16,19 +17,23 @@ function App() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName='Login' screenOptions={{headerShown: false}}>
         {currentUser ? (
-          <>
-            <Stack.Screen name="Setup" component={SetupScreen} />
-            <Stack.Screen name="Home" component={HomeScreen} />
-          </>
+          <Stack.Navigator initialRouteName='Home' screenOptions={{headerShown: false}}>
+            <>
+              <Stack.Screen name="Setup" component={SetupScreen} />
+              <Stack.Screen name="Home" component={HomeScreen} />
+              <Stack.Screen name="Profile" component={ProfileScreen} />
+              
+            </>
+          </Stack.Navigator>
         ) : (
-          <>
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="SignUp" component={SignupScreen} />
-          </>
+          <Stack.Navigator initialRouteName='Login' screenOptions={{headerShown: false}}>
+            <>
+              <Stack.Screen name="Login" component={LoginScreen} />
+              <Stack.Screen name="SignUp" component={SignupScreen} />
+            </>
+          </Stack.Navigator>
         )}
-      </Stack.Navigator>
     </NavigationContainer>
   );
 }
