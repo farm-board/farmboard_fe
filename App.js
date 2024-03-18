@@ -9,33 +9,26 @@ import { UserContext, UserProvider } from './contexts/UserContext';
 import { useContext } from 'react';
 
 
-const AuthStack = createNativeStackNavigator();
-const MainStack = createNativeStackNavigator();
-
-function AuthNavigator() {
-  return (
-    <AuthStack.Navigator initialRouteName='Login' screenOptions={{headerShown: false}}>
-      <AuthStack.Screen name="Login" component={LoginScreen} />
-      <AuthStack.Screen name="SignUp" component={SignupScreen} />
-    </AuthStack.Navigator>
-  );
-}
-
-function MainNavigator() {
-  return (
-    <MainStack.Navigator initialRouteName='Home' screenOptions={{headerShown: false}}>
-      <MainStack.Screen name="Setup" component={SetupScreen} />
-      <MainStack.Screen name="Home" component={HomeScreen} />
-    </MainStack.Navigator>
-  );
-}
+const Stack = createNativeStackNavigator();
 
 function App() {
   const { currentUser } = useContext(UserContext);
 
   return (
     <NavigationContainer>
-      {currentUser ? <MainNavigator /> : <AuthNavigator />}
+      <Stack.Navigator initialRouteName='Login' screenOptions={{headerShown: false}}>
+        {currentUser ? (
+          <>
+            <Stack.Screen name="Setup" component={SetupScreen} />
+            <Stack.Screen name="Home" component={HomeScreen} />
+          </>
+        ) : (
+          <>
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="SignUp" component={SignupScreen} />
+          </>
+        )}
+      </Stack.Navigator>
     </NavigationContainer>
   );
 }

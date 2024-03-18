@@ -21,6 +21,9 @@ export default function HomeScreen() {
     <View className="bg-white h-full w-full">
       <Image className="h-full w-full absolute" source={require('../assets/images/background.png')} />
       <View className='h-full w-full flex justify-around pt-40 pb-20'>
+      <Animated.Text entering={FadeInUp.delay(200).duration(1000).springify()} className="text-white font-bold tracking-wider text-3xl">
+          Home you are currently logged in as: {currentUser.email }
+      </Animated.Text>
         <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} className="flex items-center mx-4 space-y-4 pb-10">
           <TouchableOpacity
               className="w-full bg-green-700 p-3 rounded-2xl mb-3" onPress={handleLogout}>
