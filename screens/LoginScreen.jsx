@@ -1,7 +1,7 @@
 import { View, Text, Image, TextInput, TouchableOpacity } from 'react-native'
 import React, { useState, useContext } from 'react'
 import { StatusBar } from 'expo-status-bar';
-import Animated, { FadeIn, FadeInUp, FadeOut, FadeInDown } from 'react-native-reanimated';
+import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import { UserContext } from '../contexts/UserContext';
@@ -83,7 +83,7 @@ export default function LoginScreen() {
                 </Animated.View>
                 <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} className="w-full">
                     <TouchableOpacity
-                       className="w-full bg-green-700 p-3 rounded-2xl mb-3" onPress={handleSubmit}>
+                       className="w-full bg-green-800 p-3 rounded-2xl mb-3" onPress={handleSubmit}>
                         <Text className="text-xl font-bold text-white text-center">
                             Login
                         </Text>

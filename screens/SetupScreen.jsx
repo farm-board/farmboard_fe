@@ -6,7 +6,7 @@ import { UserContext } from '../contexts/UserContext';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import FarmForm from '../components/farm/FarmForm';
+import FarmForm from '../components/Farm/FarmForm';
 import EmployeeForm from '../components/employee/EmployeeForm';
 
 
@@ -54,8 +54,8 @@ export default function SetupScreen() {
   return (
     <View className="bg-white h-full w-full">
       <StatusBar style="light" />
-      <Image className="h-full w-full absolute" source={require('../assets/images/background.png')} />
-      <View className='h-full w-full flex justify-around pt-40'>
+      <Image className="h-full w-full absolute" source={require('../assets/images/backgroundFullColor.png')} />
+      <View className='h-full w-full flex justify-around pt-24'>
         <View className="flex items-center mx-4 space-y-4 pb-5">
             {currentUser.role_type === "no_role" ? 
               <View className="h-full w-full flex items-center pt-60">

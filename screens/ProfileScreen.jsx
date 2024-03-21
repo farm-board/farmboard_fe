@@ -1,7 +1,7 @@
 import React, { useContext } from 'react'
 import { Text, View, Image, TouchableOpacity } from 'react-native'
 import { UserContext } from '../contexts/UserContext';
-import FarmProfile from '../components/farm/FarmProfile';
+import FarmProfile from '../components/Farm/FarmProfile';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { StatusBar } from 'expo-status-bar';
 import { useNavigation } from '@react-navigation/native';
@@ -19,7 +19,7 @@ export default function ProfileScreen() {
   return (
     <View className="bg-white h-full w-full">
       <StatusBar style="light" />
-      <Image className="h-full w-full absolute" source={require('../assets/images/background.png')} />
+      <Image className="h-full w-full absolute" source={require('../assets/images/backgroundFullColor.png')} />
       <View className='h-full w-full flex justify-around'>
         <View className="flex items-center mx-4 space-y-4 pb-5">
             { currentUser.role_type === "farm" ?
