@@ -1,13 +1,13 @@
 import React, { useState, useContext, useEffect } from 'react'
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
-import { Text, View, TextInput, TouchableOpacity, Image, ScrollView } from 'react-native'
+import { Text, View, TouchableOpacity, StyleSheet } from 'react-native'
 import { useNavigation } from '@react-navigation/native';
 import { UserContext } from '../../contexts/UserContext';
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import KeyboardAvoidingContainer from "../Containers/KeyboardAvoidingContainer";
 import StyledTextInput from "../Inputs/StyledTextInput";
-import Avatar from "../Profile/Avatar";
+import AvatarEdit from "../Profile/AvatarEdit";
 import UploadModal from '../Profile/UploadModal';
 import StyledText from '../Texts/StyledText';
 
@@ -110,65 +110,65 @@ export default function FarmForm() {
   }, []);
 
   return (
-    <KeyboardAvoidingContainer style={{paddingTop: 10, paddingBottom: 25, paddingHorizontal: 10}}>
-      <View className="flex items-center">
-          <Animated.Text entering={FadeInUp.duration(1000).springify()} className="pb-10">
-            <StyledText big className="text-center">
-              Fill in your details to get started with your Farm Profile:
-            </StyledText>
-          </Animated.Text>
-          <Animated.View entering={FadeInDown.delay(1000).duration(1000).springify()} className="mb-3">
-            <Avatar uri={data.image} onButtonPress={() => setModalVisible(true)} />
-          </Animated.View>
-          <Animated.View entering={FadeInDown.duration(1000).springify()} className="rounded-2xl w-full">
-            <StyledTextInput
-              placeholder="Name"
-              icon="account-outline"
-              label="Name:"
-              onChangeText={(text) => setData({...data, name: text})}
-            />
-          </Animated.View>
-          <Animated.View entering={FadeInDown.delay(200).duration(1000).springify()} className="rounded-2xl w-full">
-            <StyledTextInput
-              placeholder="City"
-              icon="city-variant-outline"
-              label="City:"
-              onChangeText={(text) => setData({...data, city: text})}
-            />
-          </Animated.View>
-          <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} className="rounded-2xl w-full">
-            <StyledTextInput
-              placeholder="State"
-              icon="star-box-outline"
-              label="State:"
-              onChangeText={(text) => setData({...data, state: text})}
-            />
-          </Animated.View>
-          <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} className="rounded-2xl w-full">
-             <StyledTextInput
-              placeholder="Zip Code"
-              icon="longitude"
-              label="Zip Code:"
-              onChangeText={(text) => setData({...data, zip_code: text})}
-            />
-          </Animated.View>
-          <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} className="rounded-2xl w-full mb-3">
+    <KeyboardAvoidingContainer style={styles.container} behavior="padding">
+      <View style={styles.content}>
+        <Animated.Text >
+          <StyledText entering={FadeInUp.duration(1000).springify()} big style={[styles.text, styles.pb10]}>
+            Fill in your details to get started with your Farm Profile:
+          </StyledText>
+        </Animated.Text>
+        <Animated.View entering={FadeInDown.delay(1000).duration(1000).springify()} style={styles.mb3}>
+            <AvatarEdit uri={data.image} onButtonPress={() => setModalVisible(true)} style={styles.avatarEdit}/>
+        </Animated.View>
+        <Animated.View entering={FadeInDown.duration(1000).springify()}style={styles.inputContainer}>
           <StyledTextInput
-            placeholder="Bio"
-            icon="pencil-outline"
-            multiline={true}
-            label="Bio:"
-            onChangeText={(text) => setData({...data, bio: text})}
+            placeholder="Name"
+            icon="account-outline"
+            label="Name:"
+            onChangeText={(text) => setData({ ...data, name: text })}
           />
-          </Animated.View>
-          <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} className="w-full">
-            <TouchableOpacity className="w-full bg-green-700 p-3 rounded-2xl mb-3" onPress={handleSubmit}>
-              <Text className="text-xl font-bold text-white text-center">
-                Submit
-              </Text>
-            </TouchableOpacity>
-          </Animated.View>
+        </Animated.View>
+        <Animated.View entering={FadeInDown.delay(200).duration(1000).springify()} style={styles.inputContainer}>
+          <StyledTextInput
+            placeholder="City"
+            icon="city-variant-outline"
+            label="City:"
+            onChangeText={(text) => setData({...data, city: text})}
+          />
+        </Animated.View>
+        <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.inputContainer}>
+          <StyledTextInput
+            placeholder="State"
+            icon="star-box-outline"
+            label="State:"
+            onChangeText={(text) => setData({...data, state: text})}
+          />
+        </Animated.View>
+        <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.inputContainer}>
+           <StyledTextInput
+            placeholder="Zip Code"
+            icon="longitude"
+            label="Zip Code:"
+            onChangeText={(text) => setData({...data, zip_code: text})}
+          />
+        </Animated.View>
+        <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputContainer}>
+        <StyledTextInput
+          placeholder="Bio"
+          icon="pencil-outline"
+          multiline={true}
+          label="Bio:"
+          onChangeText={(text) => setData({...data, bio: text})}
+        />
+        </Animated.View>
+        {/* Submit button */}
+        <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.submitButtonContainer}>
+          <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+            <Text style={styles.submitButtonText}>Submit</Text>
+          </TouchableOpacity>
+        </Animated.View>
       </View>
+      {/* UploadModal component */}
       <UploadModal
         modalVisible={modalVisible}
         onBackPress={() => {
@@ -177,8 +177,51 @@ export default function FarmForm() {
         onCameraPress={() => pickImage()}
         onGalleryPress={() => pickImage("gallery")}
         onRemovePress={() => removeImage()}
-      />
+    />
     </KeyboardAvoidingContainer>
-  )
-}
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    paddingBottom: 25,
+    paddingHorizontal: 10,
+  },
+  content: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  text: {
+    textAlign: 'center',
+  },
+  pb10: {
+    paddingBottom: 30,
+  },
+  mb3: {
+    marginBottom: 3,
+    marginTop: 25,
+  },
+  avatarEdit: {
+    // Styles for AvatarEdit component
+  },
+  inputContainer: {
+    width: '100%',
+  },
+  submitButtonContainer: {
+    width: '100%',
+    marginBottom: 3,
+  },
+  submitButton: {
+    backgroundColor: '#ECE3CE',
+    padding: 10,
+    borderRadius: 8,
+  },
+  submitButtonText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#3A4D39',
+    textAlign: 'center',
+  },
+});
 

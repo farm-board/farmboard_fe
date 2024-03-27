@@ -1,4 +1,4 @@
-import { View, Text, Image, TextInput, TouchableOpacity } from 'react-native'
+import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet } from 'react-native'
 import Animated, { FadeIn, FadeInUp, FadeOut, FadeInDown } from 'react-native-reanimated';
 import React, { useContext, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
@@ -14,10 +14,6 @@ export default function SetupScreen() {
   const roleTypes = { 0: "no_role", 1: "farm", 2: "employee" };
   const navigation = useNavigation();
   const { setCurrentUser, currentUser, logout, loading } = useContext(UserContext);
-
-  const handleLogout = () => {
-    logout(navigation);
-  };
 
   if (loading) {
     return <Text>Loading...</Text>;
@@ -52,50 +48,78 @@ export default function SetupScreen() {
   }
 
   return (
-    <View className="bg-white h-full w-full">
-      <StatusBar style="light" />
-      <Image className="h-full w-full absolute" source={require('../assets/images/backgroundFullColor.png')} />
-      <View className='h-full w-full flex justify-around pt-24'>
-        <View className="flex items-center mx-4 space-y-4 pb-5">
-            {currentUser.role_type === "no_role" ? 
-              <View className="h-full w-full flex items-center pt-60">
-                  <Animated.Text entering={FadeInUp.duration(1000).springify()} className="text-black font-bold tracking-wider text-3xl pb-10">
-                      Please Select your role:
-                  </Animated.Text>
-                  <TouchableOpacity entering={FadeInDown.delay(400).duration(1000).springify()}
-                    className="w-full bg-green-700 p-3 rounded-2xl mb-3" onPress={() => handleRoleChange(1)}>
-                    <Text className="text-xl font-bold text-white text-center">
-                        Farmer
-                    </Text>
-                </TouchableOpacity>
-                <TouchableOpacity entering={FadeInDown.delay(600).duration(1000).springify()}
-                    className="w-full bg-green-700 p-3 rounded-2xl mb-3" onPress={() => handleRoleChange(2)}>
-                    <Text className="text-xl font-bold text-white text-center">
-                        Employee
-                    </Text>
-                </TouchableOpacity>
-              </View>
-            : 
-            currentUser.role_type === "farm" ?
-            <View>
-              <FarmForm/>
-            </View>
-            : 
-            currentUser.role_type === "employee" ?
-            <View>
-              <EmployeeForm/>
-            </View>
-            : null }
-        </View>
-        <Animated.View entering={FadeInDown.delay(1400).duration(1000).springify()} className="flex items-center mx-4 space-y-4 pt-10">
-          <TouchableOpacity
-              className="w-full bg-red-800 p-3 rounded-2xl mb-20" onPress={handleLogout}>
-              <Text className="text-xl font-bold text-white text-center">
-                  Log Out
-              </Text>
-          </TouchableOpacity>
-        </Animated.View>
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" />
+      <View style={styles.contentContainer}>
+        {currentUser.role_type === "no_role" ? (
+          <View style={styles.introContainer}>
+            <Text style={styles.introText}>Welcome to FarmBoard! What will you be using this application for?</Text>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => handleRoleChange(1)}
+            >
+              <Text style={styles.buttonText}>I will be posting jobs</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => handleRoleChange(2)}
+            >
+              <Text style={styles.buttonText}>I will be applying for jobs</Text>
+            </TouchableOpacity>
+          </View>
+        ) : currentUser.role_type === "farm" ? (
+          <View>
+            <FarmForm />
+          </View>
+        ) : currentUser.role_type === "employee" ? (
+          <View>
+            <EmployeeForm />
+          </View>
+        ) : null}
       </View>
     </View>
-  )
-}
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#4F6F52',
+  },
+  backgroundImage: {
+    flex: 1,
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+  },
+  contentContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  introContainer: {
+    alignItems: 'center',
+  },
+  introText: {
+    color: '#ECE3CE',
+    fontWeight: 'bold',
+    fontSize: 30,
+    textAlign: 'center',
+    paddingBottom: 10,
+    margin: 10,
+  },
+  button: {
+    minWidth: '90%',
+    backgroundColor: '#ECE3CE',
+    padding: 12,
+    borderRadius: 20,
+    marginBottom: 10,
+    margin: 10,
+  },
+  buttonText: {
+    color: '#3A4D39',
+    fontSize: 22,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+});
