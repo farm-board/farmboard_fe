@@ -8,6 +8,7 @@ import HomeScreen from './screens/HomeScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import { UserContext, UserProvider } from './contexts/UserContext';
 import { useContext } from 'react';
+import ProfileEditScreen from './screens/ProfileEditScreen';
 
 
 const Stack = createNativeStackNavigator();
@@ -21,9 +22,9 @@ function App() {
           <Stack.Navigator initialRouteName='Home' screenOptions={{headerShown: false}}>
             <>
               <Stack.Screen name="Setup" component={SetupScreen} />
-              <Stack.Screen name="Home" component={HomeScreen} />
               <Stack.Screen name="Profile" component={ProfileScreen} />
-              
+              <Stack.Screen name="Home" component={HomeScreen} />
+              <Stack.Screen name="Profile Edit" component={ProfileEditScreen} />
             </>
           </Stack.Navigator>
         ) : (

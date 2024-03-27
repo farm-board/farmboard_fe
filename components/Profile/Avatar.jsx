@@ -1,6 +1,5 @@
-import { StyleSheet, TouchableOpacity, Image, View } from "react-native";
+import { StyleSheet, Image, View } from "react-native";
 import { colors } from "../../config/theme";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import placeholder from "./../../assets/images/FarmProfilePlaceholder.png";
 
@@ -8,8 +7,6 @@ const Avatar = ({
   uri,
   style,
   imgStyle,
-  onPress,
-  onButtonPress,
   aviOnly = false,
   ...props
 }) => {
@@ -18,7 +15,6 @@ const Avatar = ({
       style={[styles.container, { marginBottom: aviOnly ? 0 : 15 }, style]}
       {...props}
     >
-      <TouchableOpacity onPress={onPress}>
         <Image
           source={uri ? { uri } : placeholder}
           style={[
@@ -27,17 +23,6 @@ const Avatar = ({
             imgStyle,
           ]}
         />
-
-        {!aviOnly && (
-          <TouchableOpacity style={styles.editButton} onPress={onButtonPress}>
-            <MaterialCommunityIcons
-              name="camera-outline"
-              size={30}
-              color={colors.accent}
-            />
-          </TouchableOpacity>
-        )}
-      </TouchableOpacity>
     </View>
   );
 };
@@ -53,14 +38,6 @@ const styles = StyleSheet.create({
     height: 150,
     borderColor: colors.secondary,
     borderWidth: 5,
-  },
-  editButton: {
-    backgroundColor: colors.secondary,
-    borderRadius: 24,
-    padding: 8,
-    position: "absolute",
-    right: 5,
-    bottom: 5,
   },
 });
 

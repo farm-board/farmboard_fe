@@ -8,7 +8,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const onIOS = Platform.OS == "ios";
 
-const StyledTextInput = ({ label, icon, style, multiline, ...props }) => {
+const StyledTextInput = ({ label, icon, style, value, multiline, ...props }) => {
   const [inputBackgroundColor, setInputBackgroundColor] = useState(
     colors.secondary
   );
@@ -38,6 +38,7 @@ const StyledTextInput = ({ label, icon, style, multiline, ...props }) => {
         onFocus={customOnFocus}
         multiline={multiline}
         numberOfLines={multiline && 5}
+        value={value}
         style={[
           styles.inputField,
           multiline && styles.multilineInputField,

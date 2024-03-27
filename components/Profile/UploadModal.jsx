@@ -29,7 +29,7 @@ const UploadModal = ({
 
         {!isLoading && (
           <View style={[styles.modalView, { backgroundColor: colors.modalBackground }]}>
-            <StyledText big style={{ marginBottom: 10 }}>
+            <StyledText big style={{ marginBottom: 10, color: '#ECE3CE' }}>
               Profile Photo
             </StyledText>
 
@@ -43,7 +43,7 @@ const UploadModal = ({
                   size={30}
                   color={colors.accent}
                 />
-                <StyledText small>Camera</StyledText>
+                <StyledText small style={{color: "#3A4D39"}}>Camera</StyledText>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -55,7 +55,7 @@ const UploadModal = ({
                   size={30}
                   color={colors.accent}
                 />
-                <StyledText small>Gallery</StyledText>
+                <StyledText small style={{color: "#3A4D39"}}>Gallery</StyledText>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -67,7 +67,7 @@ const UploadModal = ({
                   size={30}
                   color={colors.tertiary}
                 />
-                <StyledText small>Remove</StyledText>
+                <StyledText small style={{color: "#3A4D39"}}>Remove</StyledText>
               </TouchableOpacity>
             </View>
           </View>
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
     paddingTop: 15,
   },
   optionBtn: {
-    backgroundColor: colors.secondary,
+    backgroundColor: "#ECE3CE",
     borderRadius: 15,
     padding: 10,
     paddingHorizontal: 15,
