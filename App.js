@@ -21,8 +21,8 @@ function App() {
         {currentUser ? (
           <Stack.Navigator initialRouteName='Home' screenOptions={{headerShown: false}}>
             <>
-              <Stack.Screen name="Setup" component={SetupScreen} />
               <Stack.Screen name="Profile" component={ProfileScreen} />
+              <Stack.Screen name="Setup" component={SetupScreen} />
               <Stack.Screen name="Home" component={HomeScreen} />
               <Stack.Screen name="Profile Edit" component={ProfileEditScreen} />
             </>
