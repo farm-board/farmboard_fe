@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react'
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
-import { Text, View, TouchableOpacity, StyleSheet } from 'react-native'
+import { Text, View, TextInput, TouchableOpacity, StyleSheet } from 'react-native'
 import { useNavigation } from '@react-navigation/native';
 import { UserContext } from '../../contexts/UserContext';
 import axios from 'axios';
@@ -13,7 +13,7 @@ import StyledText from '../Texts/StyledText';
 import SkillSelect from '../../components/skills/SkillSelect';
 
 
-export default function EmployeeForm() {
+export default function EmployeeProfileEdit() {
   const [modalVisible, setModalVisible] = useState(false);
   const [data, setData] = useState({
     first_name: '',
@@ -100,26 +100,40 @@ export default function EmployeeForm() {
     }
   };
 
-  const fetchProfileImage = async () => {
-    try {
-      let response = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/image`);
-      setData({ ...data, image: response.data.image_url });
-    } catch (error) {
-      console.log('Unable to fetch profile image', error);
-    }
+  const fetchProfileData = async () => {
+    Promise.all([
+      axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`),
+      axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/image`)
+    ])
+    .then(([employeeResponse, imageResponse]) => {
+      setData({
+        ...data,
+        first_name: employeeResponse.data.data.attributes.first_name,
+        last_name: employeeResponse.data.data.attributes.last_name,
+        city: employeeResponse.data.data.attributes.city,
+        state: employeeResponse.data.data.attributes.state,
+        zip_code: employeeResponse.data.data.attributes.zip_code,
+        skills: employeeResponse.data.data.attributes.skills,
+        bio: employeeResponse.data.data.attributes.bio,
+        age: employeeResponse.data.data.attributes.age,
+        image: imageResponse.data.image_url
+      })
+    })
+    .catch(error => {
+      console.error('There was an error fetching the farm:', error);
+    });
   };
 
   useEffect(() => {
-    fetchProfileImage();
+    fetchProfileData()
   }, []);
 
   return (
-    <KeyboardAvoidingContainer style={styles.container}
-    behavior="padding">
+    <KeyboardAvoidingContainer style={styles.container} behavior="padding">
       <View style={styles.content}>
-      <Animated.Text >
+        <Animated.Text >
           <StyledText entering={FadeInUp.duration(1000).springify()} big style={[styles.text, styles.pb10]}>
-            Fill in your details to get started with your Profile:
+            Edit your profile:
           </StyledText>
         </Animated.Text>
         <Animated.View entering={FadeInDown.delay(1000).duration(1000).springify()} style={styles.mb3}>
@@ -130,6 +144,7 @@ export default function EmployeeForm() {
               placeholder="First Name"
               icon="account-outline"
               label="First Name:"
+              value={data.first_name}
               onChangeText={(text) => setData({...data, first_name: text})}
             />
         </Animated.View>
@@ -138,6 +153,7 @@ export default function EmployeeForm() {
               placeholder="Last Name"
               icon="account-outline"
               label="Last Name:"
+              value={data.last_name}
               onChangeText={(text) => setData({...data, last_name: text})}
             />
         </Animated.View>
@@ -146,6 +162,7 @@ export default function EmployeeForm() {
               placeholder="City"
               icon="city-variant-outline"
               label="City:"
+              value={data.city}
               onChangeText={(text) => setData({...data, city: text})}
             />
         </Animated.View>
@@ -154,6 +171,7 @@ export default function EmployeeForm() {
               placeholder="State"
               icon="star-box-outline"
               label="State:"
+              value={data.state}
               onChangeText={(text) => setData({...data, state: text})}
             />
         </Animated.View>
@@ -162,6 +180,7 @@ export default function EmployeeForm() {
               placeholder="Zip Code"
               icon="longitude"
               label="Zip Code:"
+              value={data.zip_code}
               onChangeText={(text) => setData({...data, zip_code: text})}
             />
         </Animated.View>
@@ -170,6 +189,7 @@ export default function EmployeeForm() {
               placeholder="Age"
               icon="cake"
               label="Age:"
+              value={data.age}
               onChangeText={(text) => setData({...data, age: text})}
             />
         <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputContainer}>
@@ -178,6 +198,7 @@ export default function EmployeeForm() {
             icon="pencil-outline"
             multiline={true}
             label="Bio:"
+            value={data.bio}
             onChangeText={(text) => setData({...data, bio: text})}
           />
         </Animated.View>
@@ -186,6 +207,7 @@ export default function EmployeeForm() {
         <Text style={{ alignSelf: 'flex-start', color: 'white', marginBottom: 5 }}>Relevant Skills:</Text>
             <SkillSelect selectedItems={selectedItems} onSelectedItemsChange={onSelectedItemsChange} />
         </Animated.View>
+        {/* Submit button */}
         <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.submitButtonContainer}>
             <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
               <Text style={styles.submitButtonText}>
@@ -193,8 +215,9 @@ export default function EmployeeForm() {
               </Text>
             </TouchableOpacity>
         </Animated.View>
-    </View>
-    <UploadModal
+      </View>
+      {/* UploadModal component */}
+      <UploadModal
         modalVisible={modalVisible}
         onBackPress={() => {
           setModalVisible(false);
@@ -205,7 +228,7 @@ export default function EmployeeForm() {
     />
     </KeyboardAvoidingContainer>
   )
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -216,6 +239,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    minWidth: '100%',
   },
   text: {
     textAlign: 'center',

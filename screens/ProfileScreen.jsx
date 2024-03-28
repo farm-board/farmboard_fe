@@ -1,10 +1,12 @@
 import React, { useContext } from 'react'
-import { Text, View, Image, TouchableOpacity } from 'react-native'
+import { Text, View, Image, TouchableOpacity, StyleSheet } from 'react-native'
 import { UserContext } from '../contexts/UserContext';
 import FarmProfile from '../components/Farm/FarmProfile';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { StatusBar } from 'expo-status-bar';
 import { useNavigation } from '@react-navigation/native';
+import EmployeeForm from '../components/employee/EmployeeForm';
+import EmployeeProfile from '../components/employee/EmployeeProfile';
 import StyledText from '../components/Texts/StyledText';
 
 export default function ProfileScreen() {
@@ -22,11 +24,9 @@ export default function ProfileScreen() {
   }
 
   return (
-    <View className="bg-white h-full w-full">
-      <StatusBar style="light" />
-      <Image className="h-full w-full absolute" source={require('../assets/images/backgroundFullColor.png')} />
-      <View className='h-full w-full flex justify-around'>
-        <View className="flex items-center mx-4 space-y-4">
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" />
+      <View style={styles.content}>
           <Animated.Text entering={FadeInUp.duration(1000).springify()} className="pt-10">
             <StyledText bold className="text-center">
               Profile
@@ -39,7 +39,7 @@ export default function ProfileScreen() {
             : 
             currentUser.role_type === "employee" ?
             <View>
-              <Text>Employee Profile</Text>
+              <EmployeeProfile/>
             </View>
             : null }
         </View>
@@ -58,6 +58,19 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </Animated.View>
       </View>
-    </View>
   )
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#4F6F52',
+    paddingLeft: 5,
+  },
+  content: {
+    flex: 1,
+    alignItems: 'center',
+    marginTop: 50,
+    justifyContent: 'center',
+  },
+});

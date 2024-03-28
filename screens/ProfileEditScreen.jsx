@@ -4,7 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { UserContext } from '../contexts/UserContext';
 import { useNavigation } from '@react-navigation/native';
 import FarmProfileEdit from '../components/Farm/FarmProfileEdit';
-import EmployeeForm from '../components/employee/EmployeeForm';
+import EmployeeProfileEdit from '../components/employee/EmployeeProfileEdit';
 
 
 export default function ProfileEditScreen() {
@@ -22,7 +22,7 @@ export default function ProfileEditScreen() {
         {currentUser.role_type === 'farm' ? (
           <FarmProfileEdit />
         ) : currentUser.role_type === 'employee' ? (
-          <EmployeeForm />
+          <EmployeeProfileEdit />
         ) : null}
       </View>
     </View>
