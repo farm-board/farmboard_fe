@@ -11,6 +11,8 @@ import AvatarEdit from "../Profile/AvatarEdit";
 import UploadModal from '../Profile/UploadModal';
 import StyledText from '../Texts/StyledText';
 import SkillSelect from '../../components/skills/SkillSelect';
+import ExperienceForm from '../Experience/ExperienceForm';
+import ReferenceForm from '../Reference/ReferenceForm';
 
 
 export default function EmployeeProfileEdit() {
@@ -26,6 +28,10 @@ export default function EmployeeProfileEdit() {
     age: '',
     image: null
   })
+  const [showExperienceForm, setShowExperienceForm] = useState(false);
+  const [experiences, setExperiences] = useState([]);
+  const [showReferencesForm, setShowReferencesForm] = useState(false);
+  const [references, setReferences] = useState([]);
 
   const [selectedItems, setSelectedItems] = useState([]);
 
@@ -47,6 +53,14 @@ export default function EmployeeProfileEdit() {
       console.log('Unable to register user', error);
     })
   }
+
+  const toggleExperienceForm = () => {
+    setShowExperienceForm(!showExperienceForm);
+  };
+
+  const toggleReferenceForm = () => {
+    setShowReferencesForm(!showReferencesForm);
+  };
 
   const pickImage = async (mode) => {
     try {
@@ -120,7 +134,7 @@ export default function EmployeeProfileEdit() {
       })
     })
     .catch(error => {
-      console.error('There was an error fetching the farm:', error);
+      console.error('There was an error fetching the employee:', error);
     });
   };
 
@@ -207,6 +221,22 @@ export default function EmployeeProfileEdit() {
         <Text style={{ alignSelf: 'flex-start', color: 'white', marginBottom: 5 }}>Relevant Skills:</Text>
             <SkillSelect selectedItems={selectedItems} onSelectedItemsChange={onSelectedItemsChange} />
         </Animated.View>
+      <View style={styles.content}>
+        <TouchableOpacity style={styles.toggleButton} onPress={toggleExperienceForm}>
+          <Text style={styles.toggleButtonText}>
+            {showExperienceForm ? 'Hide Experience Form' : 'Add Work Experience'}
+          </Text>
+        </TouchableOpacity>
+        {showExperienceForm && <ExperienceForm setExperiences={setExperiences} />}
+      </View>
+      <View style={styles.content}>
+        <TouchableOpacity style={styles.toggleButton} onPress={toggleReferenceForm}>
+          <Text style={styles.toggleButtonText}>
+            {showExperienceForm ? 'Hide Reference Form' : 'Add Reference'}
+          </Text>
+        </TouchableOpacity>
+        {showReferencesForm && <ReferenceForm setReferences={setReferences} />}
+      </View>
         {/* Submit button */}
         <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.submitButtonContainer}>
             <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
@@ -271,5 +301,18 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#3A4D39',
     textAlign: 'center',
+  },
+  toggleButton: {
+    backgroundColor: '#ECE3CE',
+    minWidth: '100%',
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  toggleButtonText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#3A4D39',
+    textAlign: 'center'
   },
 });
