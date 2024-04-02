@@ -1,13 +1,13 @@
 import { Text } from "react-native";
 import { colors } from "./../../config/theme";
 
-const StyledText = ({ children, small, big, bold, style, ...props }) => {
+const StyledText = ({ children, small, big, bold, style, tanColor, ...props }) => {
   return (
     <Text
       style={[
         {
-          color: colors?.primary,
-          fontSize: small ? 13 : big ? 24 : 15,
+          color: tanColor ? colors.highlight : colors?.primary,
+          fontSize: small ? 13 : big ? 20 : 15,
           fontWeight: big || bold ? "bold" : "normal",
           paddingBottom: 2,
         },

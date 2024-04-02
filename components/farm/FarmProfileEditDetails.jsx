@@ -10,12 +10,9 @@ import StyledTextInput from "../Inputs/StyledTextInput";
 import AvatarEdit from "../Profile/AvatarEdit";
 import UploadModal from '../Profile/UploadModal';
 import StyledText from '../Texts/StyledText';
-import ProfileInfo from '../Profile/ProfileInfo';
-import SectionHeader from '../Texts/SectionHeader';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 
-export default function FarmProfileEdit() {
+export default function FarmProfileEditDetails() {
   const [modalVisible, setModalVisible] = useState(false);
   const [data, setData] = useState({
     name: '',
@@ -28,6 +25,17 @@ export default function FarmProfileEdit() {
 
   const navigation = useNavigation();
   const { currentUser } = useContext(UserContext);
+
+  const handleSubmit = () => {
+    axios.put(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`, { farm: data})
+    .then(response => {
+      console.log(response.data);
+      navigation.push('Profile');
+    })
+    .catch(error => {
+      console.log('Unable to register user', error);
+    })
+  }
 
   const pickImage = async (mode) => {
     try {
@@ -115,87 +123,93 @@ export default function FarmProfileEdit() {
   return (
     <KeyboardAvoidingContainer style={styles.container} behavior="padding">
       <View style={styles.content}>
-        <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton}>
-          <MaterialCommunityIcons
-            name="arrow-left"
-            size={30}
-            color="#ECE3CE"
-            onPress={() => navigation.push("Profile")}
+        <Animated.Text >
+          <View style={styles.titleTextBox}>
+            <StyledText entering={FadeInUp.duration(1000).springify()} big style={styles.text}>
+              Edit Display Info:
+            </StyledText>
+          </View>
+        </Animated.Text>
+        <Animated.View entering={FadeInDown.duration(1000).springify()}style={styles.inputContainer}>
+          <StyledTextInput
+            placeholder="Name"
+            icon="account-outline"
+            label="Name:"
+            value={data.name}
+            onChangeText={(text) => setData({ ...data, name: text })}
           />
-        </TouchableOpacity>
-          <Animated.Text entering={FadeInUp.duration(1000).springify()}>
-            <StyledText bold tanColor style={[styles.text, styles.pb10]}>
-              Edit profile
-            </StyledText>
-          </Animated.Text>
-        </View>
-        <Animated.View entering={FadeInDown.delay(1000).duration(1000).springify()} style={styles.mb3}>
-            <AvatarEdit uri={data.image} onButtonPress={() => setModalVisible(true)} style={styles.avatarEdit}/>
         </Animated.View>
-        <View style={styles.inputContainer}>
-          <SectionHeader
-            option="Edit"
-            onPress={() =>
-              navigation.navigate("Farm Profile Edit Details")
-            }
-            >
-            Display Info
-          </SectionHeader>
-          <Animated.View entering={FadeInDown.duration(1000).springify()}style={styles.inputItem}>
-          <ProfileInfo label="Name" icon="account-outline">
-            <StyledText style={styles.existingData}>
-              {data.name.length > 15 ? `${data.name.substring(0, 15)}...` : data.name}
-            </StyledText>
-          </ProfileInfo>
-          </Animated.View>
-          <Animated.View entering={FadeInDown.delay(200).duration(1000).springify()} style={styles.inputItem}>
-          <ProfileInfo label="City" icon="city-variant-outline">
-            <StyledText style={styles.existingData}>{data.city}</StyledText>
-          </ProfileInfo>
-          </Animated.View>
-          <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.inputItem}>
-          <ProfileInfo label="State" icon="star-box-outline">
-            <StyledText style={styles.existingData}>{data.state}</StyledText>
-          </ProfileInfo>
-          </Animated.View>
-          <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.inputItem}>
-          <ProfileInfo label="Zip Code" icon="longitude">
-            <StyledText style={styles.existingData}>{data.zip_code}</StyledText>
-          </ProfileInfo>
-          </Animated.View>
-          <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputItem}>
-          <ProfileInfo label="About" icon="pencil-outline">
-            <StyledText style={styles.existingData}>
-            {data.bio.length > 15 ? `${data.bio.substring(0, 15)}...` : data.bio}
-            </StyledText>
-          </ProfileInfo>
-          </Animated.View>
-          {/* Submit button */}
-        </View>
-        {/* UploadModal component */}
-        <UploadModal
-          modalVisible={modalVisible}
-          onBackPress={() => {
-            setModalVisible(false);
-          }}
-          onCameraPress={() => pickImage()}
-          onGalleryPress={() => pickImage("gallery")}
-          onRemovePress={() => removeImage()}
+        <Animated.View entering={FadeInDown.delay(200).duration(1000).springify()} style={styles.inputContainer}>
+          <StyledTextInput
+            placeholder="City"
+            icon="city-variant-outline"
+            label="City:"
+            value={data.city}
+            onChangeText={(text) => setData({...data, city: text})}
+          />
+        </Animated.View>
+        <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.inputContainer}>
+          <StyledTextInput
+            placeholder="State"
+            icon="star-box-outline"
+            label="State:"
+            value={data.state}
+            onChangeText={(text) => setData({...data, state: text})}
+          />
+        </Animated.View>
+        <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.inputContainer}>
+           <StyledTextInput
+            placeholder="Zip Code"
+            icon="longitude"
+            label="Zip Code:"
+            value={data.zip_code}
+            onChangeText={(text) => setData({...data, zip_code: text})}
+          />
+        </Animated.View>
+        <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputContainer}>
+        <StyledTextInput
+          placeholder="Bio"
+          icon="pencil-outline"
+          multiline={true}
+          label="Bio:"
+          value={data.bio}
+          onChangeText={(text) => setData({...data, bio: text})}
         />
+        </Animated.View>
+        {/* Submit button */}
+        <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.submitButtonContainer}>
+          <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+            <Text style={styles.submitButtonText}>Save Changes</Text>
+          </TouchableOpacity>
+        </Animated.View>
       </View>
+      {/* UploadModal component */}
+      <UploadModal
+        modalVisible={modalVisible}
+        onBackPress={() => {
+          setModalVisible(false);
+        }}
+        onCameraPress={() => pickImage()}
+        onGalleryPress={() => pickImage("gallery")}
+        onRemovePress={() => removeImage()}
+    />
     </KeyboardAvoidingContainer>
   )
 };
 
 const styles = StyleSheet.create({
   container: {
+    paddingBottom: 25,
+    paddingHorizontal: 10,
   },
   content: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     minWidth: '100%',
+  },
+  titleTextBox: {
+    padding: 10,
   },
   text: {
     textAlign: 'center',
@@ -204,35 +218,25 @@ const styles = StyleSheet.create({
     marginTop: 25,
   },
   avatarEdit: {
-    backgroundColor: '#4F6F52',
-    padding: 30,
-    borderRadius: 100,
+    // Styles for AvatarEdit component
   },
   inputContainer: {
     width: '100%',
   },
-  existingData: {
-    color: '#3A4D39',
-  },
-  inputContainer: { 
-    backgroundColor: '#4F6F52',
+  submitButtonContainer: {
     width: '100%',
-    padding: 20,
+    marginBottom: 3,
   },
-  inputItem: {
-    minWidth: '100%',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-    paddingHorizontal: 20,
-  },
-  backButton: {
-    position: 'absolute',
-    left: 0,
+  submitButton: {
+    backgroundColor: '#ECE3CE',
     padding: 10,
+    borderRadius: 8,
+    marginTop: 20,
+  },
+  submitButtonText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#3A4D39',
+    textAlign: 'center',
   },
 });
-
