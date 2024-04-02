@@ -9,6 +9,7 @@ import ProfileScreen from './screens/ProfileScreen';
 import { UserContext, UserProvider } from './contexts/UserContext';
 import { useContext } from 'react';
 import ProfileEditScreen from './screens/ProfileEditScreen';
+import FarmProfileEditDetailsScreen from './screens/FarmProfileEditDetailsScreen';
 
 
 const Stack = createNativeStackNavigator();
@@ -25,6 +26,7 @@ function App() {
               <Stack.Screen name="Setup" component={SetupScreen} />
               <Stack.Screen name="Home" component={HomeScreen} />
               <Stack.Screen name="Profile Edit" component={ProfileEditScreen} />
+              <Stack.Screen name="Farm Profile Edit Details" component={FarmProfileEditDetailsScreen} />
             </>
           </Stack.Navigator>
         ) : (

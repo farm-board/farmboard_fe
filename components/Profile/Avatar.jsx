@@ -29,14 +29,17 @@ const Avatar = ({
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: "center",
+    marginStart: 20,
     position: "relative",
+    shadowRadius: 20,
+    shadowColor: 'black',
+    shadowOpacity: 0.5,
   },
   image: {
     borderRadius: 75,
     width: 150,
     height: 150,
-    borderColor: colors.secondary,
+    borderColor: "#ECE3CE",
     borderWidth: 5,
   },
 });
