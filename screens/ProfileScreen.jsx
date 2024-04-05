@@ -5,7 +5,6 @@ import FarmProfile from '../components/Farm/FarmProfile';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { StatusBar } from 'expo-status-bar';
 import { useNavigation } from '@react-navigation/native';
-import EmployeeForm from '../components/employee/EmployeeForm';
 import EmployeeProfile from '../components/employee/EmployeeProfile';
 import StyledText from '../components/Texts/StyledText';
 import KeyboardAvoidingContainer from '../components/Containers/KeyboardAvoidingContainer';
@@ -35,9 +34,9 @@ export default function ProfileScreen() {
           </KeyboardAvoidingContainer>
           :
           currentUser.role_type === "employee" ?
-            <View>
+          <KeyboardAvoidingContainer>
               <EmployeeProfile />
-            </View>
+          </KeyboardAvoidingContainer>
             : null}
       </View>
       <Animated.View entering={FadeInDown.delay(1400).duration(1000).springify()} style={styles.buttonContainer}>

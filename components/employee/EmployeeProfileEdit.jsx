@@ -10,7 +10,9 @@ import StyledTextInput from "../Inputs/StyledTextInput";
 import AvatarEdit from "../Profile/AvatarEdit";
 import UploadModal from '../Profile/UploadModal';
 import StyledText from '../Texts/StyledText';
-import SkillSelect from '../../components/skills/SkillSelect';
+import SectionHeader from '../Texts/SectionHeader';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import ProfileInfo from '../Profile/ProfileInfo';
 
 
 export default function EmployeeProfileEdit() {
@@ -26,6 +28,11 @@ export default function EmployeeProfileEdit() {
     age: '',
     image: null
   })
+  const [experiences, setExperiences] = useState([]);
+  const [references, setReferences] = useState([]);
+
+  const [experienceEditMode, setExperienceEditMode] = useState(false);
+  const [referenceEditMode, setReferenceEditMode] = useState(false);
 
   const [selectedItems, setSelectedItems] = useState([]);
 
@@ -37,16 +44,50 @@ export default function EmployeeProfileEdit() {
   const navigation = useNavigation();
   const { currentUser } = useContext(UserContext);
 
-  const handleSubmit = () => {
-    axios.put(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`, { employee: data})
-    .then(response => {
-      console.log(response.data);
-      navigation.push('Profile');
-    })
-    .catch(error => {
-      console.log('Unable to register user', error);
-    })
-  }
+  useEffect(() => {
+    fetchExperiences();
+  }, []);
+
+  const fetchExperiences = async () => {
+    try {
+      const response = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/experiences`);
+      const sortedExperiences = response.data.data.sort((a, b) => new Date(b.attributes.ended_at) - new Date(a.attributes.ended_at));
+      setExperiences(sortedExperiences.slice(0, 3));
+    } catch (error) {
+      console.error('Error fetching experiences:', error);
+    }
+  };
+
+  const deleteExperience = async (experienceId) => {
+    try {
+      await axios.delete(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/experiences/${experienceId}`);
+      fetchExperiences();
+    } catch (error) {
+      console.error('Error deleting experience:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchReferences();
+  }, []);
+
+  const fetchReferences = async () => {
+    try {
+      const response = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/references`);
+      setReferences
+    } catch (error) {
+      console.error('Error fetching references:', error);
+    }
+  };
+
+  const deleteReference = async (referenceId) => {
+    try {
+      await axios.delete(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/references/${referenceId}`);
+      fetchExperiences();
+    } catch (error) {
+      console.error('Error deleting references:', error);
+    }
+  };
 
   const pickImage = async (mode) => {
     try {
@@ -103,9 +144,13 @@ export default function EmployeeProfileEdit() {
   const fetchProfileData = async () => {
     Promise.all([
       axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`),
-      axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/image`)
+      axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/experiences`),
+      axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/references`),
+      axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/image`),
     ])
-    .then(([employeeResponse, imageResponse]) => {
+    .then(([employeeResponse, experiencesResponse, referencesResponse, imageResponse]) => {
+      setExperiences(experiencesResponse.data.data); 
+      setReferences(referencesResponse.data.data);
       setData({
         ...data,
         first_name: employeeResponse.data.data.attributes.first_name,
@@ -120,7 +165,7 @@ export default function EmployeeProfileEdit() {
       })
     })
     .catch(error => {
-      console.error('There was an error fetching the farm:', error);
+      console.error('There was an error fetching the employee:', error);
     });
   };
 
@@ -131,109 +176,154 @@ export default function EmployeeProfileEdit() {
   return (
     <KeyboardAvoidingContainer style={styles.container} behavior="padding">
       <View style={styles.content}>
-        <Animated.Text >
-          <StyledText entering={FadeInUp.duration(1000).springify()} big style={[styles.text, styles.pb10]}>
-            Edit your profile:
-          </StyledText>
-        </Animated.Text>
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.backButton}>
+            <MaterialCommunityIcons
+              name="arrow-left"
+              size={30}
+              color="#ECE3CE"
+              onPress={() => navigation.push("Profile")}
+            />
+          </TouchableOpacity>
+            <Animated.Text entering={FadeInUp.duration(1000).springify()}>
+              <StyledText bold tanColor style={[styles.text, styles.pb10]}>
+                Edit profile
+              </StyledText>
+            </Animated.Text>
+          </View>
         <Animated.View entering={FadeInDown.delay(1000).duration(1000).springify()} style={styles.mb3}>
             <AvatarEdit uri={data.image} onButtonPress={() => setModalVisible(true)} style={styles.avatarEdit}/>
         </Animated.View>
-        <Animated.View entering={FadeInDown.duration(1000).springify()}style={styles.inputContainer}>
-            <StyledTextInput
-              placeholder="First Name"
-              icon="account-outline"
-              label="First Name:"
-              value={data.first_name}
-              onChangeText={(text) => setData({...data, first_name: text})}
-            />
-        </Animated.View>
-        <Animated.View entering={FadeInDown.duration(1000).springify()} style={styles.inputContainer}>
-            <StyledTextInput
-              placeholder="Last Name"
-              icon="account-outline"
-              label="Last Name:"
-              value={data.last_name}
-              onChangeText={(text) => setData({...data, last_name: text})}
-            />
-        </Animated.View>
-        <Animated.View entering={FadeInDown.delay(200).duration(1000).springify()} style={styles.inputContainer}>
-            <StyledTextInput
-              placeholder="City"
-              icon="city-variant-outline"
-              label="City:"
-              value={data.city}
-              onChangeText={(text) => setData({...data, city: text})}
-            />
-        </Animated.View>
-        <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.inputContainer}>
-            <StyledTextInput
-              placeholder="State"
-              icon="star-box-outline"
-              label="State:"
-              value={data.state}
-              onChangeText={(text) => setData({...data, state: text})}
-            />
-        </Animated.View>
-        <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.inputContainer}>
-             <StyledTextInput
-              placeholder="Zip Code"
-              icon="longitude"
-              label="Zip Code:"
-              value={data.zip_code}
-              onChangeText={(text) => setData({...data, zip_code: text})}
-            />
-        </Animated.View>
-          <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputContainer}>
-            <StyledTextInput
-              placeholder="Age"
-              icon="cake"
-              label="Age:"
-              value={data.age}
-              onChangeText={(text) => setData({...data, age: text})}
-            />
-        <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputContainer}>
-          <StyledTextInput
-            placeholder="Bio"
-            icon="pencil-outline"
-            multiline={true}
-            label="Bio:"
-            value={data.bio}
-            onChangeText={(text) => setData({...data, bio: text})}
-          />
-        </Animated.View>
-        </Animated.View>
-        <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} >
-        <Text style={{ alignSelf: 'flex-start', color: 'white', marginBottom: 5 }}>Relevant Skills:</Text>
-            <SkillSelect selectedItems={selectedItems} onSelectedItemsChange={onSelectedItemsChange} />
-        </Animated.View>
-        {/* Submit button */}
-        <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.submitButtonContainer}>
-            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-              <Text style={styles.submitButtonText}>
-                Submit
-              </Text>
-            </TouchableOpacity>
-        </Animated.View>
+        <View style={styles.inputContainer}>
+          <SectionHeader
+            option="Edit"
+            onPress={() =>
+              navigation.navigate("Employee Profile Edit Details")
+            }
+            >
+            Display Info
+          </SectionHeader>
+          <Animated.View entering={FadeInDown.duration(1000).springify()}style={styles.inputItem}>
+          <ProfileInfo label="First Name" icon="account-outline">
+            <StyledText style={styles.existingData}>
+              {data.first_name.length > 15 ? `${data.first_name.substring(0, 15)}...` : data.first_name}
+            </StyledText>
+          </ProfileInfo>
+          </Animated.View>
+          <Animated.View entering={FadeInDown.delay(200).duration(1000).springify()} style={styles.inputItem}>
+          <ProfileInfo label="Last Name" icon="account-outline">
+            <StyledText style={styles.existingData}>{data.last_name}</StyledText>
+          </ProfileInfo>
+          </Animated.View>
+          <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.inputItem}>
+          <ProfileInfo label="City" icon="city-variant-outline">
+            <StyledText style={styles.existingData}>{data.city}</StyledText>
+          </ProfileInfo>
+          </Animated.View>
+          <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.inputItem}>
+          <ProfileInfo label="State" icon="star-box-outline">
+            <StyledText style={styles.existingData}>{data.state}</StyledText>
+          </ProfileInfo>
+          </Animated.View>
+          <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.inputItem}>
+          <ProfileInfo label="Zip Code" icon="longitude">
+            <StyledText style={styles.existingData}>{data.zip_code}</StyledText>
+          </ProfileInfo>
+          </Animated.View>
+          <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.inputItem}>
+          <ProfileInfo label="Age" icon="cake">
+            <StyledText style={styles.existingData}>{data.age}</StyledText>
+          </ProfileInfo>
+          </Animated.View>
+          <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputItem}>
+          <ProfileInfo label="About" icon="pencil-outline">
+            <StyledText style={styles.existingData}>
+            {data.bio.length > 15 ? `${data.bio.substring(0, 15)}...` : data.bio}
+            </StyledText>
+          </ProfileInfo>
+          </Animated.View>
+        </View>
+        <View style={styles.inputContainer}>
+            <SectionHeader
+              option={experienceEditMode ? 'Done' : 'Edit'}
+              onPress={() => setExperienceEditMode(!experienceEditMode)}
+            >
+              Experience Info
+            </SectionHeader>
+            {experiences.map((experience, index) => (
+              <Animated.View key={index} entering={FadeInDown.duration(1000).springify()} style={styles.inputItem}>
+                <ProfileInfo label="Company Name" icon="briefcase-outline">
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <StyledText style={styles.existingData}>
+                      {experience.attributes.company_name}
+                    </StyledText>
+                    {experienceEditMode && (
+                      <TouchableOpacity onPress={() => deleteExperience(experience.id)}>
+                        <MaterialCommunityIcons name="delete" size={24} color="red" />
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                </ProfileInfo>
+              </Animated.View>
+            ))}
+            {experienceEditMode && experiences.length < 3 && (
+              <TouchableOpacity
+                style={[styles.addButton, styles.bottomButton]}
+                onPress={() => navigation.navigate("Employee Profile Add Experiences")}
+              >
+                <Text style={styles.addButtonText}>Add Experience</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+          <View style={styles.inputContainer}>
+            <SectionHeader
+              option={referenceEditMode ? 'Done' : 'Edit'}
+              onPress={() => setReferenceEditMode(!referenceEditMode)}
+            >
+              Reference Info
+            </SectionHeader>
+            {references.map((reference, index) => (
+              <Animated.View key={index} entering={FadeInDown.duration(1000).springify()} style={styles.inputItem}>
+                <ProfileInfo label="Reference Name" icon="account-outline">
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <StyledText style={styles.existingData}>
+                      {reference.attributes.first_name}
+                    </StyledText>
+                    {referenceEditMode && (
+                      <TouchableOpacity onPress={() => deleteReference(reference.id)}>
+                        <MaterialCommunityIcons name="delete" size={24} color="red" />
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                </ProfileInfo>
+              </Animated.View>
+            ))}
+            {referenceEditMode && references.length < 3 && (
+              <TouchableOpacity
+                style={[styles.addButton, styles.bottomButton]}
+                onPress={() => navigation.navigate("Employee Profile Add References")}
+              >
+                <Text style={styles.addButtonText}>Add Reference</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        {/* UploadModal component */}
+        <UploadModal
+          modalVisible={modalVisible}
+          onBackPress={() => {
+            setModalVisible(false);
+          }}
+          onCameraPress={() => pickImage()}
+          onGalleryPress={() => pickImage("gallery")}
+          onRemovePress={() => removeImage()}
+        />
       </View>
-      {/* UploadModal component */}
-      <UploadModal
-        modalVisible={modalVisible}
-        onBackPress={() => {
-          setModalVisible(false);
-        }}
-        onCameraPress={() => pickImage()}
-        onGalleryPress={() => pickImage("gallery")}
-        onRemovePress={() => removeImage()}
-    />
     </KeyboardAvoidingContainer>
   )
 };
 
 const styles = StyleSheet.create({
   container: {
-    paddingBottom: 25,
-    paddingHorizontal: 10,
   },
   content: {
     flex: 1,
@@ -248,28 +338,51 @@ const styles = StyleSheet.create({
     paddingBottom: 30,
   },
   mb3: {
-    marginBottom: 3,
     marginTop: 25,
   },
   avatarEdit: {
-    // Styles for AvatarEdit component
+    backgroundColor: '#4F6F52',
+    padding: 30,
+    borderRadius: 100,
   },
   inputContainer: {
     width: '100%',
   },
-  submitButtonContainer: {
-    width: '100%',
-    marginBottom: 3,
-  },
-  submitButton: {
-    backgroundColor: '#ECE3CE',
-    padding: 10,
-    borderRadius: 8,
-  },
-  submitButtonText: {
-    fontSize: 20,
-    fontWeight: 'bold',
+  existingData: {
     color: '#3A4D39',
-    textAlign: 'center',
+  },
+  inputContainer: { 
+    backgroundColor: '#4F6F52',
+    width: '100%',
+    padding: 20,
+  },
+  inputItem: {
+    minWidth: '100%',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    paddingHorizontal: 20,
+  },
+  backButton: {
+    position: 'absolute',
+    left: 0,
+    padding: 10,
+  },
+  addButton: {
+    backgroundColor: '#ECE3CE',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 10, // Adjust the margin top as needed
+  },
+  addButtonText: {
+    color: '#4F6F52',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
