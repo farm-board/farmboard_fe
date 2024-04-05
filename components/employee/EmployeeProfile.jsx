@@ -3,9 +3,10 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { UserContext } from '../../contexts/UserContext';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
-import Animated from 'react-native-reanimated'; // Only importing Animated from react-native-reanimated
-import ExperienceForm from '../Experience/ExperienceForm';
 import Avatar from '../Profile/Avatar';
+import { MaterialCommunityIcons } from '@expo/vector-icons'
+import { colors } from '../../config/theme'
+import StyledText from '../Texts/StyledText'
 
 export default function EmployeeProfile() {
   const navigation = useNavigation();
@@ -13,7 +14,6 @@ export default function EmployeeProfile() {
   const [employee, setEmployee] = useState({});
   const [experiences, setExperiences] = useState([]);
   const [references, setReferences] = useState([]); 
-  const [showForm, setShowForm] = useState(false);
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [loading, setLoading] = useState(true); 
   const [expanded, setExpanded] = useState(false); 
@@ -43,17 +43,36 @@ export default function EmployeeProfile() {
     return <Text>Loading...</Text>; // Render loading indicator
   }
 
+  const onEditButtonPress = () => {
+    navigation.push('Profile Edit');
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.topSectionContainer}>
+        <TouchableOpacity style={styles.editButton} onPress={onEditButtonPress}>
+              <MaterialCommunityIcons
+                name="pencil-outline"
+                size={25}
+                color={colors.highlight}
+              />
+        </TouchableOpacity>
         <View style={styles.leftContent}>
-          <Animated.View style={styles.avatarContainer}>
-            <Avatar uri={profilePhoto} />
-          </Animated.View>
+          <View style={[styles.avatarContainer, styles.marginBottom3]}>
+              <Avatar uri={profilePhoto} />
+          </View>
         </View>
         <View style={styles.rightContent}>
-          <Text style={styles.name}>{`${employee.first_name} ${employee.last_name}`}</Text>
-          <Text style={styles.location}>{`${employee.city}, ${employee.state} ${employee.zip_code}`}</Text>
+          <Text style={styles.name}>
+            <StyledText big bold tanColor >
+              {`${employee.first_name} ${employee.last_name}`}
+            </StyledText>
+          </Text>
+          <Text style={styles.location}>
+            <StyledText tanColor >
+              {`${employee.city}, ${employee.state} ${employee.zip_code}`}
+            </StyledText>
+          </Text>
         </View>
       </View>
       <View style={styles.subContentContainer}>
@@ -106,7 +125,7 @@ export default function EmployeeProfile() {
                   <Text style={styles.experienceCompany}>{`${reference.attributes.first_name} ${reference.attributes.last_name}`}</Text>
 
                   <Text style={styles.label}>Contact:</Text>
-                  <Text style={styles.experienceCompany}>{`${reference.attributes.phone} / ${reference.attributes.email}`}</Text>
+                  <Text style={styles.experienceCompany}>{`${reference.attributes.phone}  ${reference.attributes.email}`}</Text>
 
                   <Text style={styles.label}>Relationship:</Text>
                   <Text style={styles.experienceCompany}>{reference.attributes.relationship}</Text>
@@ -231,6 +250,14 @@ const styles = StyleSheet.create({
   },
   label: {
     fontWeight: 'bold',
+  },
+  editButton: {
+    backgroundColor: "#739072",
+    borderRadius: 24,
+    padding: 8,
+    position: "absolute",
+    right: 15,
+    top: 15,
   },
 });
 
