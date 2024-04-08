@@ -2,10 +2,10 @@ import { View, Text, StyleSheet } from 'react-native'
 import React, { useContext } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { UserContext } from '../contexts/UserContext';
-import FarmProfileEditDetails from '../components/Farm/FarmProfileEditDetails';
+import FarmProfileEditAccommodations from '../components/Farm/FarmProfileEditAccommodations';
 
 
-export default function FarmProfileEditDetailsScreen() {
+export default function FarmProfileEditAccommodationsScreen() {
   const { loading } = useContext(UserContext);
 
   if (loading) {
@@ -16,7 +16,7 @@ export default function FarmProfileEditDetailsScreen() {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
       <View style={styles.content}>
-        <FarmProfileEditDetails />
+        <FarmProfileEditAccommodations />
       </View>
     </View>
   );

@@ -1,14 +1,18 @@
-import { View, Text, StyleSheet } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import React, { useContext } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { UserContext } from '../contexts/UserContext';
 import { useNavigation } from '@react-navigation/native';
 import FarmProfileEdit from '../components/Farm/FarmProfileEdit';
 import EmployeeProfileEdit from '../components/employee/EmployeeProfileEdit';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import Animated, { FadeInUp } from 'react-native-reanimated';
+import StyledText from '../components/Texts/StyledText';
 
 
 export default function ProfileEditScreen() {
   const { currentUser, logout, loading } = useContext(UserContext);
+  const navigation = useNavigation();
 
   if (loading) {
     return <Text>Loading...</Text>;
@@ -17,6 +21,21 @@ export default function ProfileEditScreen() {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backButton}>
+          <MaterialCommunityIcons
+            name="arrow-left"
+            size={30}
+            color="#ECE3CE"
+            onPress={() => navigation.push("Profile")}
+          />
+        </TouchableOpacity>
+          <Animated.Text entering={FadeInUp.duration(1000).springify()}>
+            <StyledText bold tanColor style={[styles.text, styles.pb10]}>
+              Edit profile
+            </StyledText>
+          </Animated.Text>
+        </View>
       <View style={styles.content}>
         {currentUser.role_type === 'farm' ? (
           <FarmProfileEdit />
@@ -45,5 +64,18 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    marginTop: 60,
+    marginBottom: 10,
+  },
+  backButton: {
+    position: 'absolute',
+    left: 0,
+    padding: 10,
   },
 });

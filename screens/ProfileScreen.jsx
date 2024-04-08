@@ -75,6 +75,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    marginTop: 60,
   },
   greenButton: {
     width: '80%',

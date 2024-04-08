@@ -1,64 +1,48 @@
 import React, { useState, useContext, useEffect } from 'react'
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
-import { Text, View, TextInput, TouchableOpacity, StyleSheet } from 'react-native'
+import { Text, View, TouchableOpacity, StyleSheet } from 'react-native'
 import { useNavigation } from '@react-navigation/native';
 import { UserContext } from '../../contexts/UserContext';
 import axios from 'axios';
-import * as ImagePicker from 'expo-image-picker';
 import KeyboardAvoidingContainer from "../Containers/KeyboardAvoidingContainer";
 import StyledTextInput from "../Inputs/StyledTextInput";
-import AvatarEdit from "../Profile/AvatarEdit";
-import UploadModal from '../Profile/UploadModal';
 import StyledText from '../Texts/StyledText';
+import StyledSwitch from '../Inputs/StyledSwitch';
+import SkillsSelect from '../skills/SkillSelect';
 
 
-export default function FarmProfileEditDetails() {
-  const [modalVisible, setModalVisible] = useState(false);
+export default function FarmProfileAddPostings() {
   const [data, setData] = useState({
-    name: '',
-    state: '',
-    city: '',
-    zip_code: '',
-    bio: '',
-    image: null
+    title: '',
+    salary: '',
+    skill_requirements: [],
+    offers_lodging: false,
+    duration: '',
+    age_requirement: '',
+    payment_type: '',
+    description: ''
   })
 
   const navigation = useNavigation();
   const { currentUser } = useContext(UserContext);
 
+  const [selectedItems, setSelectedItems] = useState([]);
+
+  const onSelectedItemsChange = (selectedItems, selectedSkills) => {
+    setSelectedItems(selectedItems);
+    setData({...data, skill_requirements: selectedSkills});
+  }
+
   const handleSubmit = () => {
-    axios.put(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`, { farm: data})
+    axios.post(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/postings`, data)
     .then(response => {
       console.log(response.data);
       navigation.push('Profile');
     })
     .catch(error => {
-      console.log('Unable to register user', error);
+      console.log('Unable to add posting', error);
     })
   }
-
-  const fetchProfileData = async () => {
-    Promise.all([
-      axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`),
-    ])
-    .then(([farmResponse, imageResponse]) => {
-      setData({
-        ...data,
-        name: farmResponse.data.data.attributes.name,
-        state: farmResponse.data.data.attributes.state,
-        city: farmResponse.data.data.attributes.city,
-        zip_code: farmResponse.data.data.attributes.zip_code,
-        bio: farmResponse.data.data.attributes.bio
-      })
-    })
-    .catch(error => {
-      console.error('There was an error fetching the farm:', error);
-    });
-  };
-
-  useEffect(() => {
-    fetchProfileData()
-  }, []);
 
   return (
     <KeyboardAvoidingContainer style={styles.container} behavior="padding">
@@ -66,87 +50,92 @@ export default function FarmProfileEditDetails() {
         <Animated.Text >
           <View style={styles.titleTextBox}>
             <StyledText entering={FadeInUp.duration(1000).springify()} big style={styles.text}>
-              Edit Display Info:
+              Complete the form below to add a new job posting:
             </StyledText>
           </View>
         </Animated.Text>
         <Animated.View entering={FadeInDown.duration(1000).springify()}style={styles.inputContainer}>
           <StyledTextInput
-            placeholder="Name"
+            placeholder="Job Title"
             icon="account-outline"
-            label="Name:"
-            value={data.name}
-            onChangeText={(text) => setData({ ...data, name: text })}
+            label="Job Title:"
+            onChangeText={(text) => setData({ ...data, title: text })}
           />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(200).duration(1000).springify()} style={styles.inputContainer}>
           <StyledTextInput
-            placeholder="City"
+            placeholder="Salary"
             icon="city-variant-outline"
-            label="City:"
-            value={data.city}
-            onChangeText={(text) => setData({...data, city: text})}
-          />
-        </Animated.View>
-        <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.inputContainer}>
-          <StyledTextInput
-            placeholder="State"
-            icon="star-box-outline"
-            label="State:"
-            value={data.state}
-            onChangeText={(text) => setData({...data, state: text})}
+            label="Salary:"
+            onChangeText={(text) => setData({...data, salary: text})}
           />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.inputContainer}>
            <StyledTextInput
-            placeholder="Zip Code"
+            placeholder="Payment Type"
             icon="longitude"
-            label="Zip Code:"
-            value={data.zip_code}
-            onChangeText={(text) => setData({...data, zip_code: text})}
+            label="Payment Type:"
+            onChangeText={(text) => setData({...data, payment_type: text})}
+          />
+        </Animated.View>
+        <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.inputContainer}>
+          <StyledTextInput
+            placeholder="Duration"
+            icon="star-box-outline"
+            label="Duration:"
+            onChangeText={(text) => setData({...data, duration: text})}
+          />
+        </Animated.View>
+        <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.inputContainer}>
+           <StyledTextInput
+            placeholder="Age Requirement"
+            icon="longitude"
+            label="Age Requirement:"
+            onChangeText={(text) => setData({...data, age_requirement: text})}
+          />
+        </Animated.View>
+        <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} >
+        <Text style={{ alignSelf: 'flex-start', color: 'white', marginBottom: 5 }}>Relevant Skills:</Text>
+            <SkillsSelect selectedItems={selectedItems} onSelectedItemsChange={onSelectedItemsChange} />
+        </Animated.View>
+        <Animated.View entering={FadeInDown.duration(1000).springify()}style={styles.inputContainer}>
+          <StyledSwitch
+            placeholder="Offers Accommodations"
+            icon="home-outline"
+            label="Offers Accommodations:"
+            value={data.offers_lodging}
+            onValueChange={(newValue) => setData({ ...data, offers_lodging: newValue })}
           />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputContainer}>
         <StyledTextInput
-          placeholder="Bio"
+          placeholder="Description"
           icon="pencil-outline"
           multiline={true}
-          label="Bio:"
-          value={data.bio}
-          onChangeText={(text) => setData({...data, bio: text})}
+          label="Description:"
+          onChangeText={(text) => setData({...data, description: text})}
         />
         </Animated.View>
         {/* Submit button */}
         <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.submitButtonContainer}>
           <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-            <Text style={styles.submitButtonText}>Save Changes</Text>
+            <Text style={styles.submitButtonText}>Create Posting</Text>
           </TouchableOpacity>
         </Animated.View>
       </View>
-      {/* UploadModal component */}
-      <UploadModal
-        modalVisible={modalVisible}
-        onBackPress={() => {
-          setModalVisible(false);
-        }}
-        onCameraPress={() => pickImage()}
-        onGalleryPress={() => pickImage("gallery")}
-        onRemovePress={() => removeImage()}
-    />
     </KeyboardAvoidingContainer>
-  )
+  );
 };
 
 const styles = StyleSheet.create({
   container: {
     paddingBottom: 25,
-    paddingHorizontal: 25,
+    paddingHorizontal: 10,
   },
   content: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    minWidth: '100%',
   },
   titleTextBox: {
     padding: 10,
@@ -154,7 +143,11 @@ const styles = StyleSheet.create({
   text: {
     textAlign: 'center',
   },
+  pb10: {
+    paddingBottom: 30,
+  },
   mb3: {
+    marginBottom: 3,
     marginTop: 25,
   },
   avatarEdit: {
@@ -171,7 +164,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#ECE3CE',
     padding: 10,
     borderRadius: 8,
-    marginTop: 20,
   },
   submitButtonText: {
     fontSize: 20,
@@ -180,3 +172,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
+

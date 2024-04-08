@@ -4,30 +4,19 @@ import { Text, View, TextInput, TouchableOpacity, StyleSheet } from 'react-nativ
 import { useNavigation } from '@react-navigation/native';
 import { UserContext } from '../../contexts/UserContext';
 import axios from 'axios';
-import * as ImagePicker from 'expo-image-picker';
 import KeyboardAvoidingContainer from "../Containers/KeyboardAvoidingContainer";
-import StyledTextInput from "../Inputs/StyledTextInput";
-import AvatarEdit from "../Profile/AvatarEdit";
-import UploadModal from '../Profile/UploadModal';
 import StyledText from '../Texts/StyledText';
+import StyledSwitch from '../Inputs/StyledSwitch';
 
 
-export default function FarmProfileEditDetails() {
-  const [modalVisible, setModalVisible] = useState(false);
-  const [data, setData] = useState({
-    name: '',
-    state: '',
-    city: '',
-    zip_code: '',
-    bio: '',
-    image: null
-  })
+export default function FarmProfileEditAccommodations() {
+  const [data, setData] = useState({})
 
   const navigation = useNavigation();
   const { currentUser } = useContext(UserContext);
 
   const handleSubmit = () => {
-    axios.put(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`, { farm: data})
+    axios.put(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/accommodation`, data )
     .then(response => {
       console.log(response.data);
       navigation.push('Profile');
@@ -37,27 +26,24 @@ export default function FarmProfileEditDetails() {
     })
   }
 
-  const fetchProfileData = async () => {
-    Promise.all([
-      axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`),
-    ])
-    .then(([farmResponse, imageResponse]) => {
+  const fetchAccommodationData = async () => {
+    axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/accommodation`)
+    .then((accommodationResponse) => {
+      console.log('current accommodations:', accommodationResponse.data);
       setData({
         ...data,
-        name: farmResponse.data.data.attributes.name,
-        state: farmResponse.data.data.attributes.state,
-        city: farmResponse.data.data.attributes.city,
-        zip_code: farmResponse.data.data.attributes.zip_code,
-        bio: farmResponse.data.data.attributes.bio
+        housing: accommodationResponse.data.data.attributes.housing,
+        transportation: accommodationResponse.data.data.attributes.transportation,
+        meals: accommodationResponse.data.data.attributes.meals,
       })
     })
     .catch(error => {
-      console.error('There was an error fetching the farm:', error);
+      console.error('There was an error fetching the farm accommodations:', error);
     });
   };
 
   useEffect(() => {
-    fetchProfileData()
+    fetchAccommodationData()
   }, []);
 
   return (
@@ -66,55 +52,36 @@ export default function FarmProfileEditDetails() {
         <Animated.Text >
           <View style={styles.titleTextBox}>
             <StyledText entering={FadeInUp.duration(1000).springify()} big style={styles.text}>
-              Edit Display Info:
+              Edit Accommodation Info:
             </StyledText>
           </View>
         </Animated.Text>
         <Animated.View entering={FadeInDown.duration(1000).springify()}style={styles.inputContainer}>
-          <StyledTextInput
-            placeholder="Name"
-            icon="account-outline"
-            label="Name:"
-            value={data.name}
-            onChangeText={(text) => setData({ ...data, name: text })}
+          <StyledSwitch
+            placeholder="Housing"
+            icon="home-outline"
+            label="Housing:"
+            value={data.housing}
+            onValueChange={(newValue) => setData({ ...data, housing: newValue })}
           />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(200).duration(1000).springify()} style={styles.inputContainer}>
-          <StyledTextInput
-            placeholder="City"
-            icon="city-variant-outline"
-            label="City:"
-            value={data.city}
-            onChangeText={(text) => setData({...data, city: text})}
+          <StyledSwitch
+            placeholder="Meals"
+            icon="food-apple-outline"
+            label="Meals:"
+            value={data.meals}
+            onValueChange={(newValue) => setData({ ...data, meals: newValue })}
           />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.inputContainer}>
-          <StyledTextInput
-            placeholder="State"
-            icon="star-box-outline"
-            label="State:"
-            value={data.state}
-            onChangeText={(text) => setData({...data, state: text})}
+          <StyledSwitch
+            placeholder="Transportation"
+            icon="car-outline"
+            label="Transportation:"
+            value={data.transportation}
+            onValueChange={(newValue) => setData({ ...data, transportation: newValue })}
           />
-        </Animated.View>
-        <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.inputContainer}>
-           <StyledTextInput
-            placeholder="Zip Code"
-            icon="longitude"
-            label="Zip Code:"
-            value={data.zip_code}
-            onChangeText={(text) => setData({...data, zip_code: text})}
-          />
-        </Animated.View>
-        <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputContainer}>
-        <StyledTextInput
-          placeholder="Bio"
-          icon="pencil-outline"
-          multiline={true}
-          label="Bio:"
-          value={data.bio}
-          onChangeText={(text) => setData({...data, bio: text})}
-        />
         </Animated.View>
         {/* Submit button */}
         <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.submitButtonContainer}>
@@ -123,16 +90,6 @@ export default function FarmProfileEditDetails() {
           </TouchableOpacity>
         </Animated.View>
       </View>
-      {/* UploadModal component */}
-      <UploadModal
-        modalVisible={modalVisible}
-        onBackPress={() => {
-          setModalVisible(false);
-        }}
-        onCameraPress={() => pickImage()}
-        onGalleryPress={() => pickImage("gallery")}
-        onRemovePress={() => removeImage()}
-    />
     </KeyboardAvoidingContainer>
   )
 };
@@ -162,6 +119,8 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   submitButtonContainer: {
     width: '100%',
@@ -180,3 +139,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
+
