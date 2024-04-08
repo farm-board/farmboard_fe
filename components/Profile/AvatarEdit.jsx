@@ -46,6 +46,9 @@ const styles = StyleSheet.create({
   container: {
     alignItems: "center",
     position: "relative",
+    shadowRadius: 10,
+    shadowColor: 'black',
+    shadowOpacity: 0.3,
   },
   image: {
     borderRadius: 75,

@@ -10,7 +10,10 @@ import { UserContext, UserProvider } from './contexts/UserContext';
 import { useContext } from 'react';
 import ProfileEditScreen from './screens/ProfileEditScreen';
 import FarmProfileEditDetailsScreen from './screens/FarmProfileEditDetailsScreen';
-
+import FarmProfileEditAccommodationsScreen from './screens/FarmProfileEditAccommodationsScreen.jsx';
+import FarmProfileAddAccommodationsScreen from './screens/FarmProfileAddAccommodationsScreen.jsx';
+import FarmProfileAddPostingsScreen from './screens/FarmProfileAddPostingsScreen.jsx';
+import FarmProfileEditPostingsScreen from './screens/FarmProfileEditPostingsScreen.jsx';
 
 const Stack = createNativeStackNavigator();
 
@@ -27,6 +30,10 @@ function App() {
               <Stack.Screen name="Home" component={HomeScreen} />
               <Stack.Screen name="Profile Edit" component={ProfileEditScreen} />
               <Stack.Screen name="Farm Profile Edit Details" component={FarmProfileEditDetailsScreen} />
+              <Stack.Screen name="Farm Profile Edit Accommodations" component={FarmProfileEditAccommodationsScreen} />
+              <Stack.Screen name="Farm Profile Add Accommodations" component={FarmProfileAddAccommodationsScreen} />
+              <Stack.Screen name="Farm Profile Add Postings" component={FarmProfileAddPostingsScreen} />
+              <Stack.Screen name="Farm Profile Edit Postings" component={FarmProfileEditPostingsScreen} />
             </>
           </Stack.Navigator>
         ) : (

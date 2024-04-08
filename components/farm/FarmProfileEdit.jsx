@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react'
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
-import { Text, View, TextInput, TouchableOpacity, StyleSheet } from 'react-native'
+import { Text, View, TextInput, TouchableOpacity, StyleSheet, Dimensions, Alert } from 'react-native'
 import { useNavigation } from '@react-navigation/native';
 import { UserContext } from '../../contexts/UserContext';
 import axios from 'axios';
@@ -13,10 +13,13 @@ import StyledText from '../Texts/StyledText';
 import ProfileInfo from '../Profile/ProfileInfo';
 import SectionHeader from '../Texts/SectionHeader';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import GalleryEdit from '../Profile/GalleryEdit';
 
 
 export default function FarmProfileEdit() {
   const [modalVisible, setModalVisible] = useState(false);
+  const [accommodations, setAccommodations] = useState({});
+  const [galleryImages, setGalleryImages] = useState([]);
   const [data, setData] = useState({
     name: '',
     state: '',
@@ -25,6 +28,8 @@ export default function FarmProfileEdit() {
     bio: '',
     image: null
   })
+
+  const width = Dimensions.get('window').width;
 
   const navigation = useNavigation();
   const { currentUser } = useContext(UserContext);
@@ -87,12 +92,64 @@ export default function FarmProfileEdit() {
     setModalVisible(false);
   };
 
+  const handleGalleryImageUpload = async () => {
+    if (galleryImages.length >= 6) {
+      Alert.alert('Upload limit reached', 'You can only upload 6 images to your gallery.');
+      return;
+    }
+
+    try {
+      let result = {};
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+      result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 2],
+        quality: 1,
+      });
+  
+      if (!result.cancelled) {
+        uploadGalleryImage(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.log('Unable to pick image', error);
+    }
+  };
+
+  const uploadGalleryImage = async (uri) => {
+    try {
+      let formData = new FormData();
+      formData.append('gallery_photo', {
+        uri,
+        type: 'image/jpeg',
+        name: `profile_${currentUser.id}.jpg`,
+      });
+
+      // Upload image to Amazon S3
+      let response = await axios.post(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/upload_gallery_photo`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      fetchGalleryImages();
+    } catch (error) {
+      console.log('Unable to upload image', error);
+    }
+  };
+
+  const handleDeleteGalleryImage = (photoId) => {
+    axios.delete(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/delete_gallery_photo/${photoId}`);
+    console.log('Deleted photo:', photoId);
+    setGalleryImages(galleryImages.filter(galleryPhoto => galleryPhoto.id !== photoId));
+  };
+
   const fetchProfileData = async () => {
     Promise.all([
       axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`),
-      axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/image`)
+      axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/image`),
+      axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/accommodation`)
     ])
-    .then(([farmResponse, imageResponse]) => {
+    .then(([farmResponse, imageResponse, accommodationResponse]) => {
       setData({
         ...data,
         name: farmResponse.data.data.attributes.name,
@@ -101,38 +158,61 @@ export default function FarmProfileEdit() {
         zip_code: farmResponse.data.data.attributes.zip_code,
         bio: farmResponse.data.data.attributes.bio,
         image: imageResponse.data.image_url
-      })
+      }),
+      console.log('accommodations:', accommodationResponse.data.data.attributes),
+      setAccommodations(accommodationResponse.data.data.attributes)
     })
     .catch(error => {
       console.error('There was an error fetching the farm:', error);
     });
   };
 
+  const fetchGalleryImages = () => {
+    axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/gallery_photos`)
+    .then((galleryResponse) => {
+      console.log('gallery images:', galleryResponse.data.gallery_photos);
+      setGalleryImages(galleryResponse.data.gallery_photos);
+    })
+    .catch(error => {
+      console.error('There was an error fetching the gallery images:', error);
+    });
+  };
+
+  const handleAddAccommodation = () => {
+    navigation.push('Farm Profile Add Accommodations');
+  }
+
   useEffect(() => {
     fetchProfileData()
+    fetchGalleryImages();
   }, []);
 
   return (
     <KeyboardAvoidingContainer style={styles.container} behavior="padding">
       <View style={styles.content}>
-        <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton}>
-          <MaterialCommunityIcons
-            name="arrow-left"
-            size={30}
-            color="#ECE3CE"
-            onPress={() => navigation.push("Profile")}
-          />
-        </TouchableOpacity>
-          <Animated.Text entering={FadeInUp.duration(1000).springify()}>
-            <StyledText bold tanColor style={[styles.text, styles.pb10]}>
-              Edit profile
-            </StyledText>
-          </Animated.Text>
-        </View>
         <Animated.View entering={FadeInDown.delay(1000).duration(1000).springify()} style={styles.mb3}>
             <AvatarEdit uri={data.image} onButtonPress={() => setModalVisible(true)} style={styles.avatarEdit}/>
         </Animated.View>
+        {Object.keys(galleryImages).length !== 0 ?
+        <View style={styles.galleryContainer}>
+          <GalleryEdit
+            width={width}
+            galleryImages={galleryImages}
+            handleDeleteImage={handleDeleteGalleryImage}
+            handleGalleryImageUpload={handleGalleryImageUpload}
+          />
+        </View>
+        : 
+        <View style={styles.galleryPhotosNotFoundContainer}>
+        <StyledText tanColor bold style={styles.galleryPhotosNotFoundText}>
+          You do not currently have any photos added to your gallery. Click on the button below to add gallery photos to your profile.
+        </StyledText> 
+        </View>}
+        <View style={styles.addImageContainer}>
+        <TouchableOpacity style={styles.addImageButton} onPress={handleGalleryImageUpload}>
+          <Text style={styles.addImageText}>Upload Image To Gallery</Text>
+        </TouchableOpacity>
+        </View>
         <View style={styles.inputContainer}>
           <SectionHeader
             option="Edit"
@@ -173,6 +253,46 @@ export default function FarmProfileEdit() {
           </Animated.View>
           {/* Submit button */}
         </View>
+        <View style={styles.inputContainer}>
+          { Object.keys(accommodations).length === 0 ?
+            <View>
+              <StyledText tanColor bold >
+                No accommodations found. Click on the button below to add accommodations to your profile.
+              </StyledText>
+              <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.submitButtonContainer}>
+                <TouchableOpacity style={styles.submitButton} onPress={handleAddAccommodation}>
+                  <Text style={styles.submitButtonText}>Add Accommodations</Text>
+                </TouchableOpacity>
+              </Animated.View>
+            </View>
+            :
+            <View>
+              <SectionHeader
+                option="Edit"
+                onPress={() =>
+                  navigation.navigate("Farm Profile Edit Accommodations")
+                }
+                >
+                Accommodation Info
+              </SectionHeader>
+              <Animated.View entering={FadeInDown.delay(1000).duration(1000).springify()} style={styles.inputItem}>
+                <ProfileInfo label="Offers Housing" icon="home-outline">
+                  <StyledText style={styles.existingData}>{accommodations.housing === true ? "Yes" : "No"}</StyledText>
+                </ProfileInfo>
+              </Animated.View>
+              <Animated.View entering={FadeInDown.delay(1200).duration(1000).springify()} style={styles.inputItem}>
+                <ProfileInfo label="Offers Meals" icon="food-apple-outline">
+                  <StyledText style={styles.existingData}>{accommodations.meals === true ? "Yes" : "No"}</StyledText>
+                </ProfileInfo>
+              </Animated.View>
+              <Animated.View entering={FadeInDown.delay(1400).duration(1000).springify()} style={styles.inputItem}>
+                <ProfileInfo label="Offers Transportation" icon="car-outline">
+                  <StyledText style={styles.existingData}>{accommodations.transportation === true ? "Yes" : "No"}</StyledText>
+                </ProfileInfo>
+              </Animated.View>
+            </View>
+          }
+        </View>
         {/* UploadModal component */}
         <UploadModal
           modalVisible={modalVisible}
@@ -201,15 +321,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   mb3: {
-    marginTop: 25,
+    marginTop: 15,
+    marginBottom: 5,
   },
   avatarEdit: {
     backgroundColor: '#4F6F52',
     padding: 30,
     borderRadius: 100,
-  },
-  inputContainer: {
-    width: '100%',
   },
   existingData: {
     color: '#3A4D39',
@@ -233,6 +351,53 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     padding: 10,
+  },
+  submitButton: {
+    backgroundColor: '#ECE3CE',
+    padding: 10,
+    borderRadius: 8,
+    marginTop: 20,
+  },
+  submitButtonText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#3A4D39',
+    textAlign: 'center',
+  },
+  galleryContainer: {
+    flex: 1,
+    justifyContent: 'space-between',
+    maxWidth: '100%',
+    backgroundColor: '#4F6F52',
+  },
+  galleryPhotosNotFoundContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    backgroundColor: '#4F6F52',
+    padding: 20,
+  },
+  galleryPhotosNotFoundText: {
+    textAlign: 'center',
+  },
+  addImageContainer: {
+    width: '100%',
+    backgroundColor: '#4F6F52',
+    paddingTop: 10,
+  },
+  addImageButton: {
+    backgroundColor: '#ECE3CE',
+    alignSelf: 'center',
+    padding: 10,
+    borderRadius: 8,
+    width: '80%',
+  },
+  addImageText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#3A4D39',
+    textAlign: 'center',
   },
 });
 
