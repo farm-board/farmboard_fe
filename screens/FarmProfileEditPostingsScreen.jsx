@@ -1,12 +1,12 @@
-import { View, Text, StyleSheet } from 'react-native'
+import { View, Text, StyleSheet } from 'react-native';
 import React, { useContext } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { UserContext } from '../contexts/UserContext';
 import FarmProfileEditPostings from '../components/Farm/FarmProfileEditPostings';
 
-
-export default function FarmProfileEditPostingsScreen() {
+export default function FarmProfileEditPostingsScreen({ route }) {
   const { loading } = useContext(UserContext);
+  const { postingId } = route.params;
 
   if (loading) {
     return <Text>Loading...</Text>;
@@ -16,11 +16,11 @@ export default function FarmProfileEditPostingsScreen() {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
       <View style={styles.content}>
-        <FarmProfileEditPostings />
+        <FarmProfileEditPostings postingId={postingId} />
       </View>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {

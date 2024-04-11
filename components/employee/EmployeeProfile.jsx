@@ -19,7 +19,7 @@ export default function EmployeeProfile() {
   const [expanded, setExpanded] = useState(false); 
 
   useEffect(() => {
-    setLoading(true); // Set loading state to true before making requests
+    setLoading(true); 
     Promise.all([
       axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`),
       axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/experiences`),
@@ -45,6 +45,10 @@ export default function EmployeeProfile() {
 
   const onEditButtonPress = () => {
     navigation.push('Profile Edit');
+  }
+
+  const goToFeedScreen = () => {
+    navigation.navigate('Feed'); // Navigate to the Feed screen
   }
 
   return (
@@ -76,7 +80,7 @@ export default function EmployeeProfile() {
         </View>
       </View>
       <View style={styles.subContentContainer}>
-        <Text style={styles.sectionTitle}>Skills</Text>
+        <StyledText big tanColor style={styles.sectionTitle}>Skills</StyledText>
         <View style={styles.skillContainer}>
           {employee.skills && employee.skills.slice(0, expanded ? employee.skills.length : 5).map((skill, index) => (
             <View key={index} style={styles.skillBubble}>
@@ -91,11 +95,11 @@ export default function EmployeeProfile() {
         )}
       </View>
       <View style={styles.subContentContainer}>
-        <Text style={styles.sectionTitle}>About</Text>
-        <Text style={styles.sectionText}>{employee.bio}</Text>
+        <StyledText big tanColor style={styles.sectionTitle}>About</StyledText>
+        <StyledText small tanColor style={styles.sectionText}>{employee.bio}</StyledText>
       </View>
       <View style={styles.subContentContainer}>
-          <Text style={styles.sectionTitle}>Experience</Text>
+          <StyledText big tanColor style={styles.sectionTitle}>Experience</StyledText>
           <View style={styles.experienceWrapper}>
             {experiences
               .sort((a, b) => new Date(b.attributes.ended_at) - new Date(a.attributes.ended_at)) // Sort by end date in descending order
@@ -106,16 +110,20 @@ export default function EmployeeProfile() {
                   <Text style={styles.experienceCompany}>{experience.attributes.company_name}</Text>
                   
                   <Text style={styles.label}>Employment:</Text>
+                  <Text style={styles.experienceCompany}>
                   <Text>{`${experience.attributes.started_at} to ${experience.attributes.ended_at}`}</Text>
-                  
+                  </Text>
                   <Text style={styles.label}>Description:</Text>
-                  <Text>{experience.attributes.description}</Text>
+                  <Text style={styles.experienceCompany}>
+                  <Text>{experience.attributes.description}
+                  </Text>
+                  </Text>
                 </View>
               ))}
           </View>
         </View>
         <View style={styles.subContentContainer}>
-          <Text style={styles.sectionTitle}>References</Text>
+          <StyledText big tanColor style={styles.sectionTitle}>References</StyledText>
           <View style={styles.experienceWrapper}>
             {references
               .slice(0, 3) // Slice the first three references
@@ -133,6 +141,9 @@ export default function EmployeeProfile() {
                 </View>
               ))}
           </View>
+          <TouchableOpacity style={styles.feedButton} onPress={goToFeedScreen}>
+        <Text style={styles.feedButtonText}>Go to Feed</Text>
+      </TouchableOpacity>
         </View>
     </View>
   );
@@ -239,7 +250,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   experienceContainer: {
-    minWidth: '75%',
+    minWidth: '100%',
     padding: 10,
     backgroundColor: '#ECE3CE', 
     borderRadius: 10,
@@ -250,6 +261,10 @@ const styles = StyleSheet.create({
   },
   label: {
     fontWeight: 'bold',
+    color: '#3A4D39',
+    fontSize: 14,
+    paddingBottom: 2,
+    paddingTop: 2,
   },
   editButton: {
     backgroundColor: "#739072",
@@ -258,6 +273,19 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 15,
     top: 15,
+  },
+  experienceCompany: {
+    color: '#3A4D39',
+  },
+  feedButton: {
+    backgroundColor: colors.highlight,
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 20,
+  },
+  feedButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
 

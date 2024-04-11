@@ -17,6 +17,7 @@ import FarmProfileEditPostingsScreen from './screens/FarmProfileEditPostingsScre
 import EmployeeProfileEditDetailsScreen from './screens/EmployeeProfileEditDetailsScreen';
 import EmployeeProfileAddExperiencesScreen from './screens/EmployeeProfileAddExperiencesScreen';
 import EmployeeProfileAddReferencesScreen from './screens/EmployeeProfileAddReferencesScreen';
+import FeedScreen from './screens/FeedScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -31,6 +32,7 @@ function App() {
               <Stack.Screen name="Profile" component={ProfileScreen} />
               <Stack.Screen name="Setup" component={SetupScreen} />
               <Stack.Screen name="Home" component={HomeScreen} />
+              <Stack.Screen name="Feed" component={FeedScreen} />
               <Stack.Screen name="Profile Edit" component={ProfileEditScreen} />
               <Stack.Screen name="Farm Profile Edit Details" component={FarmProfileEditDetailsScreen} />
               <Stack.Screen name="Farm Profile Edit Accommodations" component={FarmProfileEditAccommodationsScreen} />
