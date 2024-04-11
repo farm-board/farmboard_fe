@@ -13,7 +13,7 @@ import Gallery from '../Profile/Gallery';
 export default function FarmProfile() {
   const {currentUser} = useContext(UserContext);
   const [farm, setFarm] = useState({});
-  const [accommodations, setAccommodations] = useState({});
+  const [accommodations, setAccommodations] = useState(null);
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [galleryImages, setGalleryImages] = useState([]);
   const [postings, setPostings] = useState([]);
@@ -23,12 +23,16 @@ export default function FarmProfile() {
   
   const fetchAccommodations = () => {
     axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/accommodation`)
-    .then((accommodationResponse) => {
-      setAccommodations(accommodationResponse.data.data.attributes);
-    })
-    .catch(error => {
-      console.error('There was an error fetching the accommodations:', error);
-    });
+      .then((accommodationResponse) => {
+        if (accommodationResponse.data && accommodationResponse.data.data && accommodationResponse.data.data.attributes) {
+          setAccommodations(accommodationResponse.data.data.attributes);
+        } else {
+          console.log('No accommodations found for this farm.');
+        }
+      })
+      .catch(error => {
+        console.error('There was an error fetching the accommodations:', error);
+      });
   };
 
   const fetchGalleryImages = () => {
@@ -81,7 +85,7 @@ export default function FarmProfile() {
   
   const handlePostingEdit = (postingId) => {
     console.log('Posting ID:', postingId);
-    navigation.push('Farm Profile Edit Postings', { postingId }); // Pass postingId as a parameter
+    navigation.push('Farm Profile Edit Postings', {postingId}); // Pass postingId as a parameter
   }
 
   const handleDeletePosting = (postingId) => {
@@ -159,7 +163,7 @@ export default function FarmProfile() {
           {`${farm.bio}`}
         </StyledText>
       </View>
-      { Object.keys(accommodations).length !== 0 ?
+      {accommodations !== null ?
       <View style={styles.accommodationsContainer}>
         <Text style={styles.accommodationTitle}>
           <StyledText big bold tanColor style={styles.accommodationTitle}>
@@ -207,7 +211,7 @@ export default function FarmProfile() {
                   <MaterialCommunityIcons name="trash-can" size={24} color="red" />
                 </TouchableOpacity>
                 <StyledText tanColor bold style={styles.postingTitle}>
-                  Job Title: {posting.attributes.title}
+                  {posting.attributes.title}
                 </StyledText>
                 <View style={styles.skillsContainer}>
                   <Text style={styles.postingItem}>Required Skills:</Text>

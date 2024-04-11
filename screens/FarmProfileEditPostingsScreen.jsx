@@ -4,6 +4,8 @@ import { StatusBar } from 'expo-status-bar';
 import { UserContext } from '../contexts/UserContext';
 import FarmProfileEditPostings from '../components/Farm/FarmProfileEditPostings';
 
+
+
 export default function FarmProfileEditPostingsScreen({ route }) {
   const { loading } = useContext(UserContext);
   const { postingId } = route.params;

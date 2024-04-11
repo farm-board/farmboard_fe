@@ -9,10 +9,12 @@ import StyledTextInput from "../Inputs/StyledTextInput";
 import StyledText from '../Texts/StyledText';
 import StyledSwitch from '../Inputs/StyledSwitch';
 import SkillsSelect from '../skills/SkillSelect';
+import SelectDropdown from 'react-native-select-dropdown';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; 
+import StyledSelectDropdown from '../Inputs/StyledSelectDropdown';
 
 
 export default function FarmProfileEditPostings() {
-
   const [data, setData] = useState({
     attributes: {
       title: '',
@@ -25,6 +27,12 @@ export default function FarmProfileEditPostings() {
       description: '',
     }
   });
+
+  const [accommodationData, setAccommodationData] = useState({});
+
+  const durationList = [ "Full-Time", "Part-Time", "Seasonal", "Contract"];
+
+  const paymentTypeList = [ "Hourly", "Salary"];
 
   const navigation = useNavigation();
   const { currentUser } = useContext(UserContext);
@@ -39,15 +47,27 @@ export default function FarmProfileEditPostings() {
   }
 
   const fetchPosting = () => {
+    console.log('Posting ID:', postingId );
     axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/postings/${postingId}`)
-      .then((postingsResponse) => {
-        console.log('Posting:', postingsResponse.data.data);
-        const postingData = postingsResponse.data.data;
-        setData({ attributes: { ...postingData.attributes } });
-      })
-      .catch(error => {
-        console.error("There was an error fetching the farm's postings:", error);
-      });
+    .then((postingsResponse) => {
+      console.log('Posting:', postingsResponse.data.data);
+      setData(postingsResponse.data.data);
+      setSelectedItems(postingsResponse.data.data.attributes.skill_requirements);
+    })
+    .catch(error => {
+      console.error("There was an error fetching the farm's postings:", error);
+    });
+  };
+
+  const fetchAccommodationData = async () => {
+    axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/accommodation`)
+    .then((accommodationResponse) => {
+      console.log('current accommodations:', accommodationResponse.data.data.attributes);
+      setAccommodationData(accommodationResponse.data.data.attributes);
+    })
+    .catch(error => {
+      console.error('There was an error fetching the farm accommodations:', error);
+    });
   };
 
 
@@ -57,7 +77,6 @@ export default function FarmProfileEditPostings() {
         attributes: { ...data.attributes }
       }
     };
-  
     axios.put(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/postings/${postingId}`, postData)
       .then(response => {
         console.log(response.data);
@@ -67,11 +86,9 @@ export default function FarmProfileEditPostings() {
         console.log('Unable to edit posting', error);
       });
   }
-
   useEffect(() => {
-    console.log('Posting ID:', postingId);
     if (postingId) fetchPosting();
-
+    fetchAccommodationData();
   }, [postingId]);
 
   return (
@@ -93,31 +110,38 @@ export default function FarmProfileEditPostings() {
             onChangeText={(text) => setData({ ...data, attributes: { ...data.attributes, title: text } })}
           />
         </Animated.View>
-        <Animated.View entering={FadeInDown.delay(200).duration(1000).springify()} style={styles.inputContainer}>
-          <StyledTextInput
-            placeholder="Salary"
-            icon="city-variant-outline"
-            label="Salary:"
-            value={data.attributes.salary}
-            onChangeText={(text) => setData({ ...data, attributes: { ...data.attributes, salary: text } })}
-          />
-        </Animated.View>
-        <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.inputContainer}>
-           <StyledTextInput
-            placeholder="Payment Type"
-            icon="longitude"
-            label="Payment Type:"
-            value={data.attributes.payment_type}
-            onChangeText={(text) => setData({ ...data, attributes: { ...data.attributes, payment_type: text } })}
-          />
-        </Animated.View>
+        <View style={styles.paymentInfo}>
+          <Animated.View entering={FadeInDown.delay(200).duration(1000).springify()} style={styles.inputContainerPayment}>
+            <StyledTextInput
+              placeholder="Salary"
+              icon="city-variant-outline"
+              label="Payment Amount:"
+              keyboardType="numeric"
+              value={data.attributes.salary}
+              onChangeText={(text) => setData({ ...data, attributes: { ...data.attributes, salary: text } })}
+            />
+          </Animated.View>
+          <Animated.View entering={FadeInDown.delay(200).duration(1000).springify()} style={styles.inputContainerPayment}>
+            <StyledSelectDropdown
+              listData={paymentTypeList}
+              value={data.attributes.payment_type}
+              fieldPlaceholder="Payment Type"
+              label="Payment Type:"
+              onSelect={(selectedItem) => {
+                setData({ ...data, attributes: { ...data.attributes, payment_type: selectedItem } });
+              }}
+            />
+          </Animated.View>
+        </View>
         <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.inputContainer}>
-          <StyledTextInput
-            placeholder="Duration"
-            icon="star-box-outline"
-            label="Duration:"
+          <StyledSelectDropdown
+            listData={durationList}
             value={data.attributes.duration}
-            onChangeText={(text) => setData({ ...data, attributes: { ...data.attributes, duration: text } })}
+            fieldPlaceholder="Duration"
+            label="Duration:"
+            onSelect={(selectedItem) => {
+              setData({ ...data, attributes: { ...data.attributes, duration: selectedItem } });
+            }}
           />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.inputContainer}>
@@ -125,24 +149,56 @@ export default function FarmProfileEditPostings() {
             placeholder="Age Requirement"
             icon="longitude"
             label="Age Requirement:"
+            keyboardType="numeric"
             value={data.attributes.age_requirement.toString()}
             onChangeText={(text) => setData({ ...data, attributes: { ...data.attributes, age_requirement: text } })}
           />
         </Animated.View>
-        <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} >
+        <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} >
         <Text style={{ alignSelf: 'flex-start', color: 'white', marginBottom: 5 }}>Relevant Skills:</Text>
-            <SkillsSelect selectedItems={selectedItems} onSelectedItemsChange={onSelectedItemsChange} />
+            <SkillsSelect selectedItems={selectedItems} onSelectedItemsChange={onSelectedItemsChange}/>
         </Animated.View>
-        <Animated.View entering={FadeInDown.duration(1000).springify()}style={styles.inputContainer}>
+        <Animated.View entering={FadeInDown.delay(1000).duration(1000).springify()} style={styles.inputContainer}>
           <StyledSwitch
             placeholder="Offers Accommodations"
             icon="home-outline"
             label="Offers Accommodations:"
-            value={data.offers_lodging}
-            onValueChange={(newValue) => setData({ ...data, offers_lodging: newValue })}
+            value={data.attributes.offers_lodging}
+            onValueChange={(newValue) => setData({ ...data, attributes: { ...data.attributes, offers_lodging: newValue } })}
           />
+          {data.attributes.offers_lodging === false ? 
+          null 
+          : 
+          <View style={styles.accommodationsContainer}>
+            <Text style={styles.accommodationTitle}>
+              <StyledText big bold style={styles.accommodationTitle}>
+                Accommodations Offered:
+              </StyledText>
+            </Text>
+            <Text style={styles.accommodationListItem}>
+              <StyledText small >
+              Offers Housing: {accommodationData.housing === true ? "Yes" : "No"}
+              </StyledText>
+            </Text>
+            <Text style={styles.accommodationListItem}>
+              <StyledText small >
+                Offers Meals: {accommodationData.meals === true ? "Yes" : "No"}
+              </StyledText>
+            </Text>
+            <Text style={styles.accommodationListItem}>
+              <StyledText small >
+                Offers Transporation: {accommodationData.transportation === true ? "Yes" : "No"}
+              </StyledText>
+            </Text>
+            <Text style={styles.accommodationDisclaimer}>
+              <Text >
+                If you would like to change these selections, please visit the edit profile page.
+              </Text>
+            </Text>
+          </View>
+          }
         </Animated.View>
-        <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputContainer}>
+        <Animated.View entering={FadeInDown.delay(1200).duration(1000).springify()} style={styles.inputContainer}>
         <StyledTextInput
           placeholder="Description"
           icon="pencil-outline"
@@ -153,7 +209,7 @@ export default function FarmProfileEditPostings() {
         />
         </Animated.View>
         {/* Submit button */}
-        <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.submitButtonContainer}>
+        <Animated.View entering={FadeInDown.delay(1400).duration(1000).springify()} style={styles.submitButtonContainer}>
           <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
             <Text style={styles.submitButtonText}>Save Changes</Text>
           </TouchableOpacity>
@@ -172,6 +228,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    maxWidth: '100%',
   },
   titleTextBox: {
     padding: 10,
@@ -186,11 +243,11 @@ const styles = StyleSheet.create({
     marginBottom: 3,
     marginTop: 25,
   },
-  avatarEdit: {
-    // Styles for AvatarEdit component
-  },
   inputContainer: {
     width: '100%',
+    shadowRadius: 20,
+    shadowColor: 'black',
+    shadowOpacity: 0.4,
   },
   submitButtonContainer: {
     width: '100%',
@@ -206,6 +263,45 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#3A4D39',
     textAlign: 'center',
+  },
+  paymentInfo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  inputContainerPayment: {
+    width: '48.5%',
+    marginHorizontal: 5,
+    shadowRadius: 20,
+    shadowColor: 'black',
+    shadowOpacity: 0.4,
+  },
+  accommodationsContainer: {
+    letterSpacing: 1,
+    paddingHorizontal: 25,
+    paddingVertical: 10,
+    marginBottom: 30,
+    backgroundColor: '#4F6F52',
+    minWidth: '100%',
+    shadowRadius: 20,
+    shadowColor: 'black',
+    shadowOpacity: 0.4,
+  },
+  accommodationTitle: {
+    letterSpacing: 1,
+    fontSize: 15,
+    paddingBottom: 5,
+  },
+  accommodationListItem: {
+    letterSpacing: 1,
+    marginVertical: 5,
+    fontSize: 13,
+  },
+  accommodationDisclaimer: {
+    letterSpacing: 1,
+    marginVertical: 5,
+    marginTop: 15,
+    fontSize: 12,
+    color: '#ECE3CE',
   },
 });
 

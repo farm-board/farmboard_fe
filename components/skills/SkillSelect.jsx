@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import SectionedMultiSelect from 'react-native-sectioned-multi-select';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
 import { StyleSheet, View, Text, Platform } from 'react-native';
@@ -61,24 +61,20 @@ const skills = [
 ];
 
 export default function SkillsSelect({ selectedItems, onSelectedItemsChange }) {
+  const [selectedSkills, setSelectedSkills] = useState([]);
+
   const handleSelectedItemsChange = (selectedItems) => {
-    const livestockTypeIds = skills.find(skill => skill.name === 'Livestock Type').skills.map(skill => skill.id);
-    const livestockOperationsIds = skills.find(skill => skill.name === 'Livestock Operations').skills.map(skill => skill.id);
-  
-    const selectedLivestockTypeIds = selectedItems.filter(id => livestockTypeIds.includes(id));
-    const selectedLivestockOperationsIds = selectedItems.filter(id => livestockOperationsIds.includes(id));
-  
-    if (selectedLivestockOperationsIds.length > 0 && selectedLivestockTypeIds.length === 0) {
-      alert('Please select a Livestock Type before selecting Livestock Operations.');
-      return;
-    }
-  
+    setSelectedSkills(selectedItems); // Update selectedSkills with IDs
+    const selectedSkillsNames = mapSelectedSkills(selectedItems); // Get names of selected skills
+    onSelectedItemsChange(selectedItems, selectedSkillsNames); // Pass selectedItems and selected skills to parent component
+  };
+
+  const mapSelectedSkills = (selectedItems) => {
     const selectedSkills = skills
-      .flatMap(skill => skill.skills) 
-      .filter(skill => selectedItems.includes(skill.id))
-      .map(skill => skill.name);
-  
-    onSelectedItemsChange(selectedItems, selectedSkills);
+    .flatMap(skill => skill.skills)
+    .filter(skill => selectedItems.includes(skill.id))
+    .map(skill => skill.name);
+    return selectedSkills;
   };
   
     return (
