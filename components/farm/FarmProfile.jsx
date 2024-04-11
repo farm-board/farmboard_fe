@@ -81,7 +81,7 @@ export default function FarmProfile() {
   
   const handlePostingEdit = (postingId) => {
     console.log('Posting ID:', postingId);
-    navigation.push('Farm Profile Edit Postings', {id: postingId}); // Pass postingId as a parameter
+    navigation.push('Farm Profile Edit Postings', { postingId }); // Pass postingId as a parameter
   }
 
   const handleDeletePosting = (postingId) => {
@@ -236,7 +236,7 @@ export default function FarmProfile() {
                 </StyledText>
                 <TouchableOpacity 
                   style={styles.editPostingButton} 
-                  onPress={() => handlePostingEdit({id: posting.id})}
+                  onPress={() => handlePostingEdit(posting.id)}
                 >
                   <Text style={styles.editPostingText}>Edit This Posting</Text>
                 </TouchableOpacity>

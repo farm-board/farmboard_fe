@@ -13,15 +13,17 @@ import SkillsSelect from '../skills/SkillSelect';
 
 export default function FarmProfileAddPostings() {
   const [data, setData] = useState({
-    title: '',
-    salary: '',
-    skill_requirements: [],
-    offers_lodging: false,
-    duration: '',
-    age_requirement: '',
-    payment_type: '',
-    description: ''
-  })
+    attributes: {
+      title: '',
+      salary: '',
+      payment_type: '',
+      duration: '',
+      age_requirement: 0,
+      offers_lodging: false,
+      skill_requirements: [],
+      description: '',
+    }
+  });
 
   const navigation = useNavigation();
   const { currentUser } = useContext(UserContext);
@@ -30,19 +32,25 @@ export default function FarmProfileAddPostings() {
 
   const onSelectedItemsChange = (selectedItems, selectedSkills) => {
     setSelectedItems(selectedItems);
-    setData({...data, skill_requirements: selectedSkills});
+    setData({...data, attributes: { ...data.attributes, skill_requirements: selectedSkills}});
   }
 
   const handleSubmit = () => {
-    axios.post(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/postings`, data)
-    .then(response => {
-      console.log(response.data);
-      navigation.push('Profile');
-    })
-    .catch(error => {
-      console.log('Unable to add posting', error);
-    })
-  }
+    const postData = {
+      posting: {
+        attributes: { ...data.attributes }
+      }
+    };
+  
+    axios.post(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/postings`, postData)
+      .then(response => {
+        console.log(response.data);
+        navigation.push('Profile');
+      })
+      .catch(error => {
+        console.log('Unable to add posting', error);
+      });
+  };
 
   return (
     <KeyboardAvoidingContainer style={styles.container} behavior="padding">
@@ -59,7 +67,7 @@ export default function FarmProfileAddPostings() {
             placeholder="Job Title"
             icon="account-outline"
             label="Job Title:"
-            onChangeText={(text) => setData({ ...data, title: text })}
+            onChangeText={(text) => setData({ ...data, attributes: { ...data.attributes, title: text } })}
           />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(200).duration(1000).springify()} style={styles.inputContainer}>
@@ -67,7 +75,7 @@ export default function FarmProfileAddPostings() {
             placeholder="Salary"
             icon="city-variant-outline"
             label="Salary:"
-            onChangeText={(text) => setData({...data, salary: text})}
+            onChangeText={(text) => setData({ ...data, attributes: { ...data.attributes, salary: text } })}
           />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.inputContainer}>
@@ -75,7 +83,7 @@ export default function FarmProfileAddPostings() {
             placeholder="Payment Type"
             icon="longitude"
             label="Payment Type:"
-            onChangeText={(text) => setData({...data, payment_type: text})}
+            onChangeText={(text) => setData({ ...data, attributes: { ...data.attributes, payment_type: text } })}
           />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.inputContainer}>
@@ -83,7 +91,7 @@ export default function FarmProfileAddPostings() {
             placeholder="Duration"
             icon="star-box-outline"
             label="Duration:"
-            onChangeText={(text) => setData({...data, duration: text})}
+            onChangeText={(text) => setData({ ...data, attributes: { ...data.attributes, duration: text } })}
           />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.inputContainer}>
@@ -91,7 +99,7 @@ export default function FarmProfileAddPostings() {
             placeholder="Age Requirement"
             icon="longitude"
             label="Age Requirement:"
-            onChangeText={(text) => setData({...data, age_requirement: text})}
+            onChangeText={(text) => setData({ ...data, attributes: { ...data.attributes, age_requirement: text } })}
           />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} >
@@ -113,7 +121,7 @@ export default function FarmProfileAddPostings() {
           icon="pencil-outline"
           multiline={true}
           label="Description:"
-          onChangeText={(text) => setData({...data, description: text})}
+          onChangeText={(text) => setData({ ...data, attributes: { ...data.attributes, description: text } })}
         />
         </Animated.View>
         {/* Submit button */}
