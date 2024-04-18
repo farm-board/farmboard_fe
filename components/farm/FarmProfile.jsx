@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Image, Alert } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Modal, ScrollView, Button } from 'react-native'
 import React, { useContext, useState, useEffect } from 'react'
 import { UserContext } from '../../contexts/UserContext'
 import axios from 'axios'
@@ -14,9 +14,13 @@ export default function FarmProfile() {
   const {currentUser} = useContext(UserContext);
   const [farm, setFarm] = useState({});
   const [accommodations, setAccommodations] = useState(null);
+  const [expanded, setExpanded] = useState(false); 
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [galleryImages, setGalleryImages] = useState([]);
   const [postings, setPostings] = useState([]);
+  const [applicantsMap, setApplicantsMap] = useState({});
+  const [applicants, setApplicants] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const width = Dimensions.get('window').width;
   const navigation = useNavigation();
@@ -46,35 +50,72 @@ export default function FarmProfile() {
     });
   };
 
-  const fetchPostings = () => {
-    axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/postings`)
-    .then((postingsResponse) => {
-      console.log('Postings:', postingsResponse.data.data);
-      setPostings(postingsResponse.data.data);
-    })
-    .catch(error => {
+  const fetchPostings = async () => {
+    try {
+      const postingsResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/postings`);
+      return postingsResponse;
+    } catch (error) {
       console.error("There was an error fetching the farm's postings:", error);
-    });
+    }
+  };
+  
+  const fetchApplicantsCount = async (postingId) => {
+    try {
+      const applicantsResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/postings/${postingId}/applicants`);
+      console.log('Applicants:', applicantsResponse.data);
+
+      if (applicantsResponse.data.length > 0) {
+        const newApplicants = [...applicants, ...applicantsResponse.data];
+        setApplicants(newApplicants);
+        setApplicantsMap(prevMap => ({
+          ...prevMap,
+          [postingId]: applicantsResponse.data.length,
+        }));
+      }
+    } catch (error) {
+      console.error(`Error fetching applicants count for posting ${postingId}:`, error);
+    }
   };
 
   useEffect(() => {
-    Promise.all([
-      axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`),
-      axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/image`),
-    ])
-    .then(([farmResponse, imageResponse]) => {
-      console.log('current farm:', farmResponse.data.data.attributes);
-      setFarm(farmResponse.data.data.attributes);
-      setProfilePhoto(imageResponse.data.image_url);
-    })
-    .catch(error => {
-      console.error('There was an error fetching the farm:', error);
-    });
-    fetchGalleryImages();
-    fetchAccommodations();
-    fetchPostings();
+    const fetchData = async () => {
+      try {
+        const [farmResponse, imageResponse] = await Promise.all([
+          axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`),
+          axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/image`),
+        ]);
+  
+        console.log('current farm:', farmResponse.data.data.attributes);
+        setFarm(farmResponse.data.data.attributes);
+        setProfilePhoto(imageResponse.data.image_url);
+  
+        fetchGalleryImages();
+        fetchAccommodations();
+        const postingsResponse = await fetchPostings();
+        if (postingsResponse) {
+          console.log('Postings:', postingsResponse.data.data);
+          setPostings(postingsResponse.data.data);
+  
+          // Call fetchApplicantsCount after setPostings to ensure data availability
+          await Promise.all(postingsResponse.data.data.map(posting => fetchApplicantsCount(posting.id)));
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+  
+    fetchData();
   }, [currentUser.id]);
-
+  
+  useEffect(() => {
+    if (postings.length > 0) {
+      Promise.all(postings.map(posting => fetchApplicantsCount(posting.id)))
+        .catch(error => {
+          console.error('Error fetching applicants counts:', error);
+        });
+    }
+  }, [currentUser.id, postings]);
+  
   if (farm === undefined) {
     return <Text>Loading...</Text>;
   }
@@ -88,36 +129,69 @@ export default function FarmProfile() {
     navigation.push('Farm Profile Edit Postings', {postingId}); // Pass postingId as a parameter
   }
 
-  const handleDeletePosting = (postingId) => {
-    Alert.alert(
-      'Delete Posting', "Are you sure you want to delete this posting?",
-      [
-        {
-          text: 'Cancel',
-          onPress: () => console.log('Cancel Pressed'),
-          style: 'cancel'
-        },
-        {
-          text: 'Delete',
-          onPress: () => {
-            axios.delete(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/postings/${postingId}`)
-            .then(response => {
-              console.log('Posting deleted:', postingId);
-              Alert.alert('Posting deleted');
-              fetchPostings();
-            })
-            .catch(error => {
-              console.log('Unable to delete posting', error);
-            });
-          }
-        }
-      ]
-    );
+  const handleEmployeeProfileView = (employeeId) => {
+    navigation.push('Employee Profile View', {employeeId});
+    setModalVisible(false);
   }
 
   const onEditButtonPress = () => {
     navigation.push('Profile Edit');
   }
+
+  const renderModal = () => (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={modalVisible}
+      onRequestClose={() => {
+        setModalVisible(!modalVisible);
+      }}
+    >
+      <ScrollView contentContainerStyle={styles.modalContainer}>
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backButton}>
+          <MaterialCommunityIcons
+            name="arrow-left"
+            size={30}
+            color="#ECE3CE"
+            onPress={() => setModalVisible(false)}
+          />
+        </TouchableOpacity>
+          <Animated.Text entering={FadeInUp.duration(1000).springify()}>
+            <StyledText bold tanColor>
+              Applicants
+            </StyledText>
+          </Animated.Text>
+        </View>
+        {applicants.map((applicant) => (
+          <View key={applicant.id} style={styles.modalSectionContainer}>
+            <View style={styles.modalContentContainer}>
+              <View style={styles.leftContent}>
+                <View style={[styles.avatarContainer, styles.marginBottom3]}>
+                  <Avatar uri={applicant.image_url}/>
+                </View>
+              </View>
+              <View style={styles.rightContent}>
+                <Text style={styles.farmName}>
+                  <StyledText big bold tanColor>{applicant.first_name} {applicant.last_name}</StyledText>
+                </Text>
+                <Text style={styles.farmAddress}>
+                  <StyledText>{applicant.city}, {applicant.state}</StyledText>
+                </Text>
+              </View>
+            </View>
+            <View>
+              <TouchableOpacity style={styles.ViewApplicantButton} 
+                onPress={() => handleEmployeeProfileView(applicant.id)}  
+              >
+                <StyledText bold style={styles.ViewApplicantButtonText}>View Applicant Proflie</StyledText>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ))}
+      </ScrollView>
+    </Modal>
+  );
 
   return (
     <View style={styles.container}>
@@ -206,50 +280,91 @@ export default function FarmProfile() {
               <View style={styles.postingContainer} key={posting.id}>
                 <TouchableOpacity 
                   style={styles.deletePostingButton} 
-                  onPress={() => handleDeletePosting(posting.id)}
-                >
-                  <MaterialCommunityIcons name="trash-can" size={24} color="red" />
-                </TouchableOpacity>
-                <StyledText tanColor bold style={styles.postingTitle}>
-                  {posting.attributes.title}
-                </StyledText>
-                <View style={styles.skillsContainer}>
-                  <Text style={styles.postingItem}>Required Skills:</Text>
-                  {posting.attributes.skill_requirements.map((skill, index) => (
-                    <Text key={index} style={styles.sectionText}>{skill}</Text>
-                  ))}
-                  <View style={styles.line} />
-                </View>
-                <StyledText tanColor bold style={styles.postingItem}>
-                  Amount: {posting.attributes.salary}
-                </StyledText>
-                <StyledText tanColor bold style={styles.postingItem}>
-                  Payment Type: {posting.attributes.payment_type}
-                </StyledText>
-                <StyledText tanColor bold style={styles.postingItem}>
-                  Duration: {posting.attributes.duration}
-                </StyledText>
-                <StyledText tanColor bold style={styles.postingItem}>
-                  Age Requirement: {posting.attributes.age_requirement}
-                </StyledText>
-                <StyledText tanColor bold style={styles.postingItem}>
-                  Offers Accommodations: {posting.attributes.offers_lodging === true ? "Yes" : "No"}
-                </StyledText>
-                <StyledText tanColor bold style={styles.postingItem}>
-                  Description: {posting.attributes.description}
-                </StyledText>
-                <TouchableOpacity 
-                  style={styles.editPostingButton} 
                   onPress={() => handlePostingEdit(posting.id)}
                 >
-                  <Text style={styles.editPostingText}>Edit This Posting</Text>
+                  <MaterialCommunityIcons name="pencil-outline" size={24} color='#3A4D39' />
                 </TouchableOpacity>
+                <StyledText bold style={styles.postingTitle}>
+                  {posting.attributes.title}
+                </StyledText>
+                <View style={styles.divider}></View>
+                <View style={styles.itemRow}>
+                  <StyledText bold style={styles.postingItem}>
+                    Compensation:
+                  </StyledText>
+                  <StyledText style={styles.postingItem}>
+                    ${posting.attributes.salary} / {posting.attributes.payment_type}
+                  </StyledText>
+                </View>
+                <View style={styles.itemRow}>
+                  <StyledText bold style={styles.postingItem}>
+                    Duration:
+                  </StyledText>
+                  <StyledText style={styles.postingItem}>
+                    {posting.attributes.duration}
+                  </StyledText>
+                </View>
+                <View style={styles.itemRow}>
+                  <StyledText bold style={styles.postingItem}>
+                    Age Requirement:
+                  </StyledText>
+                  <StyledText style={styles.postingItem}>
+                    {posting.attributes.age_requirement}
+                  </StyledText>
+                </View>
+                <View style={styles.itemRow}>
+                  <StyledText bold style={styles.postingItem}>
+                    Offers Accommodations:
+                  </StyledText>
+                  <StyledText style={styles.postingItem}>
+                    {posting.attributes.offers_lodging === true ? "Yes" : "No"}
+                  </StyledText>
+                </View>
+                <View style={styles.midModalContainer}>
+                {expanded && <StyledText bold style={styles.postingItem}>Required Skills:</StyledText>}
+                <View style={styles.skillContainer}>
+                  {posting?.attributes.skill_requirements && posting?.attributes.skill_requirements.slice(0, expanded ? posting?.attributes.skill_requirements.length : 0).map((skill, index) => (
+                    <View key={index} style={styles.skillBubble}>
+                      <Text style={styles.skillText}>{skill}</Text>
+                    </View>
+                  ))}
+                </View>
+                {posting?.attributes.skill_requirements && posting?.attributes.skill_requirements.length > 0 && (
+                  <TouchableOpacity onPress={() => setExpanded(!expanded)} style={styles.showMoreButton}>
+                    <StyledText bold style={styles.showMoreButtonText}>{expanded ? 'Hide Skills' : 'Show Skills'}</StyledText>
+                  </TouchableOpacity>
+                )}
+              </View>
+                <StyledText bold style={styles.postingItem}>
+                  Description:
+                </StyledText>
+                <StyledText style={styles.postingItem}>
+                  {posting.attributes.description}
+                </StyledText>
+                  {applicantsMap[posting.id] > 0 ?
+                  <View>
+                  <StyledText style={styles.applicantNumber}>
+                    {applicantsMap[posting.id] === 1 ? '1 person has applied for this posting.' : applicantsMap[posting.id] > 1 ? `${applicantsMap[posting.id]} people have applied for this posting.` : null }
+                  </StyledText>
+                  <TouchableOpacity 
+                    style={styles.editPostingButton} 
+                    onPress={() => setModalVisible(true)}
+                  >
+                    <StyledText bold style={styles.editPostingText}>{applicantsMap[posting.id] === 1 ? 'View Applicant' : 'View Applicants'}</StyledText>
+                  </TouchableOpacity>
+                  </View>
+                  : 
+                  <StyledText style={styles.applicantNumber}>
+                    No one has applied for this posting yet.
+                  </StyledText>
+                  }
               </View>
             );
           })}
         </>
         : null }
       </View>
+      {renderModal()}
     </View>
   );
 }
@@ -258,7 +373,17 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
   },
-  avatarContainer: {
+  backButton: {
+    position: 'absolute',
+    left: 0,
+    padding: 10,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    marginBottom: 10,
   },
   topSectionContainer: {
     flexDirection: 'row',
@@ -360,8 +485,13 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     shadowRadius: 20,
     shadowColor: 'black',
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.1,
     minWidth: '100%',
+  },
+  divider: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#3A4D39',
+    marginBottom: 5,
   },
   postingsNotFoundText: {
     textAlign: 'center',
@@ -383,21 +513,36 @@ const styles = StyleSheet.create({
   },
   postingActiveTitle: {
     textAlign: 'center',
-    marginBottom: 10,
+    marginBottom: 20,
   },
   postingContainer: {
     backgroundColor: '#ECE3CE',
     padding: 10,
     borderRadius: 8,
-    marginBottom: 10,
+    marginBottom: 25,
+    shadowRadius: 20,
+    shadowColor: 'black',
+    shadowOpacity: 0.3,
   },
   postingTitle: {
     color: '#3A4D39',
+    marginVertical: 10,
     marginRight: 40,
   },
   postingItem: {
     color: '#3A4D39',
-    marginRight: 40,
+    marginRight: 10,
+    marginTop: 5,
+  },
+  applicantNumber: {
+    color: '#3A4D39',
+    marginRight: 10,
+    marginTop: 15,
+    textAlign: 'center',
+    fontWeight: 'bold',
+  },
+  itemRow: {
+    flexDirection: 'row',
   },
   deletePostingButton: {
     position: 'absolute',
@@ -408,18 +553,102 @@ const styles = StyleSheet.create({
   skillsContainer: {
     marginRight: 40,
   },
+  skillBubble: {
+    backgroundColor: '#4F6F52',
+    borderRadius: 20,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    marginRight: 10,
+    marginBottom: 10,
+  },
+  skillText: {
+    color: '#ECE3CE',
+  },
+  skillContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 10,
+  },
+  sectionText: {
+    color: '#3A4D39',
+  },
+  showMoreButton: {
+    backgroundColor: '#4F6F52',
+    paddingVertical: 8,
+    borderRadius: 8,
+    marginBottom: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: '100%',
+  },
+  showMoreButtonText: {
+    color: "#ECE3CE",
+    fontSize: 16,
+  },
   editPostingButton: {
     backgroundColor: '#4F6F52',
     alignSelf: 'center',
-    padding: 10,
+    padding: 8,
     borderRadius: 8,
     marginTop: 10,
     minWidth: '100%',
   },
   editPostingText: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 16,
     color: "#ECE3CE",
+    textAlign: 'center',
+  },
+  modalContainer: {
+    paddingTop: 60,
+    alignItems: 'center',
+    backgroundColor: '#739072',
+    minHeight: '100%',
+  },
+  modalTitle: {
+    fontSize: 25,
+    fontWeight: 'bold',
+    color: '#ECE3CE',
+  },
+  modalDetails: {
+    fontSize: 18,
+    color: '#ECE3CE',
+    marginBottom: 20,
+  },
+  modalSectionContainer: {
+    backgroundColor: '#4F6F52',
+    marginBottom: 10,
+    shadowRadius: 20,
+    shadowColor: 'black',
+    shadowOpacity: 0.3,
+  },
+  modalContentContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 5,
+    paddingBottom: 10,
+    backgroundColor: '#4F6F52',
+    minWidth: '100%',
+  },
+  modalLeftContent: {
+    marginTop: 20,
+  },
+  modalRightContent: {
+    flex: 1,
+    marginTop: 20,
+  },
+  ViewApplicantButton: {
+    alignSelf: 'center',
+    backgroundColor: '#ECE3CE',
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 20,
+    width: '90%',
+  },
+  ViewApplicantButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#3A4D39',
     textAlign: 'center',
   },
 });

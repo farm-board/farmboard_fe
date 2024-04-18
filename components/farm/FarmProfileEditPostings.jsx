@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react'
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
-import { Text, View, TouchableOpacity, StyleSheet } from 'react-native'
+import { Text, View, TouchableOpacity, StyleSheet, Alert } from 'react-native'
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { UserContext } from '../../contexts/UserContext';
 import axios from 'axios';
@@ -59,15 +59,45 @@ export default function FarmProfileEditPostings() {
     });
   };
 
-  const fetchAccommodationData = async () => {
+  const handleDeletePosting = () => {
+    Alert.alert(
+      'Delete Posting', "Are you sure you want to delete this posting?",
+      [
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel'
+        },
+        {
+          text: 'Delete',
+          onPress: () => {
+            axios.delete(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/postings/${postingId}`)
+            .then(response => {
+              console.log('Posting deleted:', postingId);
+              Alert.alert('Posting deleted');
+              navigation.push('Profile');
+            })
+            .catch(error => {
+              console.log('Unable to delete posting', error);
+            });
+          }
+        }
+      ]
+    );
+  }
+
+  const fetchAccommodationData = () => {
     axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/accommodation`)
-    .then((accommodationResponse) => {
-      console.log('current accommodations:', accommodationResponse.data.data.attributes);
-      setAccommodationData(accommodationResponse.data.data.attributes);
-    })
-    .catch(error => {
-      console.error('There was an error fetching the farm accommodations:', error);
-    });
+      .then((accommodationResponse) => {
+        if (accommodationResponse.data && accommodationResponse.data.data && accommodationResponse.data.data.attributes) {
+          setAccommodationData(accommodationResponse.data.data.attributes);
+        } else {
+          console.log('No accommodations found for this farm.');
+        }
+      })
+      .catch(error => {
+        console.error('There was an error fetching the accommodations:', error);
+      });
   };
 
 
@@ -158,46 +188,48 @@ export default function FarmProfileEditPostings() {
         <Text style={{ alignSelf: 'flex-start', color: 'white', marginBottom: 5 }}>Relevant Skills:</Text>
             <SkillsSelect selectedItems={selectedItems} onSelectedItemsChange={onSelectedItemsChange}/>
         </Animated.View>
-        <Animated.View entering={FadeInDown.delay(1000).duration(1000).springify()} style={styles.inputContainer}>
-          <StyledSwitch
-            placeholder="Offers Accommodations"
-            icon="home-outline"
-            label="Offers Accommodations:"
-            value={data.attributes.offers_lodging}
-            onValueChange={(newValue) => setData({ ...data, attributes: { ...data.attributes, offers_lodging: newValue } })}
-          />
-          {data.attributes.offers_lodging === false ? 
-          null 
-          : 
-          <View style={styles.accommodationsContainer}>
-            <Text style={styles.accommodationTitle}>
-              <StyledText big bold style={styles.accommodationTitle}>
-                Accommodations Offered:
-              </StyledText>
-            </Text>
-            <Text style={styles.accommodationListItem}>
-              <StyledText small >
-              Offers Housing: {accommodationData.housing === true ? "Yes" : "No"}
-              </StyledText>
-            </Text>
-            <Text style={styles.accommodationListItem}>
-              <StyledText small >
-                Offers Meals: {accommodationData.meals === true ? "Yes" : "No"}
-              </StyledText>
-            </Text>
-            <Text style={styles.accommodationListItem}>
-              <StyledText small >
-                Offers Transporation: {accommodationData.transportation === true ? "Yes" : "No"}
-              </StyledText>
-            </Text>
-            <Text style={styles.accommodationDisclaimer}>
-              <Text >
-                If you would like to change these selections, please visit the edit profile page.
-              </Text>
-            </Text>
-          </View>
-          }
-        </Animated.View>
+        { accommodationData.housing || accommodationData.meals || accommodationData.transportation ?
+          <Animated.View entering={FadeInDown.delay(1000).duration(1000).springify()}style={styles.inputContainer}>
+            <StyledSwitch
+              placeholder="Offers Accommodations"
+              icon="home-outline"
+              label="Offers Accommodations:"
+              value={data.attributes.offers_lodging}
+              onValueChange={(newValue) => setData({ ...data, attributes: { ...data.attributes, offers_lodging: newValue } })}
+            />
+            {data.attributes.offers_lodging === false ? 
+              null 
+              : 
+              <View style={styles.accommodationsContainer}>
+                <Text style={styles.accommodationTitle}>
+                  <StyledText big bold style={styles.accommodationTitle}>
+                    Accommodations Offered:
+                  </StyledText>
+                </Text>
+                <Text style={styles.accommodationListItem}>
+                  <StyledText small >
+                    Offers Housing: {accommodationData.housing ? "Yes" : "No"}
+                  </StyledText>
+                </Text>
+                <Text style={styles.accommodationListItem}>
+                  <StyledText small >
+                    Offers Meals: {accommodationData.meals ? "Yes" : "No"}
+                  </StyledText>
+                </Text>
+                <Text style={styles.accommodationListItem}>
+                  <StyledText small >
+                    Offers Transporation: {accommodationData.transportation ? "Yes" : "No"}
+                  </StyledText>
+                </Text>
+                <Text style={styles.accommodationDisclaimer}>
+                  <Text >
+                    If you would like to change these selections, please visit the edit profile page.
+                  </Text>
+                </Text>
+              </View>
+            }
+          </Animated.View>
+        : null}
         <Animated.View entering={FadeInDown.delay(1200).duration(1000).springify()} style={styles.inputContainer}>
         <StyledTextInput
           placeholder="Description"
@@ -212,6 +244,11 @@ export default function FarmProfileEditPostings() {
         <Animated.View entering={FadeInDown.delay(1400).duration(1000).springify()} style={styles.submitButtonContainer}>
           <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
             <Text style={styles.submitButtonText}>Save Changes</Text>
+          </TouchableOpacity>
+        </Animated.View>
+        <Animated.View entering={FadeInDown.delay(1400).duration(1000).springify()} style={styles.deleteButtonContainer}>
+          <TouchableOpacity style={styles.submitButton} onPress={handleDeletePosting}>
+            <Text style={styles.submitButtonText}>Remove Posting</Text>
           </TouchableOpacity>
         </Animated.View>
       </View>
@@ -252,6 +289,11 @@ const styles = StyleSheet.create({
   submitButtonContainer: {
     width: '100%',
     marginBottom: 3,
+  },
+  deleteButtonContainer: {
+    width: '100%',
+    marginBottom: 3,
+    marginTop: 15,
   },
   submitButton: {
     backgroundColor: '#ECE3CE',

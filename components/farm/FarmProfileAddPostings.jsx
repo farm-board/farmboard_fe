@@ -44,13 +44,16 @@ export default function FarmProfileAddPostings() {
 
   const fetchAccommodationData = () => {
     axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/accommodation`)
-    .then((accommodationResponse) => {
-      console.log('current accommodations:', accommodationResponse.data.data.attributes);
-      setAccommodationData(accommodationResponse.data.data.attributes);
-    })
-    .catch(error => {
-      console.error('There was an error fetching the farm accommodations:', error);
-    });
+      .then((accommodationResponse) => {
+        if (accommodationResponse.data && accommodationResponse.data.data && accommodationResponse.data.data.attributes) {
+          setAccommodationData(accommodationResponse.data.data.attributes);
+        } else {
+          console.log('No accommodations found for this farm.');
+        }
+      })
+      .catch(error => {
+        console.error('There was an error fetching the accommodations:', error);
+      });
   };
 
   const handleSubmit = () => {
@@ -135,7 +138,7 @@ export default function FarmProfileAddPostings() {
         <Text style={{ alignSelf: 'flex-start', color: 'white', marginBottom: 5 }}>Relevant Skills:</Text>
             <SkillsSelect selectedItems={selectedItems} onSelectedItemsChange={onSelectedItemsChange} />
         </Animated.View>
-        { accommodationData.length > 0 ?
+        { accommodationData.housing || accommodationData.meals || accommodationData.transportation ?
           <Animated.View entering={FadeInDown.delay(1000).duration(1000).springify()}style={styles.inputContainer}>
             <StyledSwitch
               placeholder="Offers Accommodations"
@@ -145,35 +148,35 @@ export default function FarmProfileAddPostings() {
               onValueChange={(newValue) => setData({ ...data, attributes: { ...data.attributes, offers_lodging: newValue } })}
             />
             {data.attributes.offers_lodging === false ? 
-            null 
-            : 
-            <View style={styles.accommodationsContainer}>
-              <Text style={styles.accommodationTitle}>
-                <StyledText big bold style={styles.accommodationTitle}>
-                  Accommodations Offered:
-                </StyledText>
-              </Text>
-              <Text style={styles.accommodationListItem}>
-                <StyledText small >
-                Offers Housing: {accommodationData.housing === true ? "Yes" : "No"}
-                </StyledText>
-              </Text>
-              <Text style={styles.accommodationListItem}>
-                <StyledText small >
-                  Offers Meals: {accommodationData.meals === true ? "Yes" : "No"}
-                </StyledText>
-              </Text>
-              <Text style={styles.accommodationListItem}>
-                <StyledText small >
-                  Offers Transporation: {accommodationData.transportation === true ? "Yes" : "No"}
-                </StyledText>
-              </Text>
-              <Text style={styles.accommodationDisclaimer}>
-                <Text >
-                  If you would like to change these selections, please visit the edit profile page.
+              null 
+              : 
+              <View style={styles.accommodationsContainer}>
+                <Text style={styles.accommodationTitle}>
+                  <StyledText big bold style={styles.accommodationTitle}>
+                    Accommodations Offered:
+                  </StyledText>
                 </Text>
-              </Text>
-            </View>
+                <Text style={styles.accommodationListItem}>
+                  <StyledText small >
+                    Offers Housing: {accommodationData.housing ? "Yes" : "No"}
+                  </StyledText>
+                </Text>
+                <Text style={styles.accommodationListItem}>
+                  <StyledText small >
+                    Offers Meals: {accommodationData.meals ? "Yes" : "No"}
+                  </StyledText>
+                </Text>
+                <Text style={styles.accommodationListItem}>
+                  <StyledText small >
+                    Offers Transporation: {accommodationData.transportation ? "Yes" : "No"}
+                  </StyledText>
+                </Text>
+                <Text style={styles.accommodationDisclaimer}>
+                  <Text >
+                    If you would like to change these selections, please visit the edit profile page.
+                  </Text>
+                </Text>
+              </View>
             }
           </Animated.View>
         : null}

@@ -10,6 +10,7 @@ import StyledTextInput from "../Inputs/StyledTextInput";
 import AvatarEdit from "../Profile/AvatarEdit";
 import UploadModal from '../Profile/UploadModal';
 import StyledText from '../Texts/StyledText';
+import StyledSelectDropdown from '../Inputs/StyledSelectDropdown';
 
 
 export default function FarmProfileEditDetails() {
@@ -22,6 +23,19 @@ export default function FarmProfileEditDetails() {
     bio: '',
     image: null
   })
+
+  const states = [
+    "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
+    "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho",
+    "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana",
+    "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota",
+    "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada",
+    "New Hampshire", "New Jersey", "New Mexico", "New York",
+    "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon",
+    "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota",
+    "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington",
+    "West Virginia", "Wisconsin", "Wyoming"
+]
 
   const navigation = useNavigation();
   const { currentUser } = useContext(UserContext);
@@ -89,12 +103,13 @@ export default function FarmProfileEditDetails() {
           />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.inputContainer}>
-          <StyledTextInput
-            placeholder="State"
-            icon="star-box-outline"
+          <StyledSelectDropdown
+            listData={states}
+            fieldPlaceholder="State"
             label="State:"
-            value={data.state}
-            onChangeText={(text) => setData({...data, state: text})}
+            onSelect={(selectedItem) => {
+              setData({...data, state: selectedItem})
+            }}
           />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.inputContainer}>
@@ -102,6 +117,7 @@ export default function FarmProfileEditDetails() {
             placeholder="Zip Code"
             icon="longitude"
             label="Zip Code:"
+            keyboardType="numeric"
             value={data.zip_code}
             onChangeText={(text) => setData({...data, zip_code: text})}
           />
