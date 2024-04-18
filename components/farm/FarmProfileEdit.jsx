@@ -91,6 +91,11 @@ export default function FarmProfileEdit() {
     axios.delete(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/delete_image`);
     setModalVisible(false);
   };
+  
+  const handleAccommodationsDelete = () => {
+    setAccommodations({});
+    axios.delete(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/accommodation`);
+  };
 
   const handleGalleryImageUpload = async () => {
     if (galleryImages.length >= 6) {
@@ -147,7 +152,6 @@ export default function FarmProfileEdit() {
     Promise.all([
       axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`),
       axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/image`),
-      axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/accommodation`)
     ])
     .then(([farmResponse, imageResponse, accommodationResponse]) => {
       setData({
@@ -158,14 +162,27 @@ export default function FarmProfileEdit() {
         zip_code: farmResponse.data.data.attributes.zip_code,
         bio: farmResponse.data.data.attributes.bio,
         image: imageResponse.data.image_url
-      }),
-      console.log('accommodations:', accommodationResponse.data.data.attributes),
-      setAccommodations(accommodationResponse.data.data.attributes)
+      });
     })
     .catch(error => {
       console.error('There was an error fetching the farm:', error);
     });
   };
+
+  const fetchAccommodationData = async () => {
+    axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/accommodation`)
+      .then((accommodationResponse) => {
+        if (accommodationResponse.data && accommodationResponse.data.data && accommodationResponse.data.data.attributes) {
+          setAccommodations(accommodationResponse.data.data.attributes);
+        } else {
+          console.log('No accommodations found for this farm.');
+        }
+      })
+      .catch(error => {
+        console.error('There was an error fetching the accommodations:', error);
+      });
+  };
+
 
   const fetchGalleryImages = () => {
     axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/gallery_photos`)
@@ -185,6 +202,7 @@ export default function FarmProfileEdit() {
   useEffect(() => {
     fetchProfileData()
     fetchGalleryImages();
+    fetchAccommodationData();
   }, []);
 
   return (
@@ -290,6 +308,11 @@ export default function FarmProfileEdit() {
                   <StyledText style={styles.existingData}>{accommodations.transportation === true ? "Yes" : "No"}</StyledText>
                 </ProfileInfo>
               </Animated.View>
+              <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.submitButtonContainer}>
+                <TouchableOpacity style={styles.submitButton} onPress={handleAccommodationsDelete}>
+                  <Text style={styles.submitButtonText}>Remove Accommodations</Text>
+                </TouchableOpacity>
+              </Animated.View>
             </View>
           }
         </View>
@@ -384,14 +407,13 @@ const styles = StyleSheet.create({
   addImageContainer: {
     width: '100%',
     backgroundColor: '#4F6F52',
-    paddingTop: 10,
   },
   addImageButton: {
     backgroundColor: '#ECE3CE',
     alignSelf: 'center',
     padding: 10,
     borderRadius: 8,
-    width: '80%',
+    width: '90%',
   },
   addImageText: {
     fontSize: 20,

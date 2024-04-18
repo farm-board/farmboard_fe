@@ -12,7 +12,6 @@ const FeedScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedPosting, setSelectedPosting] = useState(null);
   const [expanded, setExpanded] = useState(false); 
-  const [userId, setUserId] = useState(null);
   const { currentUser } = useContext(UserContext);
   const navigation = useNavigation();
 
