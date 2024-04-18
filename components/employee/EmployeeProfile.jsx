@@ -102,12 +102,13 @@ export default function EmployeeProfile() {
           <StyledText big tanColor style={styles.sectionTitle}>Experience</StyledText>
           <View style={styles.experienceWrapper}>
             {experiences
-              .sort((a, b) => new Date(b.attributes.ended_at) - new Date(a.attributes.ended_at)) // Sort by end date in descending order
-              .slice(0, 3) // Slice the first three experiences
+              .sort((a, b) => new Date(b.attributes.ended_at) - new Date(a.attributes.ended_at))
+              .slice(0, 3) 
               .map((experience, index) => (
                 <View key={index} style={[styles.experienceContainer, styles.experienceBox]}>
-                  <Text style={styles.label}>Company Name:</Text>
-                  <Text style={styles.experienceCompany}>{experience.attributes.company_name}</Text>
+                  <View style={styles.labelContainer}>
+                  <Text style={styles.experienceLabel}>{experience.attributes.company_name}</Text>
+                  </View>
                   
                   <Text style={styles.label}>Employment:</Text>
                   <Text style={styles.experienceCompany}>
@@ -126,15 +127,19 @@ export default function EmployeeProfile() {
           <StyledText big tanColor style={styles.sectionTitle}>References</StyledText>
           <View style={styles.experienceWrapper}>
             {references
-              .slice(0, 3) // Slice the first three references
+              .slice(0, 3)
               .map((reference, index) => (
                 <View key={index} style={[styles.experienceContainer, styles.experienceBox]}>
-                  <Text style={styles.label}>Name:</Text>
-                  <Text style={styles.experienceCompany}>{`${reference.attributes.first_name} ${reference.attributes.last_name}`}</Text>
-
+                  <View style={styles.labelContainer}>
+                  <Text style={styles.experienceLabel}>{`${reference.attributes.first_name} ${reference.attributes.last_name}`}</Text>
+                  </View>
                   <Text style={styles.label}>Contact:</Text>
-                  <Text style={styles.experienceCompany}>{`${reference.attributes.phone}  ${reference.attributes.email}`}</Text>
-
+                  {reference.attributes.phone && (
+                      <Text style={styles.experienceCompany}>Phone: {reference.attributes.phone}</Text>
+                    )}
+                    {reference.attributes.email && (
+                      <Text style={styles.experienceCompany}>Email: {reference.attributes.email}</Text>
+                    )}
                   <Text style={styles.label}>Relationship:</Text>
                   <Text style={styles.experienceCompany}>{reference.attributes.relationship}</Text>
                   
@@ -254,10 +259,23 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: '#ECE3CE', 
     borderRadius: 10,
+    marginBottom: 10,
   },
   experienceBox: {
     padding: 10,
     marginBottom: 10,
+  },
+  labelContainer: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#3A4D39',
+  },
+  experienceLabel: {
+    fontWeight: 'bold',
+    color: '#3A4D39',
+    fontSize: 14,
+    paddingBottom: 2,
+    paddingTop: 2,
+    textAlign: 'center',
   },
   label: {
     fontWeight: 'bold',
