@@ -69,6 +69,11 @@ const FeedScreen = () => {
     }
   };
 
+  const handleProfileRedirect = (farmId) => {
+    navigation.push("Farm Profile View", { farmId: selectedPosting?.attributes.farm_id }),
+    setModalVisible(false);
+    }
+
   const renderPostingItem = ({ item }) => (
     <TouchableOpacity onPress={() => {
       setSelectedPosting(item);
@@ -109,9 +114,12 @@ const FeedScreen = () => {
       </View>
         <View style={styles.midModalContainer}>
             <Text style={styles.modalTitle}>Location</Text>
-            <Text style={styles.modalDetails}>{selectedPosting?.attributes.farm_name}</Text>
+            <TouchableOpacity onPress={() => handleProfileRedirect(selectedPosting?.attributes.farm_id)}>
+            <Text style={styles.modalDetails}>
+            {selectedPosting?.attributes.farm_name}</Text>
             <Text style={styles.modalDetails}>{selectedPosting?.attributes.farm_city}, {selectedPosting?.attributes.farm_state}
             </Text>
+            </TouchableOpacity>
         </View>
         <View style={styles.midModalTwoContainer}>
             <Text style={styles.modalTwoTitle}>Compensation</Text>
