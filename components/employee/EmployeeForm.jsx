@@ -24,6 +24,8 @@ export default function EmployeeForm() {
     skills: [],
     bio: '',
     age: '',
+    phone: '',
+    email: '',
     image: null
   })
 
@@ -172,6 +174,20 @@ export default function EmployeeForm() {
               label="Age:"
               onChangeText={(text) => setData({...data, age: text})}
             />
+            <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputContainer}>
+            <StyledTextInput
+              placeholder="Phone"
+              icon="phone"
+              label="Phone number that potential employers can contact you at:"
+              onChangeText={(text) => setData({...data, phone: text})}
+            />
+            <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputContainer}>
+            <StyledTextInput
+              placeholder="Email"
+              icon="email"
+              label="Email that potential employers can contact you at:"
+              onChangeText={(text) => setData({...data, email: text})}
+            />
         <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputContainer}>
           <StyledTextInput
             placeholder="Bio"
@@ -180,6 +196,8 @@ export default function EmployeeForm() {
             label="Bio:"
             onChangeText={(text) => setData({...data, bio: text})}
           />
+          </Animated.View>
+          </Animated.View>
         </Animated.View>
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} >

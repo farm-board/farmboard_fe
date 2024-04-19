@@ -69,6 +69,11 @@ const FeedScreen = () => {
     }
   };
 
+  const handleProfileRedirect = (farmId) => {
+    navigation.push("Farm Profile View", { farmId: selectedPosting?.attributes.farm_id }),
+    setModalVisible(false);
+    }
+
   const renderPostingItem = ({ item }) => (
     <TouchableOpacity onPress={() => {
       setSelectedPosting(item);
@@ -97,20 +102,29 @@ const FeedScreen = () => {
       }}
     >
       <ScrollView contentContainerStyle={styles.modalContainer}>
-      <View style={styles.midModalContainer}>
-      <Text style={styles.modalTitle}>Position</Text>
-      <Text style={styles.modalDetails}>{selectedPosting?.attributes.title}</Text>
+      <TouchableOpacity
+        style={styles.closeButton}
+        onPress={() => setModalVisible(false)}
+      >
+        <Text style={styles.closeButtonText}>X</Text>
+      </TouchableOpacity>
+      <View style={styles.midModalTwoContainer}>
+      <Text style={styles.modalTwoTitle}>Position</Text>
+      <Text style={styles.modalTwoDetails}>{selectedPosting?.attributes.title}</Text>
       </View>
         <View style={styles.midModalContainer}>
             <Text style={styles.modalTitle}>Location</Text>
-            <Text style={styles.modalDetails}>{selectedPosting?.attributes.farm_name}</Text>
+            <TouchableOpacity onPress={() => handleProfileRedirect(selectedPosting?.attributes.farm_id)}>
+            <Text style={styles.modalDetails}>
+            {selectedPosting?.attributes.farm_name}</Text>
             <Text style={styles.modalDetails}>{selectedPosting?.attributes.farm_city}, {selectedPosting?.attributes.farm_state}
             </Text>
+            </TouchableOpacity>
         </View>
-        <View style={styles.midModalContainer}>
-            <Text style={styles.modalTitle}>Compensation</Text>
-            <Text style={styles.modalDetails}>${selectedPosting?.attributes.salary} / {selectedPosting?.attributes.payment_type}</Text>
-            <Text style={styles.modalDetails}>{selectedPosting?.attributes.duration}</Text>
+        <View style={styles.midModalTwoContainer}>
+            <Text style={styles.modalTwoTitle}>Compensation</Text>
+            <Text style={styles.modalTwoDetails}>${selectedPosting?.attributes.salary} / {selectedPosting?.attributes.payment_type}</Text>
+            <Text style={styles.modalTwoDetails}>{selectedPosting?.attributes.duration}</Text>
         </View>
         <View style={styles.midModalContainer}>
         <Text style={styles.modalTitle}>Required Skills</Text>
@@ -127,16 +141,17 @@ const FeedScreen = () => {
           </TouchableOpacity>
         )}
       </View>
-        <View style={styles.midModalContainer}>
-            <Text style={styles.modalTitle}>Job Description</Text>
-            <Text style={styles.modalDetails}>{selectedPosting?.attributes.description}</Text>
+        <View style={styles.midModalTwoContainer}>
+            <Text style={styles.modalTwoTitle}>Job Description</Text>
+            <Text style={styles.modalTwoDetails}>{selectedPosting?.attributes.description}</Text>
         </View>
-        <View style={styles.midModalContainer}>
-            <Text style={styles.modalTitle}>Accomodations Offered</Text>
-            <Text style={styles.modalDetails}>{selectedPosting?.attributes.offers_lodging}</Text>
+        <View style={styles.submitButtonContainer}>
+            <TouchableOpacity style={styles.submitButton} onPress={applyToPosting}>
+              <Text style={styles.submitButtonText}>
+                Apply
+              </Text>
+            </TouchableOpacity>
         </View>
-        <Button title="Apply" onPress={applyToPosting} />
-        <Button title="Close" onPress={() => setModalVisible(false)} />
       </ScrollView>
     </Modal>
   );
@@ -250,6 +265,7 @@ const styles = StyleSheet.create({
     paddingTop: 70,
     alignItems: 'center',
     backgroundColor: '#4F6F52',
+    minHeight: '100%',
   },
   topModalContainer: {
     backgroundColor: '#ECE3CE',
@@ -259,21 +275,40 @@ const styles = StyleSheet.create({
     minWidth: '100%',
   },
   midModalContainer: {
-    backgroundColor: '#4F6F52',
+    backgroundColor: '#ECE3CE',
     padding: 10,
     alignItems: 'center',
     justifyContent: 'center',
     minWidth: '100%',
     borderWidth: 5,
     borderColor: '#ECE3CE', 
+    borderRadius: 20,
+  },
+  midModalTwoContainer: {
+    backgroundColor: '#4F6F52',
+    padding: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: '100%',
   },
   modalTitle: {
+    fontSize: 25,
+    fontWeight: 'bold',
+    color: '#4F6F52',
+    marginBottom: 10,
+  },
+  modalDetails: {
+    fontSize: 18,
+    color: '#4F6F52',
+    marginBottom: 5,
+  },
+  modalTwoTitle: {
     fontSize: 25,
     fontWeight: 'bold',
     color: '#ECE3CE',
     marginBottom: 10,
   },
-  modalDetails: {
+  modalTwoDetails: {
     fontSize: 18,
     color: '#ECE3CE',
     marginBottom: 5,
@@ -284,7 +319,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   skillBubble: {
-    backgroundColor: '#ECE3CE',
+    backgroundColor: '#4F6F52',
     borderRadius: 20,
     paddingVertical: 5,
     paddingHorizontal: 10,
@@ -292,7 +327,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   skillText: {
-    color: '#3A4D39',
+    color: '#ECE3CE',
   },
   showMoreButton: {
     backgroundColor: '#ECE3CE',
@@ -309,6 +344,34 @@ const styles = StyleSheet.create({
   skillContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 37,
+    right: 20,
+    backgroundColor: 'transparent',
+    zIndex: 1,
+  },
+  closeButtonText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#ECE3CE',
+  },
+  submitButtonContainer: {
+    width: '100%',
+    padding: 10,
+    marginBottom: 30,
+  },
+  submitButton: {
+    backgroundColor: '#ECE3CE',
+    padding: 10,
+    borderRadius: 8,
+  },
+  submitButtonText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#3A4D39',
+    textAlign: 'center',
   },
 });
 
