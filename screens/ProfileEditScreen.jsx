@@ -27,7 +27,7 @@ export default function ProfileEditScreen() {
             name="arrow-left"
             size={30}
             color="#ECE3CE"
-            onPress={() => navigation.push("Profile")}
+            onPress={() => navigation.navigate("Profile")}
           />
         </TouchableOpacity>
           <Animated.Text entering={FadeInUp.duration(1000).springify()}>

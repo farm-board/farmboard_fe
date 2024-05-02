@@ -11,6 +11,7 @@ import AvatarEdit from "../Profile/AvatarEdit";
 import UploadModal from '../Profile/UploadModal';
 import StyledText from '../Texts/StyledText';
 import SkillSelect from '../../components/skills/SkillSelect';
+import StyledSelectDropdown from '../Inputs/StyledSelectDropdown';
 
 
 export default function EmployeeForm() {
@@ -29,6 +30,19 @@ export default function EmployeeForm() {
     image: null
   })
 
+  const states = [
+    "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
+    "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho",
+    "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana",
+    "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota",
+    "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada",
+    "New Hampshire", "New Jersey", "New Mexico", "New York",
+    "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon",
+    "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota",
+    "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington",
+    "West Virginia", "Wisconsin", "Wyoming"
+  ]
+
   const [selectedItems, setSelectedItems] = useState([]);
 
   const onSelectedItemsChange = (selectedItems, selectedSkills) => {
@@ -43,7 +57,7 @@ export default function EmployeeForm() {
     axios.put(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`, { employee: data})
     .then(response => {
       console.log(response.data);
-      navigation.push('Profile');
+      navigation.navigate('Profile');
     })
     .catch(error => {
       console.log('Unable to register user', error);
@@ -152,18 +166,21 @@ export default function EmployeeForm() {
             />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.inputContainer}>
-            <StyledTextInput
-              placeholder="State"
-              icon="star-box-outline"
-              label="State:"
-              onChangeText={(text) => setData({...data, state: text})}
-            />
+          <StyledSelectDropdown
+            listData={states}
+            fieldPlaceholder="State"
+            label="State:"
+            onSelect={(selectedItem) => {
+              setData({...data, state: selectedItem})
+            }}
+          />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.inputContainer}>
              <StyledTextInput
               placeholder="Zip Code"
               icon="longitude"
               label="Zip Code:"
+              keyboardType="numeric"
               onChangeText={(text) => setData({...data, zip_code: text})}
             />
         </Animated.View>
@@ -179,6 +196,7 @@ export default function EmployeeForm() {
               placeholder="Phone"
               icon="phone"
               label="Phone number that potential employers can contact you at:"
+              keyboardType="numeric"
               onChangeText={(text) => setData({...data, phone: text})}
             />
             <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputContainer}>
