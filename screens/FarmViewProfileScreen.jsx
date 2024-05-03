@@ -17,21 +17,6 @@ export default function FarmViewProfileScreen() {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton}>
-          <MaterialCommunityIcons
-            name="arrow-left"
-            size={30}
-            color="#ECE3CE"
-            onPress={() => navigation.goBack()}
-          />
-        </TouchableOpacity>
-          <Animated.Text entering={FadeInUp.duration(1000).springify()}>
-            <StyledText bold tanColor style={[styles.text, styles.pb10]}>
-              Farm Profile
-            </StyledText>
-          </Animated.Text>
-        </View>
       <View style={styles.content}>
         <KeyboardAvoidingContainer>
           <ViewFarmProfile />
@@ -48,7 +33,7 @@ const styles = StyleSheet.create({
   },
   content: {
     marign: 0,
-    height: '80%',
+    height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
   },
