@@ -7,40 +7,28 @@ import axios from 'axios';
 import { UserContext } from '../contexts/UserContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function LoginScreen() {
-    const [data, setData] = useState({
-        email: '',
-        password: '',
-    })
+export default function ResetPasswordScreen() {
+    const [email, setEmail] = useState('');
     
     const navigation = useNavigation();
     
     const { setCurrentUser } = useContext(UserContext);
 
     const handleSubmit = () => {
-        const user = {
-            user: {
-              email: data.email,
-              password: data.password
-            }
-          };
+        // Call your API to request password reset
+        axios.post(`http://localhost:4000/password`, { user: { email: email } })
+          .then(response => {
+            // Handle success
+            console.log('Password reset link sent');
+            alert('Password reset link has been sent to your email.')
+          })
+          .catch(error => {
+            // Handle error
+            console.error('Error requesting password reset:', error);
+            alert('Error requesting password reset. Please try again later.')
+          });
+      };
 
-        axios.post('http://localhost:4000/login', user)
-        .then(response => {
-            setCurrentUser(response.data.data);
-            AsyncStorage.setItem('token', response.headers.authorization);
-            if (response.data.data.role_type === "no_role") {
-                navigation.push('Setup');
-            }
-            else {
-                navigation.push('Profile');
-            }
-        })
-        .catch(error => {
-            console.log(error);
-            console.log(error.message);
-        })
-    }
     return (
         <View style={styles.container}>
           <StatusBar style="light" />
@@ -55,21 +43,14 @@ export default function LoginScreen() {
     
             {/* Form */}
             <View style={styles.formContainer}>
+                <Text style={styles.passwordText}>Forgot your password?</Text>
+                <Text style={styles.passwordDetails}>Enter your email address and we'll send you a link to reset your password.</Text>
               <Animated.View entering={FadeInDown.delay(200).duration(1000).springify()}style={styles.inputContainer}>
                 <TextInput
                   style={styles.input}
                   placeholder='Email'
                   placeholderTextColor='gray'
-                  onChangeText={text => setData({ ...data, email: text })}
-                />
-              </Animated.View>
-              <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.inputContainer}>
-                <TextInput
-                  style={styles.input}
-                  placeholder='Password'
-                  placeholderTextColor='gray'
-                  secureTextEntry
-                  onChangeText={text => setData({ ...data, password: text })}
+                  onChangeText={text => setEmail(text)}
                 />
               </Animated.View>
               <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()}>
@@ -77,19 +58,13 @@ export default function LoginScreen() {
                     style={styles.button}
                     onPress={handleSubmit}>
                     <Text style={styles.buttonText}>
-                    Login
+                    Reset Password
                     </Text>
                 </TouchableOpacity>
               </Animated.View>
               <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.signUpTextContainer}>
-                <Text>Don't have an account?</Text>
-                <TouchableOpacity onPress={() => navigation.push('SignUp')}>
-                  <Text style={styles.signUpText}>Sign Up</Text>
-                </TouchableOpacity>
-              </Animated.View>
-              <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.signUpTextContainer}>
-                <TouchableOpacity onPress={() => navigation.push('ForgotPassword')}>
-                  <Text style={styles.signUpText}>Forgot Password?</Text>
+                <TouchableOpacity onPress={() => navigation.push('Login')}>
+                  <Text style={styles.signUpText}>Back to Login</Text>
                 </TouchableOpacity>
               </Animated.View>
             </View>
@@ -147,12 +122,12 @@ const styles = StyleSheet.create({
       padding: 15,
       paddingHorizontal: 75,
       borderRadius: 20,
-      width: '100%',
+      maxWidth: '100%',
       marginBottom: 10,
       marginTop: 10,
     },
     buttonText: {
-      fontSize: 20,
+      fontSize: 16,
       fontWeight: 'bold',
       color: '#fff',
       textAlign: 'center',
@@ -165,5 +140,16 @@ const styles = StyleSheet.create({
     signUpText: {
       color: '#00B0FF',
       marginLeft: 5,
+    },
+    passwordText: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      color: 'black',
+      textAlign: 'center',
+      marginBottom: 10,
+    },
+    passwordDetails: {
+        color: 'black',
+        textAlign: 'center',
     },
 });

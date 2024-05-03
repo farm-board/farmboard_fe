@@ -1,3 +1,4 @@
+import { createDrawerNavigator } from '@react-navigation/drawer';
 import * as React from 'react';
 import { TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -22,6 +23,9 @@ import EmployeeProfileAddExperiencesScreen from './screens/EmployeeProfileAddExp
 import EmployeeProfileAddReferencesScreen from './screens/EmployeeProfileAddReferencesScreen';
 import FeedScreen from './screens/FeedScreen';
 import EmployeeViewProfileScreen from './screens/EmployeeViewProfileScreen';
+import FarmViewProfileScreen from './screens/FarmViewProfileScreen';
+import ForgotPasswordScreen from './screens/ForgotPasswordScreen.jsx';
+import ResetPasswordScreen from './screens/ResetPasswordScreen.jsx';
 import CustomDrawerContent from './navigation/CustomDrawerContent';
 
 const Stack = createNativeStackNavigator();
@@ -386,6 +390,8 @@ function App() {
           <>
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="SignUp" component={SignupScreen} />
+            <Stack.Screen name="Forgot Password" component={ForgotPasswordScreen} />
+            <Stack.Screen name="Reset Password" component={ResetPasswordScreen} />
           </>
         </Stack.Navigator>
       )}
