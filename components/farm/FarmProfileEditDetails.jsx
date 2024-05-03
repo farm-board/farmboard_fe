@@ -4,10 +4,8 @@ import { Text, View, TextInput, TouchableOpacity, StyleSheet } from 'react-nativ
 import { useNavigation } from '@react-navigation/native';
 import { UserContext } from '../../contexts/UserContext';
 import axios from 'axios';
-import * as ImagePicker from 'expo-image-picker';
 import KeyboardAvoidingContainer from "../Containers/KeyboardAvoidingContainer";
 import StyledTextInput from "../Inputs/StyledTextInput";
-import AvatarEdit from "../Profile/AvatarEdit";
 import UploadModal from '../Profile/UploadModal';
 import StyledText from '../Texts/StyledText';
 import StyledSelectDropdown from '../Inputs/StyledSelectDropdown';
@@ -44,7 +42,7 @@ export default function FarmProfileEditDetails() {
     axios.put(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`, { farm: data})
     .then(response => {
       console.log(response.data);
-      navigation.push('Profile');
+      navigation.push('Edit Profile');
     })
     .catch(error => {
       console.log('Unable to register user', error);
@@ -77,13 +75,6 @@ export default function FarmProfileEditDetails() {
   return (
     <KeyboardAvoidingContainer style={styles.container} behavior="padding">
       <View style={styles.content}>
-        <Animated.Text >
-          <View style={styles.titleTextBox}>
-            <StyledText entering={FadeInUp.duration(1000).springify()} big style={styles.text}>
-              Edit Display Info:
-            </StyledText>
-          </View>
-        </Animated.Text>
         <Animated.View entering={FadeInDown.duration(1000).springify()}style={styles.inputContainer}>
           <StyledTextInput
             placeholder="Name"
@@ -160,6 +151,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    marginTop: 25,
     justifyContent: 'center',
     alignItems: 'center',
     minWidth: '100%',

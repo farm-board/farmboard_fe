@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
     position: "relative",
     shadowRadius: 10,
     shadowColor: 'black',
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.2,
   },
   image: {
     borderRadius: 75,

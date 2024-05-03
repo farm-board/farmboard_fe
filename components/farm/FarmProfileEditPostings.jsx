@@ -110,7 +110,7 @@ export default function FarmProfileEditPostings() {
     axios.put(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/postings/${postingId}`, postData)
       .then(response => {
         console.log(response.data);
-        navigation.push('Profile');
+        navigation.navigate('Profile');
       })
       .catch(error => {
         console.log('Unable to edit posting', error);
@@ -124,13 +124,6 @@ export default function FarmProfileEditPostings() {
   return (
     <KeyboardAvoidingContainer style={styles.container} behavior="padding">
       <View style={styles.content}>
-        <Animated.Text >
-          <View style={styles.titleTextBox}>
-            <StyledText entering={FadeInUp.duration(1000).springify()} big style={styles.text}>
-              Edit Job Posting:
-            </StyledText>
-          </View>
-        </Animated.Text>
         <Animated.View entering={FadeInDown.duration(1000).springify()}style={styles.inputContainer}>
         <StyledTextInput
             placeholder="Job Title"
@@ -262,6 +255,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   content: {
+    marginTop: 25,
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',

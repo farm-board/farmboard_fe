@@ -54,14 +54,9 @@ const styles = StyleSheet.create({
   },
   content: {
     marign: 0,
-    height: '80%',
+    height: '90%',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  pt10: {
-    marginTop: 10,
-    paddingTop: 130,
-    paddingBottom: 10,
   },
   textCenter: {
     textAlign: 'center',
@@ -70,7 +65,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 15,
   },
   greenButton: {
     width: '80%',

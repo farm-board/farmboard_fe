@@ -19,8 +19,8 @@ export default function ViewEmployeeProfile() {
 
   const route = useRoute();
   const { employeeId } = route.params;
-
   useEffect(() => {
+    console.log('employeeId:', employeeId);
     setLoading(true); 
       axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/${employeeId}/profile_info`)
     .then((employeeResponse) => {
@@ -130,7 +130,7 @@ export default function ViewEmployeeProfile() {
 const styles = StyleSheet.create({
   container: {
     minWidth: '100%',
-    height: '100%',
+    minHeight: '100%',
   },
   topSectionContainer: {
     flexDirection: 'row',

@@ -6,17 +6,12 @@ import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated'
 import Avatar from '../Profile/Avatar'
 import StyledText from '../Texts/StyledText'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
-import { colors } from '../../config/theme'
 import { useNavigation } from '@react-navigation/native'
-import Gallery from '../Profile/Gallery';
 
-export default function FarmProfile() {
+export default function FarmHome() {
   const {currentUser} = useContext(UserContext);
   const [farm, setFarm] = useState({});
-  const [accommodations, setAccommodations] = useState(null);
   const [expandedMap, setExpandedMap] = useState({});
-  const [profilePhoto, setProfilePhoto] = useState(null);
-  const [galleryImages, setGalleryImages] = useState([]);
   const [postings, setPostings] = useState([]);
   const [applicantsMap, setApplicantsMap] = useState({});
   const [applicants, setApplicants] = useState([]);
@@ -24,31 +19,6 @@ export default function FarmProfile() {
 
   const width = Dimensions.get('window').width;
   const navigation = useNavigation();
-  
-  const fetchAccommodations = () => {
-    axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/accommodation`)
-      .then((accommodationResponse) => {
-        if (accommodationResponse.data && accommodationResponse.data.data && accommodationResponse.data.data.attributes) {
-          setAccommodations(accommodationResponse.data.data.attributes);
-        } else {
-          console.log('No accommodations found for this farm.');
-        }
-      })
-      .catch(error => {
-        console.error('There was an error fetching the accommodations:', error);
-      });
-  };
-
-  const fetchGalleryImages = () => {
-    axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/gallery_photos`)
-    .then((galleryResponse) => {
-      console.log('gallery images:', galleryResponse.data.gallery_photos);
-      setGalleryImages(galleryResponse.data.gallery_photos);
-    })
-    .catch(error => {
-      console.error('There was an error fetching the gallery images:', error);
-    });
-  };
 
   const fetchPostings = async () => {
     try {
@@ -80,17 +50,10 @@ export default function FarmProfile() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [farmResponse, imageResponse] = await Promise.all([
-          axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`),
-          axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/image`),
-        ]);
-  
+        const farmResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`);
         console.log('current farm:', farmResponse.data.data.attributes);
         setFarm(farmResponse.data.data.attributes);
-        setProfilePhoto(imageResponse.data.image_url);
   
-        fetchGalleryImages();
-        fetchAccommodations();
         const postingsResponse = await fetchPostings();
         if (postingsResponse) {
           console.log('Postings:', postingsResponse.data.data);
@@ -134,9 +97,6 @@ export default function FarmProfile() {
     setModalVisible(false);
   };
 
-  const onEditButtonPress = () => {
-    navigation.navigate('Edit Profile');
-  }
 
   const toggleExpanded = (postingId) => {
   setExpandedMap(prevState => ({
@@ -202,72 +162,6 @@ export default function FarmProfile() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.topSectionContainer}>
-          <TouchableOpacity style={styles.editButton} onPress={onEditButtonPress}>
-            <MaterialCommunityIcons
-              name="pencil-outline"
-              size={25}
-              color={colors.highlight}
-            />
-          </TouchableOpacity>
-        <View style={styles.leftContent}>
-          <View style={[styles.avatarContainer, styles.marginBottom3]}>
-            <Avatar uri={profilePhoto} />
-          </View>
-        </View>
-        <View style={styles.rightContent}>
-          <Text style={styles.farmName}>
-            <StyledText big bold tanColor >
-              {`${farm.name}`}
-            </StyledText>
-          </Text>
-          <Text style={styles.farmAddress}>
-            <StyledText tanColor >
-              {`${farm.city}, ${farm.state}`}
-            </StyledText>
-          </Text>
-        </View>
-      </View>
-      {Object.keys(galleryImages).length !== 0 ?
-        <View style={styles.galleryContainer}>
-          <Gallery
-            width={width}
-            galleryImages={galleryImages}
-          />
-        </View>
-        : null }
-      <View style={styles.farmBioContainer}>
-        <StyledText big tanColor style={styles.farmBioTitle}>
-          About
-        </StyledText>
-        <StyledText small tanColor style={styles.farmBioText}>
-          {`${farm.bio}`}
-        </StyledText>
-      </View>
-      {accommodations !== null ?
-      <View style={styles.accommodationsContainer}>
-        <Text style={styles.accommodationTitle}>
-          <StyledText big bold tanColor style={styles.accommodationTitle}>
-            Accommodations
-          </StyledText>
-        </Text>
-        <Text style={styles.accommodationListItem}>
-          <StyledText small tanColor>
-          Offers Housing: {accommodations.housing === true ? "Yes" : "No"}
-          </StyledText>
-        </Text>
-        <Text style={styles.accommodationListItem}>
-          <StyledText small tanColor>
-            Offers Meals: {accommodations.meals === true ? "Yes" : "No"}
-          </StyledText>
-        </Text>
-        <Text style={styles.accommodationListItem}>
-          <StyledText small tanColor>
-            Offers Transporation: {accommodations.transportation === true ? "Yes" : "No"}
-          </StyledText>
-        </Text>
-      </View>
-      : null }
       <View style={styles.postingsContainer}>
         {postings.length === 0 ?
         <StyledText tanColor bold style={styles.postingsNotFoundText}>
@@ -385,6 +279,7 @@ export default function FarmProfile() {
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
+    marginBottom: 40,
   },
   backButton: {
     position: 'absolute',
@@ -397,17 +292,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: '100%',
     marginBottom: 10,
-  },
-  topSectionContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 5,
-    backgroundColor: '#4F6F52',
-    maxWidth: '100%',
-    shadowRadius: 20,
-    shadowColor: 'black',
-    shadowOpacity: 0.4,
   },
   leftContent: {
     marginTop: 20,
@@ -428,49 +312,6 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     marginBottom: 20,
   },
-  farmBioText: {
-    letterSpacing: 1,
-    fontSize: 13,
-    marginVertical: 5,
-  },
-  farmBioTitle: {
-    letterSpacing: 1,
-    fontSize: 15,
-  },
-  farmBioContainer: {
-    letterSpacing: 1,
-    paddingHorizontal: 25,
-    paddingVertical: 10,
-    backgroundColor: '#4F6F52',
-    marginVertical: 10,
-    shadowRadius: 20,
-    shadowColor: 'black',
-    shadowOpacity: 0.3,
-    minWidth: '100%',
-  },
-  accommodationsContainer: {
-    letterSpacing: 1,
-    paddingHorizontal: 25,
-    paddingVertical: 10,
-    backgroundColor: '#4F6F52',
-    minWidth: '100%',
-    shadowRadius: 20,
-    shadowColor: 'black',
-    shadowOpacity: 0.4,
-  },
-  gallery: {
-    marginVertical: 10,
-  },
-  accommodationTitle: {
-    letterSpacing: 1,
-    fontSize: 15,
-    paddingBottom: 5,
-  },
-  accommodationListItem: {
-    letterSpacing: 1,
-    marginVertical: 5,
-    fontSize: 13,
-  },
   paddingBottom5: {
     paddingBottom: 5,
   },
@@ -485,17 +326,12 @@ const styles = StyleSheet.create({
     right: 15,
     top: 15,
   },
-  galleryContainer: {
-    flex: 1,
-    justifyContent: 'space-between',
-    maxWidth: '100%'
-  },
   postingsContainer: {
     letterSpacing: 1,
     paddingHorizontal: 25,
     paddingVertical: 10,
+    paddingBottom: 20,
     backgroundColor: '#4F6F52',
-    marginVertical: 10,
     shadowRadius: 20,
     shadowColor: 'black',
     shadowOpacity: 0.1,

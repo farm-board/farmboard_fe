@@ -23,7 +23,7 @@ export default function FarmProfileAddAccommodations() {
     axios.post(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/accommodation`, data )
     .then(response => {
       console.log(response.data);
-      navigation.push('Profile');
+      navigation.push('Edit Profile');
     })
     .catch(error => {
       console.log('Unable to register user', error);
@@ -34,13 +34,6 @@ export default function FarmProfileAddAccommodations() {
   return (
     <KeyboardAvoidingContainer style={styles.container} behavior="padding">
       <View style={styles.content}>
-        <Animated.Text >
-          <View style={styles.titleTextBox}>
-            <StyledText entering={FadeInUp.duration(1000).springify()} big style={styles.text}>
-              Add Accommodations:
-            </StyledText>
-          </View>
-        </Animated.Text>
         <Animated.View entering={FadeInDown.duration(1000).springify()}style={styles.inputContainer}>
           <StyledSwitch
             placeholder="Housing"
@@ -85,6 +78,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 25,
   },
   content: {
+    marginTop: 25,
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
