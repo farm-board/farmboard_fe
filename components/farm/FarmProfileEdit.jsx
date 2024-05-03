@@ -203,7 +203,7 @@ export default function FarmProfileEdit() {
     fetchProfileData()
     fetchGalleryImages();
     fetchAccommodationData();
-  }, []);
+  }, [currentUser.id]);
 
   return (
     <KeyboardAvoidingContainer style={styles.container} behavior="padding">

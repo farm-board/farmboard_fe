@@ -148,7 +148,7 @@ const FeedScreen = () => {
               name="arrow-left"
               size={30}
               color="#ECE3CE"
-              onPress={() => navigation.push("Profile")}
+              onPress={() => navigation.navigate("Profile")}
             />
         </TouchableOpacity>
         <Text style={styles.TopHeading}>Job Postings</Text>

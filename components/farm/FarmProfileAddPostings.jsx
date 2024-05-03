@@ -80,13 +80,6 @@ export default function FarmProfileAddPostings() {
   return (
     <KeyboardAvoidingContainer style={styles.container} behavior="padding">
       <View style={styles.content}>
-        <Animated.Text >
-          <View style={styles.titleTextBox}>
-            <StyledText entering={FadeInUp.duration(1000).springify()} big style={styles.text}>
-              Complete the form below to add a new job posting:
-            </StyledText>
-          </View>
-        </Animated.Text>
         <Animated.View entering={FadeInDown.duration(1000).springify()}style={styles.inputContainer}>
           <StyledTextInput
             placeholder="Job Title"
@@ -206,6 +199,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   content: {
+    marginTop: 25,
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',

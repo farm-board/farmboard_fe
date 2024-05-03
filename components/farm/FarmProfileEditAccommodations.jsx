@@ -49,13 +49,6 @@ export default function FarmProfileEditAccommodations() {
   return (
     <KeyboardAvoidingContainer style={styles.container} behavior="padding">
       <View style={styles.content}>
-        <Animated.Text >
-          <View style={styles.titleTextBox}>
-            <StyledText entering={FadeInUp.duration(1000).springify()} big style={styles.text}>
-              Edit Accommodation Info:
-            </StyledText>
-          </View>
-        </Animated.Text>
         <Animated.View entering={FadeInDown.duration(1000).springify()}style={styles.inputContainer}>
           <StyledSwitch
             placeholder="Housing"
@@ -100,6 +93,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 25,
   },
   content: {
+    marginTop: 25,
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
