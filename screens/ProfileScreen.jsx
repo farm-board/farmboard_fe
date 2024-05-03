@@ -23,11 +23,6 @@ export default function ProfileScreen() {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
       <View style={styles.content}>
-        <Animated.Text entering={FadeInUp.duration(1000).springify()} style={styles.pt10}>
-          <StyledText bold style={styles.textCenter}>
-            Profile
-          </StyledText>
-        </Animated.Text>
         {currentUser.role_type === "farm" ?
           <KeyboardAvoidingContainer>
             <FarmProfile />
@@ -75,7 +70,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 60,
+    marginTop: 15,
   },
   greenButton: {
     width: '80%',

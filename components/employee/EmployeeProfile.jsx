@@ -44,7 +44,7 @@ export default function EmployeeProfile() {
   }
 
   const onEditButtonPress = () => {
-    navigation.push('Profile Edit');
+    navigation.navigate('FarmBoard', { screen: 'Profile Edit' });
   }
 
   const goToFeedScreen = () => {

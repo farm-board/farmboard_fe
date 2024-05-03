@@ -70,9 +70,9 @@ const FeedScreen = () => {
   };
 
   const handleProfileRedirect = (farmId) => {
-    navigation.push("Farm Profile View", { farmId: selectedPosting?.attributes.farm_id }),
+    navigation.navigate("Farm Profile View", { farmId: selectedPosting?.attributes.farm_id });
     setModalVisible(false);
-    }
+  }
 
   const renderPostingItem = ({ item }) => (
     <TouchableOpacity onPress={() => {
@@ -158,14 +158,6 @@ const FeedScreen = () => {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.backButton}>
-            <MaterialCommunityIcons
-              name="arrow-left"
-              size={30}
-              color="#ECE3CE"
-              onPress={() => navigation.push("Profile")}
-            />
-        </TouchableOpacity>
         <Text style={styles.TopHeading}>Job Postings</Text>
       <View style={styles.searchContainer}>
       <TextInput
@@ -193,7 +185,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#4F6F52',
     padding: 20,
-    paddingTop: 50,
+    paddingTop: 20,
   },
   heading: {
     fontSize: 24,
@@ -207,7 +199,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#ECE3CE',
-    marginBottom: 10,
+    marginBottom: 5,
     textAlign: 'center',
   },
   searchContainer: {

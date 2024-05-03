@@ -15,6 +15,7 @@ import ExperienceForm from '../Experience/ExperienceForm';
 import ReferenceForm from '../Reference/ReferenceForm';
 import SectionHeader from '../Texts/SectionHeader';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import StyledSelectDropdown from '../Inputs/StyledSelectDropdown';
 
 
 export default function EmployeeProfileEditDetails() {
@@ -30,6 +31,20 @@ export default function EmployeeProfileEditDetails() {
     age: '',
     image: null
   })
+
+  const states = [
+    "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
+    "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho",
+    "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana",
+    "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota",
+    "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada",
+    "New Hampshire", "New Jersey", "New Mexico", "New York",
+    "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon",
+    "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota",
+    "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington",
+    "West Virginia", "Wisconsin", "Wyoming"
+]
+
   const [showExperienceForm, setShowExperienceForm] = useState(false);
   const [experiences, setExperiences] = useState([]);
   const [showReferencesForm, setShowReferencesForm] = useState(false);
@@ -49,7 +64,7 @@ export default function EmployeeProfileEditDetails() {
     axios.put(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`, { employee: data})
     .then(response => {
       console.log(response.data);
-      navigation.push('Profile');
+      navigation.navigate('Profile');
     })
     .catch(error => {
       console.log('Unable to register user', error);
@@ -132,6 +147,8 @@ export default function EmployeeProfileEditDetails() {
         skills: employeeResponse.data.data.attributes.skills,
         bio: employeeResponse.data.data.attributes.bio,
         age: employeeResponse.data.data.attributes.age,
+        phone: employeeResponse.data.data.attributes.phone,
+        email: employeeResponse.data.data.attributes.email,
         image: imageResponse.data.image_url
       })
     })
@@ -193,21 +210,42 @@ export default function EmployeeProfileEditDetails() {
             />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.inputContainer}>
-            <StyledTextInput
-              placeholder="State"
-              icon="star-box-outline"
-              label="State:"
-              value={data.state}
-              onChangeText={(text) => setData({...data, state: text})}
-            />
+          <StyledSelectDropdown
+            listData={states}
+            fieldPlaceholder="State"
+            label="State:"
+            value={data.state}
+            onSelect={(selectedItem) => {
+              setData({...data, state: selectedItem})
+            }}
+          />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.inputContainer}>
              <StyledTextInput
               placeholder="Zip Code"
               icon="longitude"
               label="Zip Code:"
+              keyboardType="numeric"
               value={data.zip_code}
               onChangeText={(text) => setData({...data, zip_code: text})}
+            />
+        </Animated.View>
+        <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.inputContainer}>
+             <StyledTextInput
+              placeholder="Phone"
+              icon="phone"
+              label="Phone:"
+              value={data.phone}
+              onChangeText={(text) => setData({...data, phone: text})}
+            />
+        </Animated.View>
+        <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.inputContainer}>
+             <StyledTextInput
+              placeholder="Email"
+              icon="email"
+              label="Email:"
+              value={data.email}
+              onChangeText={(text) => setData({...data, email: text})}
             />
         </Animated.View>
           <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputContainer}>
