@@ -2,7 +2,6 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import * as React from 'react';
 import { TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { createDrawerNavigator } from '@react-navigation/drawer';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from './screens/LoginScreen';
@@ -338,7 +337,22 @@ function FeedStackNav() {
             headerBackTitleStyle: { fontSize: 15 },
           }}
         />
-        <Stack.Screen name="Employee Profile View" component={EmployeeViewProfileScreen} />
+        <Stack.Screen name="Farm View Profile" component={FarmViewProfileScreen} 
+        options={{ 
+          title: 'Farm Profile',
+          headerLeft: () => {
+            return (
+              <TouchableOpacity onPress={() => navigation.navigate('Feed')}>
+                <MaterialCommunityIcons
+                  name="arrow-left"
+                  size={30}
+                  color="#ECE3CE"
+                  style={{ marginLeft: 10 }}
+                />
+              </TouchableOpacity>
+            );
+          }
+        }}/>
       </>
     </Stack.Navigator>
   );
