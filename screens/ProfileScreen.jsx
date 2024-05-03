@@ -34,27 +34,19 @@ export default function ProfileScreen() {
           </KeyboardAvoidingContainer>
             : null}
       </View>
-      <Animated.View entering={FadeInDown.delay(1400).duration(1000).springify()} style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.redButton}
-          onPress={handleLogout}>
-          <Text style={styles.buttonText}>
-            Log Out
-          </Text>
-        </TouchableOpacity>
-      </Animated.View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    marginBottom: -10,
     flex: 1,
     backgroundColor: '#739072',
   },
   content: {
     marign: 0,
-    height: '90%',
+    height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
   },

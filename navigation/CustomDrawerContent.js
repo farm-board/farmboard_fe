@@ -42,14 +42,19 @@ const DrawerItems = props => {
 function CustomDrawerContent(props) {
   const [userData, setUserData] = useState({});
   const [avatarImage, setAvatarImage] = useState('');
+  const navigation = useNavigation();
+  const{currentUser, logout} = useContext(UserContext);
 
-  currentUser = useContext(UserContext);
+  handleLogout = () => { 
+    logout(navigation);
+  }
 
   useEffect(() => {
-    currentUser.currentUser.role_type === 'farm' ? 
+    console.log('drawer currentUser:', currentUser);
+    currentUser.role_type === 'farm' ? 
       Promise.all([
-        axios.get(`http://localhost:4000/api/v1/users/${currentUser.currentUser.id}/farms`),
-        axios.get(`http://localhost:4000/api/v1/users/${currentUser.currentUser.id}/farms/image`)
+        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`),
+        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/image`)
       ])
       .then(([farmResponse, imageResponse]) => {
         console.log('drawer farm data:', farmResponse.data);
@@ -94,7 +99,7 @@ function CustomDrawerContent(props) {
                 <View style={{marginLeft: 10, flexDirection: 'column'}}>
                   <Title style={styles.title}>{userData.name}</Title>
                   <Text style={styles.caption} numberOfLines={1}>
-                    {currentUser.currentUser.email}
+                    {currentUser.email}
                   </Text>
                 </View>
               </View>
@@ -112,6 +117,7 @@ function CustomDrawerContent(props) {
           )}
           labelStyle={{ color: "#ECE3CE" }}
           label="Sign Out"
+          onPress={handleLogout}
         />
       </View>
     </View>
