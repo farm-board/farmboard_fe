@@ -7,7 +7,7 @@ import Avatar from '../Profile/Avatar'
 import StyledText from '../Texts/StyledText'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { colors } from '../../config/theme'
-import { useNavigation } from '@react-navigation/native'
+import { useNavigation, useFocusEffect } from '@react-navigation/native'
 import Gallery from '../Profile/Gallery';
 
 export default function FarmProfile() {
@@ -30,9 +30,11 @@ export default function FarmProfile() {
     axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/accommodation`)
       .then((accommodationResponse) => {
         if (accommodationResponse.data && accommodationResponse.data.data && accommodationResponse.data.data.attributes) {
+          console.log("accommodations:", accommodationResponse.data.data.attributes)
           setAccommodations(accommodationResponse.data.data.attributes);
         } else {
-          console.log('No accommodations found for this farm.');
+          setAccommodations(null);
+          console.log('No accommodations found for this farm.', accommodations);
         }
       })
       .catch(error => {
@@ -110,6 +112,41 @@ export default function FarmProfile() {
   
     fetchData();
   }, [currentUser.id]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchData = async () => {
+        try {
+          const [farmResponse, imageResponse] = await Promise.all([
+            axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`),
+            axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/image`),
+          ]);
+    
+          console.log('current farm:', farmResponse.data.data.attributes);
+          setFarm(farmResponse.data.data.attributes);
+          setProfilePhoto(imageResponse.data.image_url);
+    
+          fetchGalleryImages();
+          fetchAccommodations();
+          const postingsResponse = await fetchPostings();
+          if (postingsResponse) {
+            console.log('Postings:', postingsResponse.data.data);
+            setPostings(postingsResponse.data.data);
+    
+            // Fetch applicants for each posting
+            await Promise.all(postingsResponse.data.data.map(async (posting) => {
+              // Fetch applicants count for each posting
+              await fetchApplicantsCount(posting.id);
+            }));
+          }
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        }
+      };
+    
+      fetchData();
+    }, [currentUser.id]) // Only trigger on currentUser.id changes
+  );
   
   if (farm === undefined) {
     return <Text>Loading...</Text>;
@@ -125,12 +162,12 @@ export default function FarmProfile() {
   };
 
   const handlePostingCreate = () => {
-    navigation.push('Farm Profile Add Postings');
+    navigation.push('Farm Profile Add Postings', { sourceStack: 'Profile' });
   }
   
   const handlePostingEdit = (postingId) => {
     console.log('Posting ID:', postingId);
-    navigation.push('Farm Profile Edit Postings', {postingId}); // Pass postingId as a parameter
+    navigation.push('Farm Profile Edit Postings', {postingId, sourceStack: 'Profile'}); // Pass postingId as a parameter
   }
 
   const handleEmployeeProfileView = (employeeId) => {

@@ -3,7 +3,7 @@ import {View, StyleSheet, Text} from 'react-native';
 import {DrawerContentScrollView, DrawerItem} from '@react-navigation/drawer';
 import {Avatar, Title} from 'react-native-paper';
 import {TouchableOpacity} from 'react-native-gesture-handler';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useFocusEffect} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { UserContext } from '../contexts/UserContext'
 import axios from 'axios';
@@ -89,6 +89,40 @@ function CustomDrawerContent(props) {
       }) 
     : null;
   }, [currentUser.id]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      currentUser.role_type === 'farm' ? 
+        Promise.all([
+          axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`),
+          axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/image`)
+        ])
+        .then(([farmResponse, imageResponse]) => {
+          console.log('drawer farm data:', farmResponse.data);
+          console.log('drawer image data:', imageResponse.data);
+          setUserData(farmResponse.data.data.attributes);
+          setAvatarImage(imageResponse.data.image_url);
+        })
+        .catch(error => {
+          console.log('Unable to fetch farm data', error);
+        }) 
+      : currentUser.role_type === 'employee' ?
+      Promise.all([
+        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`),
+        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/image`)
+        ])
+        .then(([employeeResponse, imageResponse]) => {
+          console.log('drawer employee data:', employeeResponse.data);
+          console.log('drawer image data:', imageResponse.data);
+          setUserData(employeeResponse.data.data.attributes);
+          setAvatarImage(imageResponse.data.image_url);
+        })
+        .catch(error => {
+          console.log('Unable to fetch farm data', error);
+        }) 
+      : null;
+    }, [currentUser.id]) // Only trigger on currentUser.id changes
+  );
   
   return (
     <View style={{flex: 1}}>
@@ -105,7 +139,11 @@ function CustomDrawerContent(props) {
                   style={{marginTop: 5}}
                 />
                 <View style={{marginLeft: 10, flexDirection: 'column'}}>
+                  {currentUser.role_type === 'farm' ?
                   <Title style={styles.title}>{userData.name}</Title>
+                  : currentUser.role_type === 'employee' ?
+                  <Title style={styles.title}>{userData.first_name} {userData.last_name}</Title>
+                  : null}
                   <Text style={styles.caption} numberOfLines={1}>
                     {currentUser.email}
                   </Text>

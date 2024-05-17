@@ -6,7 +6,7 @@ import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated'
 import Avatar from '../Profile/Avatar'
 import StyledText from '../Texts/StyledText'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
-import { useNavigation } from '@react-navigation/native'
+import { useNavigation, useFocusEffect } from '@react-navigation/native'
 
 export default function FarmHome() {
   const {currentUser} = useContext(UserContext);
@@ -75,6 +75,31 @@ export default function FarmHome() {
     return <Text>Loading...</Text>;
   }
 
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchData = async () => {
+        try {
+          const farmResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`);
+          console.log('current farm:', farmResponse.data.data.attributes);
+          setFarm(farmResponse.data.data.attributes);
+    
+          const postingsResponse = await fetchPostings();
+          if (postingsResponse) {
+            console.log('Postings:', postingsResponse.data.data);
+            setPostings(postingsResponse.data.data);
+    
+            // Fetch applicants for each posting
+            await Promise.all(postingsResponse.data.data.map(posting => fetchApplicantsCount(posting.id)));
+          }
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        }
+      };
+    
+      fetchData();
+    }, [currentUser.id]) // Only trigger on currentUser.id changes
+  );
+
   const calculateDaysAgo = (createdAt) => {
   
     const createdDate = new Date(createdAt);
@@ -85,12 +110,12 @@ export default function FarmHome() {
   };
 
   const handlePostingCreate = () => {
-    navigation.push('Farm Profile Add Postings');
+    navigation.navigate('Farm Profile Add Postings', {sourceStack: 'Home'});
   }
   
   const handlePostingEdit = (postingId) => {
     console.log('Posting ID:', postingId);
-    navigation.push('Farm Profile Edit Postings', {postingId}); // Pass postingId as a parameter
+    navigation.navigate('Farm Profile Edit Postings', {postingId, sourceStack: 'Home'}); // Pass postingId as a parameter
   }
 
   const handleEmployeeProfileView = (employeeId) => {

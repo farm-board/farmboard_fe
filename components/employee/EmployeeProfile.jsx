@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { UserContext } from '../../contexts/UserContext';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import axios from 'axios';
 import Avatar from '../Profile/Avatar';
 import { MaterialCommunityIcons } from '@expo/vector-icons'
@@ -38,6 +38,29 @@ export default function EmployeeProfile() {
       setLoading(false); // Set loading state to false in case of error
     });
   }, [currentUser.id]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      setLoading(true); 
+      Promise.all([
+        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`),
+        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/experiences`),
+        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/references`),
+        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/image`),
+      ])
+      .then(([employeeResponse, experiencesResponse, referenceResponse, imageResponse ]) => {
+        setEmployee(employeeResponse.data.data.attributes);
+        setExperiences(experiencesResponse.data.data); 
+        setProfilePhoto(imageResponse.data.image_url);
+        setLoading(false); 
+        setReferences(referenceResponse.data.data); 
+      })
+      .catch(error => {
+        console.error('There was an error fetching the employee or experiences:', error);
+        setLoading(false); // Set loading state to false in case of error
+      });
+    }, [currentUser.id]) // Only trigger on currentUser.id changes
+  );
 
   if (loading) {
     return <Text>Loading...</Text>; // Render loading indicator

@@ -75,7 +75,11 @@ export default function FarmProfileEditPostings() {
             .then(response => {
               console.log('Posting deleted:', postingId);
               Alert.alert('Posting deleted');
-              navigation.push('Profile');
+              if (route.params.sourceStack === 'Profile') {
+                navigation.navigate('Profile');
+              } else if (route.params.sourceStack === 'Home') {
+                navigation.navigate('Home');
+              }
             })
             .catch(error => {
               console.log('Unable to delete posting', error);
@@ -110,7 +114,12 @@ export default function FarmProfileEditPostings() {
     axios.put(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/postings/${postingId}`, postData)
       .then(response => {
         console.log(response.data);
-        navigation.navigate('Profile');
+        // Check the sourceStack parameter and navigate accordingly
+        if (route.params.sourceStack === 'Profile') {
+          navigation.navigate('Profile');
+        } else if (route.params.sourceStack === 'Home') {
+          navigation.navigate('Home');
+        }
       })
       .catch(error => {
         console.log('Unable to edit posting', error);

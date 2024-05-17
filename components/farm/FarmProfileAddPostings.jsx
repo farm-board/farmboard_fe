@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react'
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
 import { Text, View, TouchableOpacity, StyleSheet } from 'react-native'
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { UserContext } from '../../contexts/UserContext';
 import axios from 'axios';
 import KeyboardAvoidingContainer from "../Containers/KeyboardAvoidingContainer";
@@ -33,6 +33,7 @@ export default function FarmProfileAddPostings() {
   const paymentTypeList = [ "Hourly", "Salary"];
 
   const navigation = useNavigation();
+  const route = useRoute();
   const { currentUser } = useContext(UserContext);
 
   const [selectedItems, setSelectedItems] = useState([]);
@@ -65,7 +66,11 @@ export default function FarmProfileAddPostings() {
     axios.post(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/postings`, postData)
     .then(response => {
       console.log(response.data);
-      navigation.navigate('Profile');
+      if (route.params.sourceStack === 'Profile') {
+        navigation.navigate('Profile');
+      } else if (route.params.sourceStack === 'Home') {
+        navigation.navigate('Home');
+      }
     })
     .catch(error => {
       console.log('Unable to add posting', error);
