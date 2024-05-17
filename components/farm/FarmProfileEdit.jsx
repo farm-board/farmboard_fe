@@ -196,7 +196,7 @@ export default function FarmProfileEdit() {
   };
 
   const handleAddAccommodation = () => {
-    navigation.push('Farm Profile Add Accommodations');
+    navigation.navigate('Farm Profile Add Accommodations');
   }
 
   useEffect(() => {

@@ -83,7 +83,7 @@ export default function EmployeeProfileEdit() {
   const deleteReference = async (referenceId) => {
     try {
       await axios.delete(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/references/${referenceId}`);
-      fetchExperiences();
+      fetchReferences();
     } catch (error) {
       console.error('Error deleting references:', error);
     }
