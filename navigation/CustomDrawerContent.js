@@ -54,7 +54,7 @@ function CustomDrawerContent(props) {
   ]
   : [];
 
-  handleLogout = () => {
+  handleLogout = () => { 
     logout(navigation);
   }
 

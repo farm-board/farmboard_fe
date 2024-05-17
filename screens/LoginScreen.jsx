@@ -88,7 +88,7 @@ export default function LoginScreen() {
                 </TouchableOpacity>
               </Animated.View>
               <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.signUpTextContainer}>
-                <TouchableOpacity onPress={() => navigation.push('ForgotPassword')}>
+                <TouchableOpacity onPress={() => navigation.push('Forgot Password')}>
                   <Text style={styles.signUpText}>Forgot Password?</Text>
                 </TouchableOpacity>
               </Animated.View>

@@ -4,16 +4,34 @@ import { useNavigation } from '@react-navigation/native'
 import axios from 'axios';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { UserContext } from '../contexts/UserContext';
+import StyledSelectDropdown from '../components/Inputs/StyledSelectDropdown';
 
 const FeedScreen = () => {
   const [postings, setPostings] = useState([]);
   const [filteredPostings, setFilteredPostings] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [modalVisible, setModalVisible] = useState(false);
+  const [modalPostingVisible, setModalPostingVisible] = useState(false);
+  const [modalFilterVisible, setModalFilterVisible] = useState(false);
+  const [selectedCompensationTypes, setSelectedCompensationTypes] = useState([]);
+  const [selectedStateTypes, setSelectedStateTypes] = useState([]);
+  const [selectedDurationTypes, setSelectedDurationTypes] = useState([]);
+  const compensationTypes = ['Hourly', 'Salary'];
   const [selectedPosting, setSelectedPosting] = useState(null);
-  const [expanded, setExpanded] = useState(false); 
+  const [expanded, setExpanded] = useState(false);
   const { currentUser } = useContext(UserContext);
   const navigation = useNavigation();
+  const durationTypes = ['Part-Time', 'Full-Time', 'Seasonal', 'Contract'];
+  const stateTypes = ["Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
+    "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho",
+    "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana",
+    "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota",
+    "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada",
+    "New Hampshire", "New Jersey", "New Mexico", "New York",
+    "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon",
+    "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota",
+    "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington",
+    "West Virginia", "Wisconsin", "Wyoming"];
 
   useEffect(() => {
     fetchPostings();
@@ -22,28 +40,68 @@ const FeedScreen = () => {
   const fetchPostings = () => {
     axios.get(`http://localhost:4000/api/v1/feed`)
       .then((response) => {
-        setPostings(response.data.data); 
-        setFilteredPostings(response.data.data); 
+        setPostings(response.data.data);
+        setFilteredPostings(response.data.data);
+        setSearchResults(response.data.data); // Initialize search results with all postings
       })
       .catch(error => {
         console.error('There was an error fetching the postings:', error);
       });
   };
 
-  const handleSearch = (term = searchTerm) => { 
-    const filtered = postings.filter(posting => {
-      return (
-        posting.attributes.farm_city.toLowerCase().includes(term.toLowerCase()) ||
-        posting.attributes.farm_state.toLowerCase().includes(term.toLowerCase()) ||
-        posting.attributes.title.toLowerCase().includes(term.toLowerCase()) ||
-        posting.attributes.duration.toLowerCase().includes(term.toLowerCase()) 
-      );
+  const handleSearch = (term = searchTerm) => {
+    setSearchTerm(term); // Update the search term state
+
+    const filtered = filteredPostings.filter(posting => {
+      return posting.attributes.title.toLowerCase().includes(term.toLowerCase());
     });
+
+    setSearchResults(filtered); // Update search results state
+  };
+
+  const applyFilters = () => {
+    let filtered = [...postings]; // Make a copy of the original postings array
+
+    console.log("Initial filtered length:", filtered.length);
+
+    if (selectedCompensationTypes.length > 0) {
+      filtered = filtered.filter(posting =>
+        selectedCompensationTypes.includes(posting.attributes.payment_type)
+      );
+      console.log("Filtered by compensation types:", filtered.length);
+    }
+
+    if (selectedStateTypes.length > 0) {
+      filtered = filtered.filter(posting => {
+        console.log("Selected State Types:", selectedStateTypes);
+        console.log("Farm state:", posting.attributes.farm_state);
+        return selectedStateTypes.includes(posting.attributes.farm_state);
+      });
+      console.log("Filtered by state types:", filtered.length);
+    }
+
+    if (selectedDurationTypes.length > 0) {
+      filtered = filtered.filter(posting =>
+        selectedDurationTypes.includes(posting.attributes.duration)
+      );
+      console.log("Filtered by duration types:", filtered.length);
+    }
+
     setFilteredPostings(filtered);
+    setSearchResults(filtered); // Update search results to match filtered postings
+    setModalFilterVisible(false);
+  };
+
+  const clearFilters = () => {
+    setSelectedCompensationTypes([]);
+    setSelectedStateTypes([]);
+    setSelectedDurationTypes([]);
+    setSearchTerm('');
+    setFilteredPostings(postings);
+    setSearchResults(postings);
   };
 
   const calculateDaysAgo = (createdAt) => {
-  
     const createdDate = new Date(createdAt);
     const currentDate = new Date();
     const differenceInTime = currentDate.getTime() - createdDate.getTime();
@@ -53,10 +111,19 @@ const FeedScreen = () => {
 
   const applyToPosting = async () => {
     try {
+      // Check if the user has already applied to this posting
+      if (selectedPosting && selectedPosting.applied) {
+        alert("You have already applied to this posting.");
+        return;
+      }
+
       const response = await axios.post(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/postings/${selectedPosting.id}/apply`);
       if (response.status === 200) {
         // Application submitted successfully
         alert("Application submitted successfully!");
+
+        // Update the selectedPosting to mark it as applied
+        setSelectedPosting(prevPosting => ({ ...prevPosting, applied: true }));
       } else {
         // Error handling for other response statuses
         console.error("Error submitting application:", response.data.error);
@@ -71,18 +138,18 @@ const FeedScreen = () => {
 
   const handleProfileRedirect = (farmId) => {
     navigation.navigate("Farm Profile View", { farmId: selectedPosting?.attributes.farm_id });
-    setModalVisible(false);
+    setModalPostingVisible(false);
   }
 
   const renderPostingItem = ({ item }) => (
     <TouchableOpacity onPress={() => {
       setSelectedPosting(item);
-      setModalVisible(true);
+      setModalPostingVisible(true);
     }}>
       <View style={styles.postingItem}>
         <Text style={styles.postingTitle}>{item.attributes.title}</Text>
         <View style={styles.divider}></View>
-        <Text style={styles.postingSalary}>Compensation:  
+        <Text style={styles.postingSalary}>Compensation:
           <Text style={styles.postingSalaryAmount}> ${item.attributes.salary} / {item.attributes.payment_type}</Text>
         </Text>
         <Text style={styles.postingSalary}>Duration: {item.attributes.duration}</Text>
@@ -92,90 +159,150 @@ const FeedScreen = () => {
     </TouchableOpacity>
   );
 
-  const renderModal = () => (
+  const renderPostingModal = () => (
     <Modal
       animationType="slide"
       transparent={true}
-      visible={modalVisible}
+      visible={modalPostingVisible}
       onRequestClose={() => {
-        setModalVisible(!modalVisible);
+        setModalPostingVisible(!modalPostingVisible);
       }}
     >
       <ScrollView contentContainerStyle={styles.modalContainer}>
-      <TouchableOpacity
-        style={styles.closeButton}
-        onPress={() => setModalVisible(false)}
-      >
-        <Text style={styles.closeButtonText}>X</Text>
-      </TouchableOpacity>
-      <View style={styles.midModalTwoContainer}>
-      <Text style={styles.modalTwoTitle}>Position</Text>
-      <Text style={styles.modalTwoDetails}>{selectedPosting?.attributes.title}</Text>
-      </View>
+        <TouchableOpacity
+          style={styles.closeButton}
+          onPress={() => setModalPostingVisible(false)}
+        >
+          <Text style={styles.closeButtonText}>X</Text>
+        </TouchableOpacity>
+        <View style={styles.midModalTwoContainer}>
+          <Text style={styles.modalTwoTitle}>Position</Text>
+          <Text style={styles.modalTwoDetails}>{selectedPosting?.attributes.title}</Text>
+        </View>
         <View style={styles.midModalContainer}>
-            <Text style={styles.modalTitle}>Location</Text>
-            <TouchableOpacity onPress={() => handleProfileRedirect(selectedPosting?.attributes.farm_id)}>
+          <Text style={styles.modalTitle}>Location</Text>
+          <TouchableOpacity onPress={() => handleProfileRedirect(selectedPosting?.attributes.farm_id)}>
             <Text style={styles.modalDetails}>
-            {selectedPosting?.attributes.farm_name}</Text>
+              {selectedPosting?.attributes.farm_name}</Text>
             <Text style={styles.modalDetails}>{selectedPosting?.attributes.farm_city}, {selectedPosting?.attributes.farm_state}
             </Text>
-            </TouchableOpacity>
+          </TouchableOpacity>
         </View>
         <View style={styles.midModalTwoContainer}>
-            <Text style={styles.modalTwoTitle}>Compensation</Text>
-            <Text style={styles.modalTwoDetails}>${selectedPosting?.attributes.salary} / {selectedPosting?.attributes.payment_type}</Text>
-            <Text style={styles.modalTwoDetails}>{selectedPosting?.attributes.duration}</Text>
+          <Text style={styles.modalTwoTitle}>Compensation</Text>
+          <Text style={styles.modalTwoDetails}>${selectedPosting?.attributes.salary} / {selectedPosting?.attributes.payment_type}</Text>
+          <Text style={styles.modalTwoDetails}>{selectedPosting?.attributes.duration}</Text>
         </View>
         <View style={styles.midModalContainer}>
-        <Text style={styles.modalTitle}>Required Skills</Text>
-        <View style={styles.skillContainer}>
-          {selectedPosting?.attributes.skill_requirements && selectedPosting?.attributes.skill_requirements.slice(0, expanded ? selectedPosting?.attributes.skill_requirements.length : 5).map((skill, index) => (
-            <View key={index} style={styles.skillBubble}>
-              <Text style={styles.skillText}>{skill}</Text>
-            </View>
-          ))}
+          <Text style={styles.modalTitle}>Required Skills</Text>
+          <View style={styles.skillContainer}>
+            {selectedPosting?.attributes.skill_requirements && selectedPosting?.attributes.skill_requirements.slice(0, expanded ? selectedPosting?.attributes.skill_requirements.length : 5).map((skill, index) => (
+              <View key={index} style={styles.skillBubble}>
+                <Text style={styles.skillText}>{skill}</Text>
+              </View>
+            ))}
+          </View>
+          {selectedPosting?.attributes.skill_requirements && selectedPosting?.attributes.skill_requirements.length > 5 && (
+            <TouchableOpacity onPress={() => setExpanded(!expanded)} style={styles.showMoreButton}>
+              <Text style={styles.showMoreButtonText}>{expanded ? 'Show less' : 'Show more'}</Text>
+            </TouchableOpacity>
+          )}
         </View>
-        {selectedPosting?.attributes.skill_requirements && selectedPosting?.attributes.skill_requirements.length > 5 && (
-          <TouchableOpacity onPress={() => setExpanded(!expanded)} style={styles.showMoreButton}>
-            <Text style={styles.showMoreButtonText}>{expanded ? 'Show less' : 'Show more'}</Text>
-          </TouchableOpacity>
-        )}
-      </View>
         <View style={styles.midModalTwoContainer}>
-            <Text style={styles.modalTwoTitle}>Job Description</Text>
-            <Text style={styles.modalTwoDetails}>{selectedPosting?.attributes.description}</Text>
+          <Text style={styles.modalTwoTitle}>Job Description</Text>
+          <Text style={styles.modalTwoDetails}>{selectedPosting?.attributes.description}</Text>
         </View>
-        <View style={styles.submitButtonContainer}>
+        {currentUser.role_type !== 'farm' && (
+          <View style={styles.submitButtonContainer}>
             <TouchableOpacity style={styles.submitButton} onPress={applyToPosting}>
               <Text style={styles.submitButtonText}>
                 Apply
               </Text>
             </TouchableOpacity>
-        </View>
+          </View>
+        )}
       </ScrollView>
     </Modal>
   );
 
   return (
     <View style={styles.container}>
-        <Text style={styles.TopHeading}>Job Postings</Text>
+      <Text style={styles.TopHeading}>Job Postings</Text>
       <View style={styles.searchContainer}>
-      <TextInput
-        style={styles.searchInput}
-        placeholder="Search by city, state, title, or duration"
-        value={searchTerm}
-        onChangeText={(text) => {
-            setSearchTerm(text);
-            handleSearch(text);
-        }}
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search for a job..."
+          value={searchTerm}
+          onChangeText={(text) => handleSearch(text)} // Use handleSearch directly
         />
+        <TouchableOpacity onPress={() => setModalFilterVisible(true)}>
+          <MaterialCommunityIcons name="filter" size={24} color="white" />
+        </TouchableOpacity>
       </View>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalFilterVisible}
+        onRequestClose={() => {
+          setModalFilterVisible(!modalFilterVisible);
+        }}
+      >
+        <View style={styles.modalContainer}>
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => setModalFilterVisible(false)}
+          >
+            <Text style={styles.closeButtonText}>X</Text>
+          </TouchableOpacity>
+          <View style={styles.filterOptionTop}>
+            <Text style={styles.filterOptionLabel}>Compensation Type:</Text>
+            <StyledSelectDropdown
+              label=""
+              value={selectedCompensationTypes}
+              listData={compensationTypes}
+              onSelect={(value) => setSelectedCompensationTypes(value)}
+              fieldPlaceholder="Select"
+            />
+          </View>
+          <View style={styles.filterOption}>
+            <Text style={styles.filterOptionLabel}>State:</Text>
+            <StyledSelectDropdown
+              label=""
+              value={selectedStateTypes}
+              listData={stateTypes} // Provide your list of locations here
+              onSelect={(value) => setSelectedStateTypes(value)}
+              fieldPlaceholder="Select"
+            />
+          </View>
+          <View style={styles.filterOption}>
+            <Text style={styles.filterOptionLabel}>Duration:</Text>
+            <StyledSelectDropdown
+              label=""
+              value={selectedDurationTypes}
+              listData={durationTypes} // Provide your list of duration types here
+              onSelect={(value) => setSelectedDurationTypes(value)}
+              fieldPlaceholder="Select"
+            />
+          </View>
+          <View style={styles.submitButtonContainer}>
+            <TouchableOpacity style={styles.submitButton} onPress={applyFilters}>
+              <Text style={styles.submitButtonText}>Apply Filters</Text>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity
+            style={styles.clearFiltersButton}
+            onPress={clearFilters}
+          >
+            <Text style={styles.clearFiltersButtonText}>Clear Filters</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
       <FlatList
-        data={filteredPostings}
+        data={searchResults} // Use searchResults instead of filteredPostings
         renderItem={renderPostingItem}
         keyExtractor={(item) => item.id.toString()}
       />
-      {renderModal()}
+      {renderPostingModal()}
     </View>
   );
 };
@@ -363,6 +490,29 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: '#3A4D39',
+    textAlign: 'center',
+  },
+  filterOptionTop: {
+    minWidth: '95%',
+    marginTop: 20,
+  },
+  filterOption: {
+    minWidth: '95%',
+  },
+  filterOptionLabel: {
+    color: '#ECE3CE',
+    fontSize: 18,
+  },
+  closeButtonText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#ECE3CE',
+    marginTop: 20,
+  },
+  clearFiltersButtonText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#ECE3CE',
     textAlign: 'center',
   },
 });

@@ -44,7 +44,7 @@ export default function EmployeeProfile() {
   }
 
   const onEditButtonPress = () => {
-    navigation.navigate('FarmBoard', { screen: 'Profile Edit' });
+    navigation.navigate("Edit Profile");
   }
 
   const goToFeedScreen = () => {
@@ -146,9 +146,6 @@ export default function EmployeeProfile() {
                 </View>
               ))}
           </View>
-          <TouchableOpacity style={styles.feedButton} onPress={goToFeedScreen}>
-        <Text style={styles.feedButtonText}>Go to Feed</Text>
-      </TouchableOpacity>
         </View>
     </View>
   );
