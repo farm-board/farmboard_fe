@@ -8,7 +8,6 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { UserContext } from '../contexts/UserContext'
 import axios from 'axios';
 
-
 const DrawerLayout = ({icon, label, navigateTo}) => {
   const navigation = useNavigation();
   return (
@@ -60,7 +59,6 @@ function CustomDrawerContent(props) {
   }
 
   useEffect(() => {
-    console.log('drawer currentUser:', currentUser);
     currentUser.role_type === 'farm' ? 
       Promise.all([
         axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`),
@@ -116,7 +114,7 @@ function CustomDrawerContent(props) {
             </View>
           </TouchableOpacity>
           <View style={styles.drawerSection}>
-            <DrawerItems drawerList={DrawerList} />
+            <DrawerItems drawerList={DrawerList}/>
           </View>
         </View>
       </DrawerContentScrollView>

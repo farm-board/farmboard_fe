@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 
 export const UserContext = React.createContext();
 
@@ -30,8 +31,14 @@ export const UserProvider = ({ children }) => {
       // Clear user data from AsyncStorage
       await AsyncStorage.removeItem('user');
       await AsyncStorage.removeItem('token');
+
+      // Make a request to the backend to invalidate the token
+      await axios.delete('http://localhost:4000/logout');
+
       // Navigate to the login screen
       navigation.navigate("Login");
+    } catch (error) {
+      console.error(error);
     } finally {
       setLoading(false);
     }

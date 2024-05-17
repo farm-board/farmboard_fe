@@ -1,5 +1,6 @@
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import * as React from 'react';
+import * as Linking from 'expo-linking';
 import { TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
@@ -441,10 +442,21 @@ function DrawerNavigator() {
   );
 }
 
+
 function App() {
   const { currentUser } = useContext(UserContext);
+  
+  const linking = {
+    prefixes: ['exp://10.0.0.15:8081/', 'myapp://'], // Add your production URL here
+    config: {
+      screens: {
+        ResetPassword: '--/password/edit',
+      },
+    },
+  };
+
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking}>
       {currentUser ? (
         <DrawerNavigator />
       ) : (
@@ -452,8 +464,8 @@ function App() {
           <>
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="SignUp" component={SignupScreen} />
-            <Stack.Screen name="Forgot Password" component={ForgotPasswordScreen} />
-            <Stack.Screen name="Reset Password" component={ResetPasswordScreen} />
+            <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+            <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
           </>
         </Stack.Navigator>
       )}

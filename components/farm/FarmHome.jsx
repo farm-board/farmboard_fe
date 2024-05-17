@@ -15,7 +15,8 @@ export default function FarmHome() {
   const [postings, setPostings] = useState([]);
   const [applicantsMap, setApplicantsMap] = useState({});
   const [applicants, setApplicants] = useState([]);
-  const [modalVisible, setModalVisible] = useState(false);
+  const [visibleModal, setVisibleModal] = useState(false);
+  const [currentPostingId, setCurrentPostingId] = useState(null);
 
   const width = Dimensions.get('window').width;
   const navigation = useNavigation();
@@ -33,17 +34,17 @@ export default function FarmHome() {
     try {
       const applicantsResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/postings/${postingId}/applicants`);
       console.log('Applicants:', applicantsResponse.data);
-
-      if (applicantsResponse.data.length > 0) {
-        const newApplicants = [...applicants, ...applicantsResponse.data];
-        setApplicants(newApplicants);
-        setApplicantsMap(prevMap => ({
-          ...prevMap,
-          [postingId]: applicantsResponse.data.length,
-        }));
-      }
+  
+      // Set applicants only for the current posting being viewed
+      setApplicants(applicantsResponse.data);
+  
+      // Set applicantsMap for the current posting
+      setApplicantsMap(prevMap => ({
+        ...prevMap,
+        [postingId]: applicantsResponse.data.length,
+      }));
     } catch (error) {
-      console.error(`Error fetching applicants count for posting ${postingId}:`, error);
+      console.error(`Error fetching applicants for posting ${postingId}:`, error);
     }
   };
 
@@ -59,7 +60,7 @@ export default function FarmHome() {
           console.log('Postings:', postingsResponse.data.data);
           setPostings(postingsResponse.data.data);
   
-          // Call fetchApplicantsCount after setPostings to ensure data availability
+          // Fetch applicants for each posting
           await Promise.all(postingsResponse.data.data.map(posting => fetchApplicantsCount(posting.id)));
         }
       } catch (error) {
@@ -68,20 +69,20 @@ export default function FarmHome() {
     };
   
     fetchData();
-  }, [currentUser.id]);
-  
-  useEffect(() => {
-    if (postings.length > 0) {
-      Promise.all(postings.map(posting => fetchApplicantsCount(posting.id)))
-        .catch(error => {
-          console.error('Error fetching applicants counts:', error);
-        });
-    }
-  }, [currentUser.id, postings]);
+  }, [currentUser.id]); // Only trigger on currentUser.id changes
   
   if (farm === undefined) {
     return <Text>Loading...</Text>;
   }
+
+  const calculateDaysAgo = (createdAt) => {
+  
+    const createdDate = new Date(createdAt);
+    const currentDate = new Date();
+    const differenceInTime = currentDate.getTime() - createdDate.getTime();
+    const differenceInDays = Math.floor(differenceInTime / (1000 * 3600 * 24));
+    return `${differenceInDays} day(s) ago`;
+  };
 
   const handlePostingCreate = () => {
     navigation.push('Farm Profile Add Postings');
@@ -97,6 +98,19 @@ export default function FarmHome() {
     setModalVisible(false);
   };
 
+  const setModalVisible = async (visible, postingId) => {
+    setCurrentPostingId(postingId);
+    if (visible) {
+      await fetchApplicantsCount(postingId);
+    }
+    setVisibleModal(visible);
+  };
+
+  const clearApplicantsAndModal = () => {
+    setApplicants([]);
+    setVisibleModal(false);
+  };
+
 
   const toggleExpanded = (postingId) => {
   setExpandedMap(prevState => ({
@@ -109,10 +123,8 @@ export default function FarmHome() {
     <Modal
       animationType="slide"
       transparent={true}
-      visible={modalVisible}
-      onRequestClose={() => {
-        setModalVisible(!modalVisible);
-      }}
+      visible={visibleModal}
+      onRequestClose={clearApplicantsAndModal}
     >
       <ScrollView contentContainerStyle={styles.modalContainer}>
       <View style={styles.header}>
@@ -131,6 +143,7 @@ export default function FarmHome() {
           </Animated.Text>
         </View>
         {applicants.map((applicant) => (
+          console.log('Applicant ID:', applicant.id),
           <View key={applicant.id} style={styles.modalSectionContainer}>
             <View style={styles.modalContentContainer}>
               <View style={styles.leftContent}>
@@ -147,6 +160,9 @@ export default function FarmHome() {
                 </Text>
               </View>
             </View>
+              <Text style={styles.postingPosted}>
+                <StyledText small bold tanColor >Applied {calculateDaysAgo(applicant.created_at)} </StyledText>
+              </Text>
             <View>
               <TouchableOpacity style={styles.ViewApplicantButton} 
                 onPress={() => handleEmployeeProfileView(applicant.id)}  
@@ -255,9 +271,11 @@ export default function FarmHome() {
                   </StyledText>
                   <TouchableOpacity 
                     style={styles.editPostingButton} 
-                    onPress={() => setModalVisible(true)}
+                    onPress={() => setModalVisible(true, posting.id)} // Pass posting ID to setModalVisible
                   >
-                    <StyledText bold style={styles.editPostingText}>{applicantsMap[posting.id] === 1 ? 'View Applicant' : 'View Applicants'}</StyledText>
+                    <StyledText bold style={styles.editPostingText}>
+                      {applicantsMap[posting.id] === 1 ? 'View Applicant' : 'View Applicants'}
+                    </StyledText>
                   </TouchableOpacity>
                   </View>
                   : 
@@ -382,6 +400,13 @@ const styles = StyleSheet.create({
     color: '#3A4D39',
     marginRight: 10,
     marginTop: 5,
+  },
+  postingPosted: {
+    fontSize: 12,
+    marginBottom: 10,
+    marginTop: -5,
+    color: '#ECE3CE',
+    textAlign: 'center',
   },
   applicantNumber: {
     color: '#3A4D39',
