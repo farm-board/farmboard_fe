@@ -65,7 +65,7 @@ export default function FarmProfileAddPostings() {
     axios.post(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/postings`, postData)
     .then(response => {
       console.log(response.data);
-      navigation.push('Profile');
+      navigation.navigate('Profile');
     })
     .catch(error => {
       console.log('Unable to add posting', error);

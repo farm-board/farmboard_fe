@@ -1,33 +1,52 @@
 import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet } from 'react-native'
-import React, { useState, useContext } from 'react'
+import React, { useState, useEffect } from 'react'
 import { StatusBar } from 'expo-status-bar';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import axios from 'axios';
 import { UserContext } from '../contexts/UserContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function ResetPasswordScreen() {
-    const [email, setEmail] = useState('');
+    const [passwordResetToken, setPasswordResetToken] = useState('');
+    const [password, setPassword] = useState('');
+    const [passwordConfirmation, setPasswordConfirmation] = useState('');
     
     const navigation = useNavigation();
-    
-    const { setCurrentUser } = useContext(UserContext);
 
+    const route = useRoute();
+
+  useEffect(() => {
+    if (route.params?.reset_password_token) {
+      setPasswordResetToken(route.params.reset_password_token);
+      console.log('reset_password_token:', route.params.reset_password_token);
+    }
+  }, [route.params?.reset_password_token]);
+    
     const handleSubmit = () => {
-        // Call your API to request password reset
-        axios.post(`http://localhost:4000/password`, { user: { email: email } })
-          .then(response => {
-            // Handle success
-            console.log('Password reset link sent');
-            alert('Password reset link has been sent to your email.')
-          })
-          .catch(error => {
-            // Handle error
-            console.error('Error requesting password reset:', error);
-            alert('Error requesting password reset. Please try again later.')
-          });
-      };
+      // Call your API to request password reset
+      axios.patch('http://localhost:4000/password', {
+        user: {
+          reset_password_token: passwordResetToken,
+          password: password,
+          password_confirmation: passwordConfirmation
+        }
+      })
+      .then(response => {
+        // Handle success
+        console.log('Password has been reset');
+        alert('Your password has been reset.')
+        navigation.navigate('Login');
+      })
+      .catch(error => {
+        // Handle error
+        console.log('passwordResetToken:', passwordResetToken);
+        console.log('password:', password);
+        console.log('passwordConfirmation:', passwordConfirmation);
+        console.error('Error resetting password:', error);
+        alert('There was an issue resetting your password. Please try again later.')
+      });
+    };
 
     return (
         <View style={styles.container}>
@@ -43,14 +62,22 @@ export default function ResetPasswordScreen() {
     
             {/* Form */}
             <View style={styles.formContainer}>
-                <Text style={styles.passwordText}>Forgot your password?</Text>
-                <Text style={styles.passwordDetails}>Enter your email address and we'll send you a link to reset your password.</Text>
+                <Text style={styles.passwordText}>Enter your new password.</Text>
+                <Text style={styles.passwordDetails}>Enter your new password in the fields below.</Text>
               <Animated.View entering={FadeInDown.delay(200).duration(1000).springify()}style={styles.inputContainer}>
                 <TextInput
                   style={styles.input}
-                  placeholder='Email'
+                  placeholder='New Password'
                   placeholderTextColor='gray'
-                  onChangeText={text => setEmail(text)}
+                  onChangeText={text => setPassword(text)}
+                />
+              </Animated.View>
+              <Animated.View entering={FadeInDown.delay(200).duration(1000).springify()}style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder='Confirm Password'
+                  placeholderTextColor='gray'
+                  onChangeText={text => setPasswordConfirmation(text)}
                 />
               </Animated.View>
               <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()}>

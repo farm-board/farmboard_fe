@@ -1,6 +1,11 @@
 {
   "expo": {
     "name": "farmboard_fe",
-    "slug": "farmboard_fe"
+    "slug": "farmboard_fe",
+    "scheme": "exp",
+    "platforms": ["ios", "android"],
+    "extra": {
+      "paths": ["/--/password/edit"]
+    }
   }
 }

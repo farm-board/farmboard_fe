@@ -58,7 +58,7 @@ export default function ForgotPasswordScreen() {
                     style={styles.button}
                     onPress={handleSubmit}>
                     <Text style={styles.buttonText}>
-                    Reset Password
+                    Send Password Reset Link
                     </Text>
                 </TouchableOpacity>
               </Animated.View>
@@ -120,9 +120,9 @@ const styles = StyleSheet.create({
     button: {
       backgroundColor: '#4F6F52',
       padding: 15,
-      paddingHorizontal: 75,
+      paddingHorizontal: 60,
       borderRadius: 20,
-      maxWidth: '100%',
+      minWidth: '80%',
       marginBottom: 10,
       marginTop: 10,
     },
