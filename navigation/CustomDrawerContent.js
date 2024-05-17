@@ -8,11 +8,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { UserContext } from '../contexts/UserContext'
 import axios from 'axios';
 
-const DrawerList = [
-  {icon: 'home-outline', label: 'Home', navigateTo: 'Home Stack'},
-  {icon: 'account-multiple', label: 'Profile', navigateTo: 'Profile Stack'},
-  {icon: 'clipboard-text-multiple-outline', label: 'Feed', navigateTo: 'Feed Stack'}
-];
+
 const DrawerLayout = ({icon, label, navigateTo}) => {
   const navigation = useNavigation();
   return (
@@ -27,23 +23,37 @@ const DrawerLayout = ({icon, label, navigateTo}) => {
   );
 };
 
-const DrawerItems = props => {
-    return DrawerList.map((el, i) => {
-      return (
-        <DrawerLayout
-          key={i}
-          icon={el.icon}
-          label={el.label}
-          navigateTo={el.navigateTo}
-        />
-      );
-    });
-  };
+const DrawerItems = ({ drawerList = [] }) => {
+  return drawerList.map((el, i) => {
+    return (
+      <DrawerLayout
+        key={i}
+        icon={el.icon}
+        label={el.label}
+        navigateTo={el.navigateTo}
+      />
+    );
+  });
+};
+
 function CustomDrawerContent(props) {
   const [userData, setUserData] = useState({});
   const [avatarImage, setAvatarImage] = useState('');
   const navigation = useNavigation();
   const{currentUser, logout} = useContext(UserContext);
+
+  const DrawerList = currentUser.role_type === 'farm' ?
+  [
+    {icon: 'home-outline', label: 'Home', navigateTo: 'Home Stack'},
+    {icon: 'account-multiple', label: 'Profile', navigateTo: 'Profile Stack'},
+    {icon: 'clipboard-text-multiple-outline', label: 'Feed', navigateTo: 'Feed Stack'}
+  ]
+  : currentUser.role_type === 'employee' ?
+  [
+    {icon: 'account-multiple', label: 'Profile', navigateTo: 'Profile Stack'},
+    {icon: 'clipboard-text-multiple-outline', label: 'Feed', navigateTo: 'Feed Stack'}
+  ]
+  : [];
 
   handleLogout = () => { 
     logout(navigation);
@@ -106,7 +116,7 @@ function CustomDrawerContent(props) {
             </View>
           </TouchableOpacity>
           <View style={styles.drawerSection}>
-            <DrawerItems />
+            <DrawerItems drawerList={DrawerList} />
           </View>
         </View>
       </DrawerContentScrollView>

@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Modal, Linking } from 'react-native';
 import { UserContext } from '../../contexts/UserContext';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import axios from 'axios';
@@ -16,11 +16,15 @@ export default function ViewEmployeeProfile() {
   const [references, setReferences] = useState([]); 
   const [loading, setLoading] = useState(true); 
   const [expanded, setExpanded] = useState(false); 
+  const [contactModalVisible, setContactModalVisible] = useState(false);
+
+  const toggleContactModal = () => {
+    setContactModalVisible(!contactModalVisible);
+  };
 
   const route = useRoute();
   const { employeeId } = route.params;
   useEffect(() => {
-    console.log('employeeId:', employeeId);
     setLoading(true); 
       axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/${employeeId}/profile_info`)
     .then((employeeResponse) => {
@@ -38,6 +42,34 @@ export default function ViewEmployeeProfile() {
   if (loading) {
     return <Text>Loading...</Text>; // Render loading indicator
   }
+
+  const handlePhoneCall = () => {
+    Linking.openURL(`tel:${employee.phone}`);
+  };
+
+  const renderContactModal = () => (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={contactModalVisible}
+      onRequestClose={toggleContactModal}
+    >
+      <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>Contact Information</Text>
+          <TouchableOpacity onPress={handlePhoneCall}>
+            <Text style={styles.contactInfo}>{`Phone: `}</Text>
+            <Text style={styles.contactInfo}>{employee.phone}</Text>
+          </TouchableOpacity>
+          <Text style={styles.contactInfo}>{`Email: `}</Text>
+          <Text style={styles.contactInfo}>{employee.email}</Text>
+          <TouchableOpacity style={styles.closeButton} onPress={toggleContactModal}>
+            <Text style={styles.closeButtonText}>Close</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
 
   return (
     <View style={styles.container}>
@@ -58,6 +90,9 @@ export default function ViewEmployeeProfile() {
               {`${employee.city}, ${employee.state} ${employee.zip_code}`}
             </StyledText>
           </Text>
+          <TouchableOpacity style={styles.contactButton} onPress={toggleContactModal}>
+            <Text style={styles.contactButtonText}>Contact</Text>
+          </TouchableOpacity>
         </View>
       </View>
       <View style={styles.subContentContainer}>
@@ -123,6 +158,7 @@ export default function ViewEmployeeProfile() {
               ))}
           </View>
         </View>
+        {contactModalVisible && renderContactModal()}
     </View>
   );
 }
@@ -264,5 +300,47 @@ const styles = StyleSheet.create({
   feedButtonText: {
     color: 'white',
     fontWeight: 'bold',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', 
+  },
+  modalContent: {
+    backgroundColor: '#4F6F52',
+    padding: 20,
+    borderRadius: 10,
+    width: '80%',
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#ECE3CE',
+  },
+  contactInfo: {
+    fontSize: 18,
+    marginBottom: 10,
+    color: '#ECE3CE',
+  },
+  closeButton: {
+    alignSelf: 'flex-end',
+    marginTop: 10,
+  },
+  closeButtonText: {
+    color: '#ECE3CE',
+    fontSize: 16,
+  },
+  contactButton: {
+    backgroundColor: '#ECE3CE',
+    borderRadius: 8,
+    padding: 10,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  contactButtonText: {
+    color: '#3A4D39',
+    fontSize: 16,
   },
 });

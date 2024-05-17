@@ -281,9 +281,57 @@ function EmployeeProfileStackNav() {
               );
             }
           }}/>
-        <Stack.Screen name="Employee Profile Edit Details" component={EmployeeProfileEditDetailsScreen} />
-        <Stack.Screen name="Employee Profile Add Experiences" component={EmployeeProfileAddExperiencesScreen} />
-        <Stack.Screen name="Employee Profile Add References" component={EmployeeProfileAddReferencesScreen} />
+        <Stack.Screen name="Employee Profile Edit Details" component={EmployeeProfileEditDetailsScreen}
+          options={{ 
+            title: 'Edit Display',
+            headerLeft: () => {
+              return (
+                <TouchableOpacity onPress={() => navigation.navigate('Edit Profile')}>
+                  <MaterialCommunityIcons
+                    name="arrow-left"
+                    size={30}
+                    color="#ECE3CE"
+                    style={{ marginLeft: 10 }}
+                  />
+                </TouchableOpacity>
+              );
+            }
+          }} 
+        />
+        <Stack.Screen name="Employee Profile Add Experiences" component={EmployeeProfileAddExperiencesScreen}
+          options={{ 
+            title: 'Add Experience',
+            headerLeft: () => {
+              return (
+                <TouchableOpacity onPress={() => navigation.navigate('Edit Profile')}>
+                  <MaterialCommunityIcons
+                    name="arrow-left"
+                    size={30}
+                    color="#ECE3CE"
+                    style={{ marginLeft: 10 }}
+                  />
+                </TouchableOpacity>
+              );
+            }
+          }} 
+         />
+        <Stack.Screen name="Employee Profile Add References" component={EmployeeProfileAddReferencesScreen}
+          options={{ 
+            title: 'Add Reference',
+            headerLeft: () => {
+              return (
+                <TouchableOpacity onPress={() => navigation.navigate('Edit Profile')}>
+                  <MaterialCommunityIcons
+                    name="arrow-left"
+                    size={30}
+                    color="#ECE3CE"
+                    style={{ marginLeft: 10 }}
+                  />
+                </TouchableOpacity>
+              );
+            }
+          }} 
+       />
         <Stack.Screen name="Employee Profile View" component={EmployeeViewProfileScreen} />
       </>
     </Stack.Navigator>
@@ -386,9 +434,8 @@ function DrawerNavigator() {
         backgroundColor: '#739072'
       },
     }}>
-      <Drawer.Screen name="Home Stack" component={HomeStackNav} />
-      <Drawer.Screen name="Profile Stack" component={EmployeeProfileStackNav} />
       <Drawer.Screen name="Feed Stack" component={FeedStackNav} />
+      <Drawer.Screen name="Profile Stack" component={EmployeeProfileStackNav} />
     </Drawer.Navigator>
     : null
   );
