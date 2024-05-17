@@ -35,21 +35,6 @@ export default function ExperienceForm({ setExperiences }) {
   return (
     <KeyboardAvoidingContainer style={{paddingTop: 10, paddingBottom: 25, paddingHorizontal: 5}}>
       <View style={styles.content}>
-        <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton}>
-            <MaterialCommunityIcons
-              name="arrow-left"
-              size={30}
-              color="#ECE3CE"
-              onPress={() => navigation.push("Profile Edit")}
-            />
-            </TouchableOpacity>
-              <Animated.Text entering={FadeInUp.duration(1000).springify()}>
-                <StyledText bold tanColor style={[styles.text, styles.pb10]}>
-                  Edit profile
-                </StyledText>
-              </Animated.Text>
-        </View>
         <View style={styles.mb3}>
           <Animated.Text >
             <StyledText entering={FadeInUp.duration(1000).springify()} big style={[styles.text, styles.pb10]}>
