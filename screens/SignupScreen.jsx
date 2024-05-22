@@ -43,10 +43,10 @@ export default function SignupScreen() {
             setCurrentUser(response.data.data);
             AsyncStorage.setItem('token', response.headers.authorization);
             if (response.data.data.role_type === "no_role") {
-                navigation.push('Setup');
+                navigation.navigate('Setup');
             }
             else {
-                navigation.push('Profile');
+                navigation.navigate('Profile');
             }
         })
         .catch(error => {
@@ -63,7 +63,7 @@ return (
         {/* Title */}
         <View style={styles.logoContainer}>
             <Animated.Image entering={FadeInUp.delay(1000).duration(1000).springify()} style={styles.logoImageTop} source={require('../assets/images/logowithbarn-transformed-top.png')} />
-            <Animated.Image entering={FadeInUp.delay(400).duration(1000).springify()} style={styles.logoImageBottom} source={require('../assets/images/logowithbarn-transformed-bottom.png')} />
+            <Animated.Image entering={FadeInUp.delay(400).duration(1000).springify()} style={styles.logoImageBottom} source={require('../assets/images/logowithbarn-transformed-bottom-fix.png')} />
         </View>
 
         {/* Form */}
@@ -128,25 +128,26 @@ const styles = StyleSheet.create({
     titleAndForm: {
       paddingTop: 30,
       paddingHorizontal: 20,
-      paddingBottom: 60,
+      paddingBottom: 90,
     },
     logoContainer: {
       alignItems: 'center',
       justifyContent: 'normal',
-      paddingBottom: 15,
+      paddingBottom: 65,
     },
     logoImageTop: {
       height: '45%',
       maxWidth: '90%',
     },
     logoImageBottom: {
-      height: '22.5%',
+      height: '23%',
       maxWidth: '95%',
       aspectRatio: 3/1,
+      marginTop: 2.5,
     },
     formContainer: {
       alignItems: 'center',
-      marginTop: -100,
+      marginTop: -110,
     },
     inputContainer: {
       backgroundColor: 'rgba(0, 0, 0, 0.1)',

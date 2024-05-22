@@ -6,21 +6,52 @@ export const UserContext = React.createContext();
 
 export const UserProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
+  const [setupComplete, setSetupComplete] = useState(false);
   const [loading, setLoading] = useState(false);
 
   // Load any saved user data when the component mounts
   useEffect(() => {
     AsyncStorage.getItem('user').then(user => {
       if (user) {
-        setCurrentUser(JSON.parse(user));
+        const parsedUser = JSON.parse(user);
+        setCurrentUser(parsedUser);
       }
     });
   }, []);
-
+  
+  // Make API call when currentUser changes
+  useEffect(() => {
+    if (currentUser) {
+      if (currentUser.role_type === "farm") {
+        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`)
+        .then(response => {
+          // Update the setupComplete state
+          console.log("setup Complete:", response.data.data.attributes.setup_complete);
+          setSetupComplete(response.data.data.attributes.setup_complete);
+        })
+        .catch(error => {
+          console.log('Unable to fetch user data', error);
+        });
+      } 
+  
+      if (currentUser.role_type === "employee") {
+        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`)
+        .then(response => {
+          // Update the setupComplete state
+          console.log("setup complete:", response.data);
+          setSetupComplete(response.data.data.attributes.setup_complete);
+        })
+        .catch(error => {
+          console.log('Unable to fetch user data', error);
+        });
+      }
+    }
+  }, [currentUser]);
+  
   // Save any changes to user data
   useEffect(() => {
     AsyncStorage.setItem('user', JSON.stringify(currentUser));
-    console.log(currentUser);
+    console.log("Current User:", currentUser);
   }, [currentUser]);
 
   const logout = async (navigation) => {
@@ -45,7 +76,7 @@ export const UserProvider = ({ children }) => {
   };
 
   return (
-    <UserContext.Provider value={{ currentUser, setCurrentUser, logout, loading }}>
+    <UserContext.Provider value={{ currentUser, setCurrentUser, logout, loading, setupComplete, setSetupComplete }}>
       {children}
     </UserContext.Provider>
   );
