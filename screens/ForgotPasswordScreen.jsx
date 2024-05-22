@@ -20,7 +20,7 @@ export default function ForgotPasswordScreen() {
           .then(response => {
             // Handle success
             console.log('Password reset link sent');
-            alert('Password reset link has been sent to your email.')
+            alert('The password reset link has been sent. Please check your email for further instructions.')
           })
           .catch(error => {
             // Handle error
@@ -38,13 +38,13 @@ export default function ForgotPasswordScreen() {
             {/* Title */}
             <View style={styles.logoContainer}>
               <Animated.Image entering={FadeInUp.delay(1000).duration(1000).springify()} style={styles.logoImageTop} source={require('../assets/images/logowithbarn-transformed-top.png')} />
-              <Animated.Image entering={FadeInUp.delay(400).duration(1000).springify()} style={styles.logoImageBottom} source={require('../assets/images/logowithbarn-transformed-bottom.png')} />
+              <Animated.Image entering={FadeInUp.delay(400).duration(1000).springify()} style={styles.logoImageBottom} source={require('../assets/images/logowithbarn-transformed-bottom-fix.png')} />
             </View>
     
             {/* Form */}
             <View style={styles.formContainer}>
                 <Text style={styles.passwordText}>Forgot your password?</Text>
-                <Text style={styles.passwordDetails}>Enter your email address and we'll send you a link to reset your password.</Text>
+                <Text style={styles.passwordDetails}>Enter your email address below and we'll send you a link to reset your password.</Text>
               <Animated.View entering={FadeInDown.delay(200).duration(1000).springify()}style={styles.inputContainer}>
                 <TextInput
                   style={styles.input}
@@ -91,20 +91,21 @@ const styles = StyleSheet.create({
     logoContainer: {
       alignItems: 'center',
       justifyContent: 'normal',
-      paddingBottom: 15,
+      paddingBottom: 40,
     },
     logoImageTop: {
       height: '46%',
       maxWidth: '80%',
     },
     logoImageBottom: {
-      height: '23%',
+      height: '22%',
       maxWidth: '100%',
       aspectRatio: 3/1,
+      marginTop: 2.5,
     },
     formContainer: {
       alignItems: 'center',
-      marginTop: -80,
+      marginTop: -90,
     },
     inputContainer: {
       backgroundColor: 'rgba(0, 0, 0, 0.1)',
@@ -112,7 +113,7 @@ const styles = StyleSheet.create({
       borderRadius: 20,
       width: '100%',
       marginBottom: 10,
-      marginTop: 10,
+      marginTop: 20,
     },
     input: {
       color: 'black',

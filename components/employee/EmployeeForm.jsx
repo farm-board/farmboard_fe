@@ -51,13 +51,14 @@ export default function EmployeeForm() {
   }
 
   const navigation = useNavigation();
-  const { currentUser } = useContext(UserContext);
+  const { currentUser, setSetupComplete } = useContext(UserContext);
 
   const handleSubmit = () => {
-    axios.put(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`, { employee: data})
+    axios.put(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`, { employee: { ...data, setup_complete: true }})
     .then(response => {
       console.log(response.data);
-      navigation.navigate('Profile');
+      setSetupComplete(true);
+      navigation.navigate('Employee', { screen: 'Profile Stack' });
     })
     .catch(error => {
       console.log('Unable to register user', error);

@@ -64,7 +64,6 @@ function HomeStackNav() {
             );
           }
         }}/>
-        <Stack.Screen name="Setup" component={SetupScreen} />
         <Stack.Screen name="Profile Edit" component={ProfileEditScreen} 
           options={{
             headerLeft: () => {
@@ -140,7 +139,6 @@ function FarmProfileStackNav() {
             );
           }
         }}/>
-        <Stack.Screen name="Setup" component={SetupScreen} />
         <Stack.Screen name="Edit Profile" component={ProfileEditScreen} 
           options={{
             headerLeft: () => {
@@ -266,7 +264,6 @@ function EmployeeProfileStackNav() {
             );
           }
         }}/>
-        <Stack.Screen name="Setup" component={SetupScreen} />
         <Stack.Screen name="Edit Profile" component={ProfileEditScreen} 
           options={{
             headerLeft: () => {
@@ -371,7 +368,6 @@ function FeedStackNav() {
       }}>
       <>
         <Stack.Screen name="Feed" component={FeedScreen} />
-        <Stack.Screen name="Setup" component={SetupScreen} />
         <Stack.Screen name="Farm Profile Add Postings" component={FarmProfileAddPostingsScreen} 
           options={{ 
             title: 'Add Job Posting',
@@ -410,10 +406,11 @@ function FeedStackNav() {
 
 
 function DrawerNavigator() {
-  const { currentUser } = useContext(UserContext);
+  const { currentUser, setupComplete } = useContext(UserContext);
   const Drawer = createDrawerNavigator();
   return (
-    currentUser.role_type === 'farm' ?
+    setupComplete ? (
+      currentUser.role_type === 'farm' ?
     <Drawer.Navigator 
     drawerContent={props => <CustomDrawerContent {...props} />}
     screenOptions={{
@@ -438,7 +435,8 @@ function DrawerNavigator() {
       <Drawer.Screen name="Feed Stack" component={FeedStackNav} />
       <Drawer.Screen name="Profile Stack" component={EmployeeProfileStackNav} />
     </Drawer.Navigator>
-    : 
+    : null
+  ) :
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Setup" component={SetupScreen} />
     </Stack.Navigator>
