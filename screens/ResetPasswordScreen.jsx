@@ -57,7 +57,7 @@ export default function ResetPasswordScreen() {
             {/* Title */}
             <View style={styles.logoContainer}>
               <Animated.Image entering={FadeInUp.delay(1000).duration(1000).springify()} style={styles.logoImageTop} source={require('../assets/images/logowithbarn-transformed-top.png')} />
-              <Animated.Image entering={FadeInUp.delay(400).duration(1000).springify()} style={styles.logoImageBottom} source={require('../assets/images/logowithbarn-transformed-bottom.png')} />
+              <Animated.Image entering={FadeInUp.delay(400).duration(1000).springify()} style={styles.logoImageBottom} source={require('../assets/images/logowithbarn-transformed-bottom-fix.png')} />
             </View>
     
             {/* Form */}
@@ -118,20 +118,21 @@ const styles = StyleSheet.create({
     logoContainer: {
       alignItems: 'center',
       justifyContent: 'normal',
-      paddingBottom: 15,
+      paddingBottom: 60,
     },
     logoImageTop: {
       height: '46%',
       maxWidth: '80%',
     },
     logoImageBottom: {
-      height: '23%',
+      height: '22%',
       maxWidth: '100%',
       aspectRatio: 3/1,
+      marginTop: 2.5,
     },
     formContainer: {
       alignItems: 'center',
-      marginTop: -80,
+      marginTop: -110,
     },
     inputContainer: {
       backgroundColor: 'rgba(0, 0, 0, 0.1)',

@@ -24,13 +24,13 @@ export default function FarmForm() {
   })
 
   const navigation = useNavigation();
-  const { currentUser } = useContext(UserContext);
+  const { currentUser, setSetupComplete } = useContext(UserContext);
 
   const handleSubmit = () => {
-    axios.put(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`, { farm: data})
+    axios.put(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`, { farm: {...data, setup_complete: true}}) 
     .then(response => {
       console.log(response.data);
-      navigation.push('Profile');
+      setSetupComplete(true);
     })
     .catch(error => {
       console.log('Unable to register user', error);
