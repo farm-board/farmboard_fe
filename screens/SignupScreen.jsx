@@ -43,10 +43,10 @@ export default function SignupScreen() {
             setCurrentUser(response.data.data);
             AsyncStorage.setItem('token', response.headers.authorization);
             if (response.data.data.role_type === "no_role") {
-                navigation.push('Setup');
+                navigation.navigate('Setup');
             }
             else {
-                navigation.push('Profile');
+                navigation.navigate('Profile');
             }
         })
         .catch(error => {

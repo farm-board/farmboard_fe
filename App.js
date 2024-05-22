@@ -438,7 +438,10 @@ function DrawerNavigator() {
       <Drawer.Screen name="Feed Stack" component={FeedStackNav} />
       <Drawer.Screen name="Profile Stack" component={EmployeeProfileStackNav} />
     </Drawer.Navigator>
-    : null
+    : 
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Setup" component={SetupScreen} />
+    </Stack.Navigator>
   );
 }
 

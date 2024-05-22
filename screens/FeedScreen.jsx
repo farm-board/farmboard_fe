@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput, Button, Modal, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native'
 import axios from 'axios';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons, MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import { UserContext } from '../contexts/UserContext';
 import StyledSelectDropdown from '../components/Inputs/StyledSelectDropdown';
 
@@ -18,6 +18,7 @@ const FeedScreen = () => {
   const [selectedDurationTypes, setSelectedDurationTypes] = useState([]);
   const compensationTypes = ['Hourly', 'Salary'];
   const [selectedPosting, setSelectedPosting] = useState(null);
+  const [activeTab, setActiveTab] = useState('Description');
   const [expanded, setExpanded] = useState(false);
   const { currentUser } = useContext(UserContext);
   const navigation = useNavigation();
@@ -142,21 +143,38 @@ const FeedScreen = () => {
   }
 
   const renderPostingItem = ({ item }) => (
-    <TouchableOpacity onPress={() => {
-      setSelectedPosting(item);
-      setModalPostingVisible(true);
-    }}>
-      <View style={styles.postingItem}>
-        <Text style={styles.postingTitle}>{item.attributes.title}</Text>
-        <View style={styles.divider}></View>
-        <Text style={styles.postingSalary}>Compensation:
-          <Text style={styles.postingSalaryAmount}> ${item.attributes.salary} / {item.attributes.payment_type}</Text>
-        </Text>
-        <Text style={styles.postingSalary}>Duration: {item.attributes.duration}</Text>
-        <Text style={styles.postingLocation}>Location: {item.attributes.farm_city}, {item.attributes.farm_state}</Text>
-        <Text style={styles.postingPosted}>Posted {calculateDaysAgo(item.attributes.created_at)}</Text>
+    <View style={styles.postingItem}>
+      <View style={styles.headerContainer}>
+        <View style={styles.companyLogoContainer}>
+          {/* Placeholder for company logo */}
+          <MaterialCommunityIcons name="barn" size={32} color="#AD110F"/>
+        </View>
+        <View style={styles.companyInfoContainer}>
+          <Text style={styles.companyName}>{item.attributes.farm_name}</Text>
+        </View>
       </View>
-    </TouchableOpacity>
+      <View style={styles.titleAndSalaryContainer}>
+        <Text style={styles.postingTitle}>{item.attributes.title}</Text>
+        <Text style={styles.postingSalary}>${item.attributes.salary} / {item.attributes.payment_type}</Text>
+      </View>
+      <Text style={styles.postingDescription}>
+        {item.attributes.description.length > 100 
+          ? item.attributes.description.substring(0, 100) + '...' 
+          : item.attributes.description}
+      </Text>
+      <Text style={styles.postingDate}>Posted: {new Date(item.attributes.created_at).toLocaleDateString()}</Text>
+      <View style={styles.locationAndButtonContainer}>
+        <Text style={styles.postingLocation}>{item.attributes.farm_city}, {"\n"}{item.attributes.farm_state}</Text>
+        <TouchableOpacity 
+          style={styles.detailsButton} 
+          onPress={() => { 
+            setSelectedPosting(item); 
+            setModalPostingVisible(true); 
+          }}>
+          <Text style={styles.detailsButtonText}>Details</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 
   const renderPostingModal = () => (
@@ -175,49 +193,89 @@ const FeedScreen = () => {
         >
           <Text style={styles.closeButtonText}>X</Text>
         </TouchableOpacity>
-        <View style={styles.midModalTwoContainer}>
-          <Text style={styles.modalTwoTitle}>Position</Text>
-          <Text style={styles.modalTwoDetails}>{selectedPosting?.attributes.title}</Text>
+        <View style={styles.logoContainer}>
+          {/* Placeholder for company logo */}
+          <MaterialCommunityIcons name="barn" size={100} color="#4F6F52" />
         </View>
-        <View style={styles.midModalContainer}>
-          <Text style={styles.modalTitle}>Location</Text>
-          <TouchableOpacity onPress={() => handleProfileRedirect(selectedPosting?.attributes.farm_id)}>
-            <Text style={styles.modalDetails}>
-              {selectedPosting?.attributes.farm_name}</Text>
-            <Text style={styles.modalDetails}>{selectedPosting?.attributes.farm_city}, {selectedPosting?.attributes.farm_state}
-            </Text>
+        <Text style={styles.modalSubTitle}>{selectedPosting?.attributes.farm_name}</Text>
+        <Text style={styles.modalTitle}>{selectedPosting?.attributes.title}</Text>
+  
+        <View style={styles.tagsContainer}>
+          <View style={styles.tag}>
+            <Text style={styles.tagText}>${selectedPosting?.attributes.salary} / {selectedPosting?.attributes.payment_type}</Text>
+          </View>
+          <View style={styles.tag}>
+            <Text style={styles.tagText}>{selectedPosting?.attributes.duration}</Text>
+          </View>
+        </View>
+  
+        <View style={styles.infoContainer}>
+          <View style={styles.infoItem}>
+            <View style={styles.iconWrapper}>
+              <MaterialCommunityIcons name="timer" size={24} color="white" />
+            </View>
+            <Text style={styles.infoLabel}>Duration</Text>
+            <Text style={styles.infoValue}>{selectedPosting?.attributes.duration}</Text>
+          </View>
+          <View style={styles.infoItem}>
+            <View style={styles.iconWrapper}>
+              <MaterialCommunityIcons name="cash" size={24} color="white" />
+            </View>
+            <Text style={styles.infoLabel}>Payment Type</Text>
+            <Text style={styles.infoValue}>{selectedPosting?.attributes.payment_type}</Text>
+          </View>
+          <View style={styles.infoItem}>
+            <View style={styles.iconWrapper}>
+              <MaterialCommunityIcons name="map-marker" size={24} color="white" />
+            </View>
+            <Text style={styles.infoLabel}>Location</Text>
+            <Text style={styles.infoValue}>{selectedPosting?.attributes.farm_city}</Text>
+            <Text style={styles.infoValue}>{selectedPosting?.attributes.farm_state}</Text>
+          </View>
+        </View>
+  
+        <View style={styles.toggleContainer}>
+          <TouchableOpacity
+            style={[styles.toggleButton, activeTab === 'Description' && styles.activeToggleButton]}
+            onPress={() => setActiveTab('Description')}
+          >
+            <Text style={[styles.toggleButtonText, activeTab === 'Description' && styles.activeToggleButtonText]}>Description</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.toggleButton, activeTab === 'Required Skills' && styles.activeToggleButton]}
+            onPress={() => setActiveTab('Required Skills')}
+          >
+            <Text style={[styles.toggleButtonText, activeTab === 'Required Skills' && styles.activeToggleButtonText]}>Required Skills</Text>
           </TouchableOpacity>
         </View>
-        <View style={styles.midModalTwoContainer}>
-          <Text style={styles.modalTwoTitle}>Compensation</Text>
-          <Text style={styles.modalTwoDetails}>${selectedPosting?.attributes.salary} / {selectedPosting?.attributes.payment_type}</Text>
-          <Text style={styles.modalTwoDetails}>{selectedPosting?.attributes.duration}</Text>
-        </View>
-        <View style={styles.midModalContainer}>
-          <Text style={styles.modalTitle}>Required Skills</Text>
-          <View style={styles.skillContainer}>
-            {selectedPosting?.attributes.skill_requirements && selectedPosting?.attributes.skill_requirements.slice(0, expanded ? selectedPosting?.attributes.skill_requirements.length : 5).map((skill, index) => (
-              <View key={index} style={styles.skillBubble}>
-                <Text style={styles.skillText}>{skill}</Text>
-              </View>
-            ))}
+  
+        {activeTab === 'Description' ? (
+          <View style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>Job Description</Text>
+            <Text style={styles.sectionText}>{selectedPosting?.attributes.description}</Text>
           </View>
-          {selectedPosting?.attributes.skill_requirements && selectedPosting?.attributes.skill_requirements.length > 5 && (
-            <TouchableOpacity onPress={() => setExpanded(!expanded)} style={styles.showMoreButton}>
-              <Text style={styles.showMoreButtonText}>{expanded ? 'Show less' : 'Show more'}</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-        <View style={styles.midModalTwoContainer}>
-          <Text style={styles.modalTwoTitle}>Job Description</Text>
-          <Text style={styles.modalTwoDetails}>{selectedPosting?.attributes.description}</Text>
-        </View>
+        ) : (
+          <View style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>Required Skills</Text>
+            <View style={styles.skillContainer}>
+              {selectedPosting?.attributes.skill_requirements && selectedPosting?.attributes.skill_requirements.slice(0, expanded ? selectedPosting?.attributes.skill_requirements.length : 5).map((skill, index) => (
+                <View key={index} style={styles.skillBubble}>
+                  <Text style={styles.skillText}>{skill}</Text>
+                </View>
+              ))}
+            </View>
+            {selectedPosting?.attributes.skill_requirements && selectedPosting?.attributes.skill_requirements.length > 5 && (
+              <TouchableOpacity onPress={() => setExpanded(!expanded)} style={styles.showMoreButton}>
+                <Text style={styles.showMoreButtonText}>{expanded ? 'Show less' : 'Show more'}</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
+  
         {currentUser.role_type !== 'farm' && (
-          <View style={styles.submitButtonContainer}>
-            <TouchableOpacity style={styles.submitButton} onPress={applyToPosting}>
-              <Text style={styles.submitButtonText}>
-                Apply
-              </Text>
+          <View style={styles.applyButtonContainer}>
+            <TouchableOpacity style={styles.applyButton} onPress={applyToPosting}>
+              <Text style={styles.applyButtonText}>Apply</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -308,6 +366,165 @@ const FeedScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  modalContainer: {
+    padding: 20,
+    backgroundColor: '#545455',
+    minHeight: '100%',
+    alignItems: 'center',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 20,
+    right: 20,
+    zIndex: 1,
+  },
+  closeButtonText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#000',
+    paddingTop: 25,
+  },
+  logoContainer: {
+    marginTop: 40,
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'white',
+    textAlign: 'center',
+  },
+  modalSubTitle: {
+    fontSize: 18,
+    color: 'white',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  tagsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  tag: {
+    backgroundColor: '#4F6F52',
+    borderRadius: 5,
+    paddingVertical: 5,
+    paddingHorizontal: 15,
+    margin: 5,
+  },
+  tagText: {
+    color: 'white',
+    fontSize: 14,
+  },
+  infoContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+    marginBottom: 20,
+  },
+  infoItem: {
+    alignItems: 'center',
+  },
+  iconWrapper: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#333',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
+  infoLabel: {
+    fontSize: 12,
+    color: 'white',
+  },
+  infoValue: {
+    fontSize: 16,
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  toggleContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 20,
+    backgroundColor: 'black',
+    borderRadius: 10,
+  },
+  toggleButton: {
+    flex: 1,
+    padding: 10,
+    alignItems: 'center',
+    borderRadius: 10,
+  },
+  activeToggleButton: {
+    backgroundColor: '#4F6F52',
+  },
+  toggleButtonText: {
+    color: 'white',
+    fontSize: 16,
+  },
+  activeToggleButtonText: {
+    color: 'white',
+  },
+  sectionContainer: {
+    backgroundColor: 'white',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 20,
+    width: '100%',
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#4F6F52',
+    marginBottom: 10,
+  },
+  sectionText: {
+    fontSize: 16,
+    color: '#4F6F52',
+  },
+  skillContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  skillBubble: {
+    backgroundColor: '#4F6F52',
+    borderRadius: 5,
+    paddingVertical: 5,
+    paddingHorizontal: 15,
+    margin: 5,
+  },
+  skillText: {
+    color: '#fff',
+    fontSize: 14,
+  },
+  showMoreButton: {
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  showMoreButtonText: {
+    fontSize: 14,
+    color: '#ffb900',
+  },
+  applyButtonContainer: {
+    width: '100%',
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  applyButton: {
+    backgroundColor: '#ffb900',
+    borderRadius: 5,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+  applyButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+  },
   container: {
     flex: 1,
     backgroundColor: '#4F6F52',
@@ -325,8 +542,8 @@ const styles = StyleSheet.create({
   TopHeading: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#ECE3CE',
-    marginBottom: 5,
+    color: 'white',
+    marginBottom: 15,
     textAlign: 'center',
   },
   searchContainer: {
@@ -342,33 +559,81 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   postingItem: {
-    minWidth: '100%',
-    padding: 10,
-    backgroundColor: '#ECE3CE', 
+    backgroundColor: '#FFFFFF',
     borderRadius: 10,
+    padding: 15,
+    marginVertical: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 2,
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 10,
   },
+  companyLogoContainer: {
+    marginRight: 10,
+  },
+  companyInfoContainer: {
+    justifyContent: 'center',
+  },
+  companyName: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#555',
+  },
+  titleAndSalaryContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
   postingTitle: {
-    paddingBottom: 5,
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#3A4D39',
-    textAlign: 'center',
+    color: '#333',
+    flex: 1,
   },
-  postingSalaryAmount: {
+  postingSalary: {
     fontSize: 16,
-    color: '#3A4D39',
-    textAlign: 'center',
+    fontWeight: 'bold',
+    color: '#333',
   },
-  postingPosted: {
+  postingDescription: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 10,
+  },
+  postingDate: {
     fontSize: 12,
-    color: '#3A4D39',
-    textAlign: 'right',
+    color: '#999',
+  },
+  locationAndButtonContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  postingLocation: {
+    fontSize: 12,
+    color: '#999',
+    flex: 1,
+  },
+  detailsButton: {
+    backgroundColor: '#4F6F52',
+    borderRadius: 5,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+  },
+  detailsButtonText: {
+    fontSize: 14,
+    color: '#FFF',
   },
   divider: {
     borderBottomWidth: 1,
-    borderBottomColor: '#3A4D39',
-    marginBottom: 5,
+    borderBottomColor: '#ECECEC',
+    marginVertical: 10,
   },
   filterOptions: {
     backgroundColor: '#fff',
@@ -379,12 +644,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 20,
     right: 20,
-  },
-  modalContainer: {
-    paddingTop: 70,
-    alignItems: 'center',
-    backgroundColor: '#4F6F52',
-    minHeight: '100%',
   },
   topModalContainer: {
     backgroundColor: '#ECE3CE',
@@ -400,7 +659,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     minWidth: '100%',
     borderWidth: 5,
-    borderColor: '#ECE3CE', 
+    borderColor: '#ECE3CE',
     borderRadius: 20,
   },
   midModalTwoContainer: {
@@ -409,17 +668,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     minWidth: '100%',
-  },
-  modalTitle: {
-    fontSize: 25,
-    fontWeight: 'bold',
-    color: '#4F6F52',
-    marginBottom: 10,
-  },
-  modalDetails: {
-    fontSize: 18,
-    color: '#4F6F52',
-    marginBottom: 5,
   },
   modalTwoTitle: {
     fontSize: 25,
@@ -437,17 +685,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     marginBottom: 20,
   },
-  skillBubble: {
-    backgroundColor: '#4F6F52',
-    borderRadius: 20,
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    marginRight: 10,
-    marginBottom: 10,
-  },
-  skillText: {
-    color: '#ECE3CE',
-  },
   showMoreButton: {
     backgroundColor: '#ECE3CE',
     paddingVertical: 5,
@@ -459,22 +696,6 @@ const styles = StyleSheet.create({
   showMoreButtonText: {
     color: '#3A4D39',
     fontSize: 16,
-  },
-  skillContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  closeButton: {
-    position: 'absolute',
-    top: 37,
-    right: 20,
-    backgroundColor: 'transparent',
-    zIndex: 1,
-  },
-  closeButtonText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#ECE3CE',
   },
   submitButtonContainer: {
     width: '100%',
@@ -502,12 +723,6 @@ const styles = StyleSheet.create({
   filterOptionLabel: {
     color: '#ECE3CE',
     fontSize: 18,
-  },
-  closeButtonText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#ECE3CE',
-    marginTop: 20,
   },
   clearFiltersButtonText: {
     fontSize: 20,
