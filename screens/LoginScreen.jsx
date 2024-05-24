@@ -27,19 +27,12 @@ export default function LoginScreen() {
 
         axios.post('http://localhost:4000/login', user)
         .then(response => {
-            setCurrentUser(response.data.data);
-            AsyncStorage.setItem('token', response.headers.authorization);
-            if (response.data.data.role_type === "farm") {
-              navigation.navigate('Farm', { screen: 'Profile Stack' });
-            } else if (response.data.data.role_type === "employee") {
-              navigation.navigate('Employee', { screen: 'Feed Stack' });
-            } else {
-              navigation.navigate('Setup');
-            }
+          setCurrentUser(response.data.data);
+          AsyncStorage.setItem('token', response.headers.authorization);
         })
         .catch(error => {
-            console.log(error);
-            console.log(error.message);
+          console.log(error);
+          console.log(error.message);
         })
     }
     return (

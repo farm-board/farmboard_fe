@@ -12,8 +12,8 @@ const DrawerLayout = ({ icon, label, navigateTo }) => {
   const navigation = useNavigation();
   return (
     <DrawerItem
-      icon={({ color, size }) => <Icon name={icon} color="#ECE3CE" size={size} />}
-      labelStyle={{ color: "#ECE3CE" }}
+      icon={({color, size}) => <Icon name={icon} color="white" size={size} />}
+      labelStyle={{ color: "white" }}
       label={label}
       onPress={() => {
         navigation.navigate(navigateTo);
@@ -147,8 +147,8 @@ function CustomDrawerContent(props) {
         <View style={styles.drawerContent}>
           <TouchableOpacity activeOpacity={0.8}>
             <View style={styles.userInfoSection}>
-              <View style={{ flexDirection: 'row', marginTop: 15 }}>
-                <Avatar.Image
+              <View style={{flexDirection: 'row', marginTop: 15}}>
+              <Avatar.Image
                   source={avatarImage ? { uri: avatarImage } : require('../assets/images/FarmProfilePlaceholder.png')}
                   size={50}
                   style={{ marginTop: 5 }}
@@ -169,10 +169,10 @@ function CustomDrawerContent(props) {
       </DrawerContentScrollView>
       <View style={styles.bottomDrawerSection}>
         <DrawerItem
-          icon={({ color, size }) => (
-            <Icon name="exit-to-app" color="#ECE3CE" size={size} />
+          icon={({color, size}) => (
+            <Icon name="exit-to-app" color="white" size={size} />
           )}
-          labelStyle={{ color: "#ECE3CE" }}
+          labelStyle={{ color: "white" }}
           label="Sign Out"
           onPress={handleLogout}
         />
@@ -185,14 +185,14 @@ export default CustomDrawerContent;
 const styles = StyleSheet.create({
   drawerContent: {
     flex: 1,
-    backgroundColor: '#4F6F52',
+    backgroundColor: '#3A4D39',
     shadowRadius: 30,
     shadowColor: 'black',
     shadowOpacity: 0.4,
   },
   userInfoSection: {
     paddingLeft: 20,
-    backgroundColor: '#4F6F52',
+    backgroundColor: '#3A4D39',
     borderTopColor: '#dedede',
     borderTopWidth: 1,
   },
@@ -200,12 +200,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 3,
     fontWeight: 'bold',
-    color: "#ECE3CE",
+    color: "white",
   },
   caption: {
     fontSize: 13,
     lineHeight: 14,
-    color: "#ECE3CE",
+    color: "white",
     width: '100%',
   },
   row: {
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderBottomColor: '#dedede',
     borderBottomWidth: 1,
-    backgroundColor: '#4F6F52',
+    backgroundColor: '#3A4D39',
     shadowRadius: 30,
     shadowColor: 'black',
     shadowOpacity: 0.4,

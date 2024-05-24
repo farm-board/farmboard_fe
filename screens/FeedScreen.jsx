@@ -1,16 +1,18 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput, Button, Modal, ScrollView } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput, Button, Modal, ScrollView, Touchable, Pressable } from 'react-native';
 import { useNavigation } from '@react-navigation/native'
 import axios from 'axios';
 import { MaterialCommunityIcons, MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import { UserContext } from '../contexts/UserContext';
 import StyledSelectDropdown from '../components/Inputs/StyledSelectDropdown';
+import Avatar from '../components/Profile/Avatar';
 
 const FeedScreen = () => {
   const [postings, setPostings] = useState([]);
   const [filteredPostings, setFilteredPostings] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [postingProfilePhoto, setPostingProfilePhoto] = useState(null);
   const [modalPostingVisible, setModalPostingVisible] = useState(false);
   const [modalFilterVisible, setModalFilterVisible] = useState(false);
   const [selectedCompensationTypes, setSelectedCompensationTypes] = useState([]);
@@ -142,6 +144,18 @@ const FeedScreen = () => {
     setModalPostingVisible(false);
   }
 
+  const fetchPostingProfileImage = (farmId) => {
+    console.log('Fetching posting profile photo for farm:', farmId);
+    axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/${farmId}/profile_info`)
+      .then((response) => {
+        console.log('Posting profile photo:', response.data.attributes.image_url);
+        setPostingProfilePhoto(response.data.attributes.image_url);
+      })
+      .catch(error => {
+        console.error('There was an error fetching the posting profile photo:', error);
+      });
+  };
+
   const renderPostingItem = ({ item }) => (
     <View style={styles.postingItem}>
       <View style={styles.headerContainer}>
@@ -170,6 +184,7 @@ const FeedScreen = () => {
           onPress={() => { 
             setSelectedPosting(item); 
             setModalPostingVisible(true); 
+            fetchPostingProfileImage(item.attributes.farm_id);
           }}>
           <Text style={styles.detailsButtonText}>Details</Text>
         </TouchableOpacity>
@@ -184,6 +199,7 @@ const FeedScreen = () => {
       visible={modalPostingVisible}
       onRequestClose={() => {
         setModalPostingVisible(!modalPostingVisible);
+        setPostingProfilePhoto(null);
       }}
     >
       <ScrollView contentContainerStyle={styles.modalContainer}>
@@ -191,13 +207,14 @@ const FeedScreen = () => {
           style={styles.closeButton}
           onPress={() => setModalPostingVisible(false)}
         >
-          <Text style={styles.closeButtonText}>X</Text>
+          <MaterialCommunityIcons name="close" size={25} color="white" />
         </TouchableOpacity>
-        <View style={styles.logoContainer}>
-          {/* Placeholder for company logo */}
-          <MaterialCommunityIcons name="barn" size={100} color="#4F6F52" />
-        </View>
-        <Text style={styles.modalSubTitle}>{selectedPosting?.attributes.farm_name}</Text>
+        <TouchableOpacity onPress={() => handleProfileRedirect(selectedPosting?.attributes.farm_id)}>
+          <View style={styles.logoContainer}>
+            <Avatar uri={postingProfilePhoto}/>
+          </View>
+          <Text style={styles.modalSubTitle}>{selectedPosting?.attributes.farm_name}</Text>
+        </TouchableOpacity>
         <Text style={styles.modalTitle}>{selectedPosting?.attributes.title}</Text>
   
         <View style={styles.tagsContainer}>
@@ -255,7 +272,7 @@ const FeedScreen = () => {
             <Text style={styles.sectionText}>{selectedPosting?.attributes.description}</Text>
           </View>
         ) : (
-          <View style={styles.sectionContainer}>
+          <View style={styles.skillsSectionContainer}>
             <Text style={styles.sectionTitle}>Required Skills</Text>
             <View style={styles.skillContainer}>
               {selectedPosting?.attributes.skill_requirements && selectedPosting?.attributes.skill_requirements.slice(0, expanded ? selectedPosting?.attributes.skill_requirements.length : 5).map((skill, index) => (
@@ -275,7 +292,10 @@ const FeedScreen = () => {
         {currentUser.role_type !== 'farm' && (
           <View style={styles.applyButtonContainer}>
             <TouchableOpacity style={styles.applyButton} onPress={applyToPosting}>
-              <Text style={styles.applyButtonText}>Apply</Text>
+              <Text style={styles.applyButtonText}>Apply Now</Text>
+              <View style={styles.applyArrow}>
+                <MaterialCommunityIcons name="arrow-right" size={24} color="white" />
+              </View>
             </TouchableOpacity>
           </View>
         )}
@@ -305,54 +325,59 @@ const FeedScreen = () => {
           setModalFilterVisible(!modalFilterVisible);
         }}
       >
-        <View style={styles.modalContainer}>
-          <TouchableOpacity
-            style={styles.closeButton}
-            onPress={() => setModalFilterVisible(false)}
-          >
-            <Text style={styles.closeButtonText}>X</Text>
-          </TouchableOpacity>
-          <View style={styles.filterOptionTop}>
-            <Text style={styles.filterOptionLabel}>Compensation Type:</Text>
-            <StyledSelectDropdown
-              label=""
-              value={selectedCompensationTypes}
-              listData={compensationTypes}
-              onSelect={(value) => setSelectedCompensationTypes(value)}
-              fieldPlaceholder="Select"
-            />
+        <View style={styles.filterContainer}>
+          <View style={styles.filterModalContainer}>
+            <View style={styles.filterHeader}>
+              <TouchableOpacity
+                style={styles.clearFiltersButton}
+                onPress={clearFilters}
+              >
+                <Text style={styles.clearFiltersButtonText}>Clear</Text>
+              </TouchableOpacity>
+              <Text style={styles.filterModalTitle}>Filter Postings</Text>
+              <TouchableOpacity
+                style={styles.filterCloseButton}
+                onPress={() => setModalFilterVisible(false)}
+              >
+                <MaterialCommunityIcons name="close" size={20} color="white" />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.filterOptionTop}>
+              <Text style={styles.filterOptionLabel}>Compensation Type</Text>
+              <StyledSelectDropdown
+                label=""
+                value={selectedCompensationTypes}
+                listData={compensationTypes}
+                onSelect={(value) => setSelectedCompensationTypes(value)}
+                fieldPlaceholder="Select"
+              />
+            </View>
+            <View style={styles.filterOption}>
+              <Text style={styles.filterOptionLabel}>State:</Text>
+              <StyledSelectDropdown
+                label=""
+                value={selectedStateTypes}
+                listData={stateTypes} // Provide your list of locations here
+                onSelect={(value) => setSelectedStateTypes(value)}
+                fieldPlaceholder="Select"
+              />
+            </View>
+            <View style={styles.filterOption}>
+              <Text style={styles.filterOptionLabel}>Duration:</Text>
+              <StyledSelectDropdown
+                label=""
+                value={selectedDurationTypes}
+                listData={durationTypes} // Provide your list of duration types here
+                onSelect={(value) => setSelectedDurationTypes(value)}
+                fieldPlaceholder="Select"
+              />
+            </View>
+            <View style={styles.submitButtonContainer}>
+              <TouchableOpacity style={styles.submitButton} onPress={applyFilters}>
+                <Text style={styles.submitButtonText}>Apply Filters</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-          <View style={styles.filterOption}>
-            <Text style={styles.filterOptionLabel}>State:</Text>
-            <StyledSelectDropdown
-              label=""
-              value={selectedStateTypes}
-              listData={stateTypes} // Provide your list of locations here
-              onSelect={(value) => setSelectedStateTypes(value)}
-              fieldPlaceholder="Select"
-            />
-          </View>
-          <View style={styles.filterOption}>
-            <Text style={styles.filterOptionLabel}>Duration:</Text>
-            <StyledSelectDropdown
-              label=""
-              value={selectedDurationTypes}
-              listData={durationTypes} // Provide your list of duration types here
-              onSelect={(value) => setSelectedDurationTypes(value)}
-              fieldPlaceholder="Select"
-            />
-          </View>
-          <View style={styles.submitButtonContainer}>
-            <TouchableOpacity style={styles.submitButton} onPress={applyFilters}>
-              <Text style={styles.submitButtonText}>Apply Filters</Text>
-            </TouchableOpacity>
-          </View>
-          <TouchableOpacity
-            style={styles.clearFiltersButton}
-            onPress={clearFilters}
-          >
-            <Text style={styles.clearFiltersButtonText}>Clear Filters</Text>
-          </TouchableOpacity>
         </View>
       </Modal>
       <FlatList
@@ -366,31 +391,75 @@ const FeedScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  filterContainer: {
+    flex: 1,
+    justifyContent: "flex-end",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+  },
   modalContainer: {
     padding: 20,
-    backgroundColor: '#545455',
+    backgroundColor: '#3A4D39',
     minHeight: '100%',
     alignItems: 'center',
   },
+  filterModalContainer: {
+    backgroundColor: '#3A4D39',
+    borderRadius: 35,
+    padding: 20,
+    paddingBottom: 30,
+    alignItems: "center",
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    width: "100%",
+  },
+  filterHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginBottom: 10,
+  },
+  filterCloseButton: {
+    backgroundColor: '#333',
+    borderRadius: 30,
+    padding: 10,
+    alignSelf: 'flex-end',
+  },
   closeButton: {
     position: 'absolute',
-    top: 20,
+    backgroundColor: '#333',
+    borderRadius: 30,
+    padding: 10,
+    top: 60,
     right: 20,
     zIndex: 1,
   },
   closeButtonText: {
     fontSize: 24,
+    backgroundColor: '#333',
     fontWeight: 'bold',
-    color: '#000',
+    color: 'white',
     paddingTop: 25,
   },
   logoContainer: {
     marginTop: 40,
-    marginBottom: 20,
-    alignItems: 'center',
+    paddingRight: 20,
+    paddingTop: 20,  
+    borderRadius: 30,
   },
   modalTitle: {
     fontSize: 24,
+    fontWeight: 'bold',
+    color: 'white',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  filterModalTitle: {
+    fontSize: 18,
+    top: 5,
     fontWeight: 'bold',
     color: 'white',
     textAlign: 'center',
@@ -399,7 +468,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: 'white',
     textAlign: 'center',
-    marginBottom: 10,
+    marginBottom: 5,
   },
   tagsContainer: {
     flexDirection: 'row',
@@ -450,7 +519,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     marginBottom: 20,
-    backgroundColor: 'black',
+    backgroundColor: '#333',
     borderRadius: 10,
   },
   toggleButton: {
@@ -469,22 +538,30 @@ const styles = StyleSheet.create({
   activeToggleButtonText: {
     color: 'white',
   },
-  sectionContainer: {
-    backgroundColor: 'white',
-    padding: 15,
+  skillsSectionContainer: {
+    paddingHorizontal: 15,
+    borderWidth: 1,
+    borderColor: 'white',
     borderRadius: 10,
+    padding: 10,
+    marginBottom: 20,
+    width: '100%',
+  },
+  sectionContainer: {
+    paddingHorizontal: 5,
     marginBottom: 20,
     width: '100%',
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#4F6F52',
+    color: 'white',
     marginBottom: 10,
   },
   sectionText: {
-    fontSize: 16,
-    color: '#4F6F52',
+    fontSize: 15,
+    letterSpacing: 1, 
+    color: 'white',
   },
   skillContainer: {
     flexDirection: 'row',
@@ -495,39 +572,33 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingVertical: 5,
     paddingHorizontal: 15,
-    margin: 5,
+    marginVertical: 7,
+    marginRight: 10,
   },
   skillText: {
     color: '#fff',
     fontSize: 14,
   },
-  showMoreButton: {
-    alignItems: 'center',
-    marginVertical: 10,
-  },
-  showMoreButtonText: {
-    fontSize: 14,
-    color: '#ffb900',
-  },
   applyButtonContainer: {
     width: '100%',
     alignItems: 'center',
-    marginVertical: 20,
+    marginBottom: 20,
   },
   applyButton: {
     backgroundColor: '#ffb900',
-    borderRadius: 5,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    borderRadius: 50,
+    paddingVertical: 30,
+    paddingHorizontal: 130,
   },
   applyButtonText: {
     fontSize: 16,
     fontWeight: 'bold',
+    textAlign: 'center',
     color: '#333',
   },
   container: {
     flex: 1,
-    backgroundColor: '#4F6F52',
+    backgroundColor: '#3A4D39',
     padding: 20,
     paddingTop: 20,
   },
@@ -686,9 +757,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   showMoreButton: {
-    backgroundColor: '#ECE3CE',
-    paddingVertical: 5,
+    backgroundColor: 'white',
+    paddingVertical: 10,
     borderRadius: 8,
+    marginVertical: 10,
     alignItems: 'center',
     justifyContent: 'center',
     minWidth: '100%',
@@ -696,6 +768,7 @@ const styles = StyleSheet.create({
   showMoreButtonText: {
     color: '#3A4D39',
     fontSize: 16,
+    fontWeight: 'bold',
   },
   submitButtonContainer: {
     width: '100%',
@@ -703,7 +776,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   submitButton: {
-    backgroundColor: '#ECE3CE',
+    backgroundColor: 'white',
     padding: 10,
     borderRadius: 8,
   },
@@ -721,14 +794,23 @@ const styles = StyleSheet.create({
     minWidth: '95%',
   },
   filterOptionLabel: {
-    color: '#ECE3CE',
+    color: 'white',
+    fontWeight: 'bold',
     fontSize: 18,
   },
   clearFiltersButtonText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#ECE3CE',
-    textAlign: 'center',
+    fontSize: 16,
+    color: 'white',
+    textAlign: 'left',
+    top: 5,
+  },
+  applyArrow: {
+    backgroundColor: "#333",
+    borderRadius: 30,
+    padding: 15,
+    position: "absolute",
+    right: 15,
+    top: 13,
   },
 });
 
