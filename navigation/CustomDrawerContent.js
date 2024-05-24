@@ -1,14 +1,14 @@
-import React, { useContext, useState, useEffect } from 'react'
-import {View, StyleSheet, Text} from 'react-native';
-import {DrawerContentScrollView, DrawerItem} from '@react-navigation/drawer';
-import {Avatar, Title} from 'react-native-paper';
-import {TouchableOpacity} from 'react-native-gesture-handler';
-import {useNavigation, useFocusEffect} from '@react-navigation/native';
+import React, { useContext, useState, useEffect } from 'react';
+import { View, StyleSheet, Text } from 'react-native';
+import { DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
+import { Avatar, Title } from 'react-native-paper';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { UserContext } from '../contexts/UserContext'
+import { UserContext } from '../contexts/UserContext';
 import axios from 'axios';
 
-const DrawerLayout = ({icon, label, navigateTo}) => {
+const DrawerLayout = ({ icon, label, navigateTo }) => {
   const navigation = useNavigation();
   return (
     <DrawerItem
@@ -39,24 +39,24 @@ function CustomDrawerContent(props) {
   const [userData, setUserData] = useState({});
   const [avatarImage, setAvatarImage] = useState('');
   const navigation = useNavigation();
-  const{currentUser, logout} = useContext(UserContext);
+  const { currentUser, logout } = useContext(UserContext);
 
   const DrawerList = currentUser.role_type === 'farm' ?
-  [
-    {icon: 'home-outline', label: 'Home', navigateTo: 'Home Stack'},
-    {icon: 'account-multiple', label: 'Profile', navigateTo: 'Profile Stack'},
-    {icon: 'clipboard-text-multiple-outline', label: 'Feed', navigateTo: 'Feed Stack'}
-  ]
-  : currentUser.role_type === 'employee' ?
-  [
-    {icon: 'account-multiple', label: 'Profile', navigateTo: 'Profile Stack'},
-    {icon: 'clipboard-text-multiple-outline', label: 'Feed', navigateTo: 'Feed Stack'}
-  ]
-  : [];
+    [
+      { icon: 'home-outline', label: 'Home', navigateTo: 'Home Stack' },
+      { icon: 'account-multiple', label: 'Profile', navigateTo: 'Profile Stack' },
+      { icon: 'clipboard-text-multiple-outline', label: 'Feed', navigateTo: 'Feed Stack' }
+    ]
+    : currentUser.role_type === 'employee' ?
+      [
+        { icon: 'account-multiple', label: 'Profile', navigateTo: 'Profile Stack' },
+        { icon: 'clipboard-text-multiple-outline', label: 'Feed', navigateTo: 'Feed Stack' }
+      ]
+      : [];
 
-  handleLogout = () => { 
+  const handleLogout = () => {
     logout(navigation);
-  }
+  };
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -131,9 +131,18 @@ function CustomDrawerContent(props) {
       fetchUserData();
     }, [currentUser.id, avatarImage]) // Only trigger on currentUser.id changes
   );
-  
+
+  const getUserDisplayName = () => {
+    if (currentUser.role_type === 'farm') {
+      return userData.name;
+    } else if (currentUser.role_type === 'employee') {
+      return `${userData.first_name} ${userData.last_name}`;
+    }
+    return '';
+  };
+
   return (
-    <View style={{flex: 1}}>
+    <View style={{ flex: 1 }}>
       <DrawerContentScrollView {...props}>
         <View style={styles.drawerContent}>
           <TouchableOpacity activeOpacity={0.8}>
@@ -144,12 +153,8 @@ function CustomDrawerContent(props) {
                   size={50}
                   style={{ marginTop: 5 }}
                 />
-                <View style={{marginLeft: 10, flexDirection: 'column'}}>
-                  {currentUser.role_type === 'farm' ?
-                  <Title style={styles.title}>{userData.name}</Title>
-                  : currentUser.role_type === 'employee' ?
-                  <Title style={styles.title}>{userData.first_name} {userData.last_name}</Title>
-                  : null}
+                <View style={{ marginLeft: 10, flexDirection: 'column' }}>
+                  <Title style={styles.title}>{getUserDisplayName()}</Title>
                   <Text style={styles.caption} numberOfLines={1}>
                     {currentUser.email}
                   </Text>
@@ -158,7 +163,7 @@ function CustomDrawerContent(props) {
             </View>
           </TouchableOpacity>
           <View style={styles.drawerSection}>
-            <DrawerItems drawerList={DrawerList}/>
+            <DrawerItems drawerList={DrawerList} />
           </View>
         </View>
       </DrawerContentScrollView>

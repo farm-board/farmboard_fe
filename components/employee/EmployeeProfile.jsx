@@ -4,9 +4,9 @@ import { UserContext } from '../../contexts/UserContext';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import axios from 'axios';
 import Avatar from '../Profile/Avatar';
-import { MaterialCommunityIcons } from '@expo/vector-icons'
-import { colors } from '../../config/theme'
-import StyledText from '../Texts/StyledText'
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { colors } from '../../config/theme';
+import StyledText from '../Texts/StyledText';
 
 export default function EmployeeProfile() {
   const navigation = useNavigation();
@@ -17,6 +17,7 @@ export default function EmployeeProfile() {
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [loading, setLoading] = useState(true); 
   const [expanded, setExpanded] = useState(false); 
+  const [selectedTab, setSelectedTab] = useState('Experience'); // New state for toggle
 
   useEffect(() => {
     const fetchEmployeeData = async () => {
@@ -118,35 +119,91 @@ export default function EmployeeProfile() {
     navigation.navigate('Feed'); // Navigate to the Feed screen
   }
 
+  const renderContent = () => {
+    if (selectedTab === 'Experience') {
+      return (
+        <View style={styles.subContentContainer}>
+          <View style={styles.experienceWrapper}>
+            {experiences
+              .sort((a, b) => new Date(b.attributes.ended_at) - new Date(a.attributes.ended_at))
+              .slice(0, 3) 
+              .map((experience, index) => (
+                <View key={index} style={[styles.experienceContainer, styles.experienceBox]}>
+                  <View style={styles.labelContainer}>
+                    <Text style={styles.experienceLabel}>{experience.attributes.company_name}</Text>
+                  </View>
+                  <Text style={styles.label}>Employment:</Text>
+                  <Text style={styles.experienceCompany}>
+                    <Text>{`${experience.attributes.started_at} to ${experience.attributes.ended_at}`}</Text>
+                  </Text>
+                  <Text style={styles.label}>Description:</Text>
+                  <Text style={styles.experienceCompany}>
+                    <Text>{experience.attributes.description}</Text>
+                  </Text>
+                </View>
+              ))}
+          </View>
+        </View>
+      );
+    } else if (selectedTab === 'References') {
+      return (
+        <View style={styles.subContentContainer}>
+          <View style={styles.experienceWrapper}>
+            {references
+              .slice(0, 3)
+              .map((reference, index) => (
+                <View key={index} style={[styles.referenceContainer, styles.experienceBox]}>
+                  <View style={styles.referenceHeader}>
+                    <Text style={styles.referenceName}>{`${reference.attributes.first_name} ${reference.attributes.last_name}`}</Text>
+                  </View>
+                  <View style={styles.referenceContent}>
+                    <Text style={styles.referenceLabel}>Contact:</Text>
+                    {reference.attributes.phone && (
+                      <Text style={styles.referenceDetail}>Phone: {reference.attributes.phone}</Text>
+                    )}
+                    {reference.attributes.email && (
+                      <Text style={styles.referenceDetail}>Email: {reference.attributes.email}</Text>
+                    )}
+                    <Text style={styles.referenceLabel}>Relationship:</Text>
+                    <Text style={styles.referenceDetail}>{reference.attributes.relationship}</Text>
+                  </View>
+                </View>
+              ))}
+          </View>
+        </View>
+      );
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.topSectionContainer}>
         <TouchableOpacity style={styles.editButton} onPress={onEditButtonPress}>
-              <MaterialCommunityIcons
-                name="pencil-outline"
-                size={25}
-                color={colors.highlight}
-              />
+          <MaterialCommunityIcons
+            name="pencil-outline"
+            size={25}
+            color={colors.highlight}
+          />
         </TouchableOpacity>
         <View style={styles.leftContent}>
           <View style={[styles.avatarContainer, styles.marginBottom3]}>
-              <Avatar uri={profilePhoto} />
+            <Avatar uri={profilePhoto} />
           </View>
         </View>
         <View style={styles.rightContent}>
           <Text style={styles.name}>
-            <StyledText big bold tanColor >
+            <StyledText big tanColor style={styles.name}>
               {`${employee.first_name} ${employee.last_name}`}
             </StyledText>
           </Text>
           <Text style={styles.location}>
-            <StyledText tanColor >
-              {`${employee.city}, ${employee.state} ${employee.zip_code}`}
+            <StyledText tanColor style={styles.location}>
+              {`${employee.city}, ${employee.state}`}
             </StyledText>
           </Text>
         </View>
       </View>
-      <View style={styles.subContentContainer}>
+      <View style={styles.subContentContainerTwo}>
         <StyledText big tanColor style={styles.sectionTitle}>Skills</StyledText>
         <View style={styles.skillContainer}>
           {employee.skills && employee.skills.slice(0, expanded ? employee.skills.length : 5).map((skill, index) => (
@@ -165,55 +222,21 @@ export default function EmployeeProfile() {
         <StyledText big tanColor style={styles.sectionTitle}>About</StyledText>
         <StyledText small tanColor style={styles.sectionText}>{employee.bio}</StyledText>
       </View>
-      <View style={styles.subContentContainer}>
-          <StyledText big tanColor style={styles.sectionTitle}>Experience</StyledText>
-          <View style={styles.experienceWrapper}>
-            {experiences
-              .sort((a, b) => new Date(b.attributes.ended_at) - new Date(a.attributes.ended_at))
-              .slice(0, 3) 
-              .map((experience, index) => (
-                <View key={index} style={[styles.experienceContainer, styles.experienceBox]}>
-                  <View style={styles.labelContainer}>
-                  <Text style={styles.experienceLabel}>{experience.attributes.company_name}</Text>
-                  </View>
-                  
-                  <Text style={styles.label}>Employment:</Text>
-                  <Text style={styles.experienceCompany}>
-                  <Text>{`${experience.attributes.started_at} to ${experience.attributes.ended_at}`}</Text>
-                  </Text>
-                  <Text style={styles.label}>Description:</Text>
-                  <Text style={styles.experienceCompany}>
-                  <Text>{experience.attributes.description}
-                  </Text>
-                  </Text>
-                </View>
-              ))}
-          </View>
-        </View>
-        <View style={styles.subContentContainer}>
-          <StyledText big tanColor style={styles.sectionTitle}>References</StyledText>
-          <View style={styles.experienceWrapper}>
-            {references
-              .slice(0, 3)
-              .map((reference, index) => (
-                <View key={index} style={[styles.experienceContainer, styles.experienceBox]}>
-                  <View style={styles.labelContainer}>
-                  <Text style={styles.experienceLabel}>{`${reference.attributes.first_name} ${reference.attributes.last_name}`}</Text>
-                  </View>
-                  <Text style={styles.label}>Contact:</Text>
-                  {reference.attributes.phone && (
-                      <Text style={styles.experienceCompany}>Phone: {reference.attributes.phone}</Text>
-                    )}
-                    {reference.attributes.email && (
-                      <Text style={styles.experienceCompany}>Email: {reference.attributes.email}</Text>
-                    )}
-                  <Text style={styles.label}>Relationship:</Text>
-                  <Text style={styles.experienceCompany}>{reference.attributes.relationship}</Text>
-                  
-                </View>
-              ))}
-          </View>
-        </View>
+      <View style={styles.toggleContainer}>
+        <TouchableOpacity
+          style={[styles.toggleButton, selectedTab === 'Experience' && styles.toggleButtonSelected]}
+          onPress={() => setSelectedTab('Experience')}
+        >
+          <Text style={[styles.toggleButtonText, selectedTab === 'Experience' && styles.toggleButtonTextSelected]}>Experience</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.toggleButton, selectedTab === 'References' && styles.toggleButtonSelected]}
+          onPress={() => setSelectedTab('References')}
+        >
+          <Text style={[styles.toggleButtonText, selectedTab === 'References' && styles.toggleButtonTextSelected]}>References</Text>
+        </TouchableOpacity>
+      </View>
+      {renderContent()}
     </View>
   );
 }
@@ -226,44 +249,56 @@ const styles = StyleSheet.create({
   topSectionContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#4F6F52',
+    backgroundColor: '#3A4D39',
     minWidth: '100%',
     shadowRadius: 20,
     shadowColor: 'black',
     shadowOpacity: 0.4,
-    paddingBottom: 5,
     paddingHorizontal: 20,
     paddingVertical: 5,
   },
   rightContent: {
     flex: 3,
-    marginLeft: 15,
+    marginLeft: 10,
+    marginTop: 15,
   },
   avatarContainer: {
     paddingTop: 20,
     marginBottom: 5,
     alignItems: 'center',
+    marginLeft: -30,
   },
   name: {
-    fontSize: 35,
+    fontSize: 25,
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 10,
+    color: 'white',
   },
   contentContainer: {
     marginBottom: 15,
     alignItems: 'center',
   },
   subContentContainer: {
-    alignItems: 'right',
-    backgroundColor: '#4F6F52',
+    alignItems: 'flex-start',
+    backgroundColor: '#3A4D39',
     minWidth: '100%',
-    shadowRadius: 20,
-    shadowColor: 'black',
-    shadowOpacity: 0.4,
     paddingLeft: 10,
     paddingRight: 10,
     paddingBottom: 10,
+    marginBottom: 5, // Add margin to the bottom of each section
+  },
+  subContentContainerTwo: {
+    alignItems: 'flex-start',
+    backgroundColor: '#3A4D39',
+    minWidth: '100%',
+    paddingLeft: 10,
+    paddingRight: 10,
+    paddingBottom: 10,
+    marginBottom: 5, 
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: 'white',
   },
   skillContainer: {
     flexDirection: 'row',
@@ -271,15 +306,19 @@ const styles = StyleSheet.create({
   },
   location: {
     textAlign: 'center',
+    color: 'white',
+    fontSize: 16,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 5,
     paddingTop: 10,
+    color: 'white',
   },
   sectionText: {
-    fontSize: 14,
+    fontSize: 16,
+    color: 'white',
   },
   addButton: {
     backgroundColor: '#007AFF',
@@ -293,18 +332,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   skillBubble: {
-    backgroundColor: '#ECE3CE',
-    borderRadius: 20,
+    backgroundColor: '#4F6F52',
+    borderRadius: 5,
     paddingVertical: 5,
     paddingHorizontal: 10,
     marginRight: 10,
     marginBottom: 10,
   },
   skillText: {
-    color: '#3A4D39',
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   showMoreButton: {
-    backgroundColor: '#ECE3CE',
+    backgroundColor: '#333',
     paddingVertical: 5,
     borderRadius: 8,
     alignItems: 'center',
@@ -312,18 +353,19 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   showMoreButtonText: {
-    color: '#3A4D39',
-    fontSize: 16,
+    color: 'white',
+    fontSize: 18,
   },
   experienceWrapper: {
     justifyContent: 'space-between',
   },
   experienceContainer: {
     minWidth: '100%',
-    padding: 10,
-    backgroundColor: '#ECE3CE', 
+    backgroundColor: '#4F6F52', 
     borderRadius: 10,
-    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#ECE3CE',
+    marginTop: 5,
   },
   experienceBox: {
     padding: 10,
@@ -331,25 +373,27 @@ const styles = StyleSheet.create({
   },
   labelContainer: {
     borderBottomWidth: 1,
-    borderBottomColor: '#3A4D39',
+    borderBottomColor: 'white',
+    marginBottom: 5,
+    paddingBottom: 5,
   },
   experienceLabel: {
     fontWeight: 'bold',
-    color: '#3A4D39',
-    fontSize: 14,
+    color: 'white',
+    fontSize: 20,
     paddingBottom: 2,
     paddingTop: 2,
     textAlign: 'center',
   },
   label: {
     fontWeight: 'bold',
-    color: '#3A4D39',
-    fontSize: 14,
+    color: 'white',
+    fontSize: 18,
     paddingBottom: 2,
     paddingTop: 2,
   },
   editButton: {
-    backgroundColor: "#739072",
+    backgroundColor: "#4F6F52",
     borderRadius: 24,
     padding: 8,
     position: "absolute",
@@ -357,7 +401,10 @@ const styles = StyleSheet.create({
     top: 15,
   },
   experienceCompany: {
-    color: '#3A4D39',
+    color: 'white',
+    fontSize: 16,
+    marginTop: 5,
+    marginBottom: 5,
   },
   feedButton: {
     backgroundColor: colors.highlight,
@@ -369,6 +416,66 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
   },
+  referenceContainer: {
+    minWidth: '100%',
+    backgroundColor: '#4F6F52', 
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#ECE3CE',
+    marginTop: 5,
+  },
+  referenceHeader: {
+    borderBottomWidth: 1,
+    borderBottomColor: 'white',
+    marginBottom: 5,
+    paddingBottom: 5,
+  },
+  referenceName: {
+    fontWeight: 'bold',
+    color: 'white',
+    fontSize: 20,
+    textAlign: 'center',
+  },
+  referenceContent: {
+    padding: 5,
+  },
+  referenceLabel: {
+    fontWeight: 'bold',
+    color: 'white',
+    fontSize: 18,
+    marginTop: 5,
+  },
+  referenceDetail: {
+    color: 'white',
+    fontSize: 16,
+  },
+  toggleContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 10,
+    borderRadius: 5,
+    marginHorizontal: 10,
+    backgroundColor: '#333',
+  },
+  toggleButton: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+  },
+  toggleButtonSelected: {
+    backgroundColor: '#4F6F52',
+  },
+  toggleButtonText: {
+    fontSize: 18,
+    color: 'white',
+  },
+  toggleButtonTextSelected: {
+    fontWeight: 'bold',
+    color: 'white',
+  },
 });
+
 
 
