@@ -12,8 +12,8 @@ const DrawerLayout = ({icon, label, navigateTo}) => {
   const navigation = useNavigation();
   return (
     <DrawerItem
-      icon={({color, size}) => <Icon name={icon} color="#ECE3CE" size={size} />}
-      labelStyle={{ color: "#ECE3CE" }}
+      icon={({color, size}) => <Icon name={icon} color="white" size={size} />}
+      labelStyle={{ color: "white" }}
       label={label}
       onPress={() => {
         navigation.navigate(navigateTo);
@@ -59,69 +59,77 @@ function CustomDrawerContent(props) {
   }
 
   useEffect(() => {
-    currentUser.role_type === 'farm' ? 
-      Promise.all([
-        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`),
-        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/image`)
-      ])
-      .then(([farmResponse, imageResponse]) => {
-        console.log('drawer farm data:', farmResponse.data);
-        console.log('drawer image data:', imageResponse.data);
-        setUserData(farmResponse.data.data.attributes);
-        setAvatarImage(imageResponse.data.image_url);
-      })
-      .catch(error => {
-        console.log('Unable to fetch farm data', error);
-      }) 
-    : currentUser.role_type === 'employee' ?
-    Promise.all([
-      axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`),
-      axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/image`)
-      ])
-      .then(([employeeResponse, imageResponse]) => {
-        console.log('drawer employee data:', employeeResponse.data);
-        console.log('drawer image data:', imageResponse.data);
-        setUserData(employeeResponse.data.data.attributes);
-        setAvatarImage(imageResponse.data.image_url);
-      })
-      .catch(error => {
-        console.log('Unable to fetch farm data', error);
-      }) 
-    : null;
-  }, [currentUser.id]);
+    const fetchUserData = async () => {
+      try {
+        if (currentUser.role_type === 'farm') {
+          const farmResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`);
+          console.log('drawer farm data:', farmResponse.data);
+          setUserData(farmResponse.data.data.attributes);
+  
+          try {
+            const imageResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/image`);
+            console.log('drawer image data:', imageResponse.data);
+            setAvatarImage(imageResponse.data.image_url);
+          } catch (imageError) {
+            console.log('Unable to fetch farm image', imageError);
+          }
+        } else if (currentUser.role_type === 'employee') {
+          const employeeResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`);
+          console.log('drawer employee data:', employeeResponse.data);
+          setUserData(employeeResponse.data.data.attributes);
+  
+          try {
+            const imageResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/image`);
+            console.log('drawer image data:', imageResponse.data);
+            setAvatarImage(imageResponse.data.image_url);
+          } catch (imageError) {
+            console.log('Unable to fetch employee image', imageError);
+          }
+        }
+      } catch (error) {
+        console.log('Unable to fetch user data', error);
+      }
+    };
+  
+    fetchUserData();
+  }, [currentUser.id, avatarImage]);
 
   useFocusEffect(
     React.useCallback(() => {
-      currentUser.role_type === 'farm' ? 
-        Promise.all([
-          axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`),
-          axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/image`)
-        ])
-        .then(([farmResponse, imageResponse]) => {
-          console.log('drawer farm data:', farmResponse.data);
-          console.log('drawer image data:', imageResponse.data);
-          setUserData(farmResponse.data.data.attributes);
-          setAvatarImage(imageResponse.data.image_url);
-        })
-        .catch(error => {
-          console.log('Unable to fetch farm data', error);
-        }) 
-      : currentUser.role_type === 'employee' ?
-      Promise.all([
-        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`),
-        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/image`)
-        ])
-        .then(([employeeResponse, imageResponse]) => {
-          console.log('drawer employee data:', employeeResponse.data);
-          console.log('drawer image data:', imageResponse.data);
-          setUserData(employeeResponse.data.data.attributes);
-          setAvatarImage(imageResponse.data.image_url);
-        })
-        .catch(error => {
-          console.log('Unable to fetch farm data', error);
-        }) 
-      : null;
-    }, [currentUser.id]) // Only trigger on currentUser.id changes
+      const fetchUserData = async () => {
+        try {
+          if (currentUser.role_type === 'farm') {
+            const farmResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`);
+            console.log('drawer farm data:', farmResponse.data);
+            setUserData(farmResponse.data.data.attributes);
+    
+            try {
+              const imageResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/image`);
+              console.log('drawer image data:', imageResponse.data);
+              setAvatarImage(imageResponse.data.image_url);
+            } catch (imageError) {
+              console.log('Unable to fetch farm image', imageError);
+            }
+          } else if (currentUser.role_type === 'employee') {
+            const employeeResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`);
+            console.log('drawer employee data:', employeeResponse.data);
+            setUserData(employeeResponse.data.data.attributes);
+    
+            try {
+              const imageResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/image`);
+              console.log('drawer image data:', imageResponse.data);
+              setAvatarImage(imageResponse.data.image_url);
+            } catch (imageError) {
+              console.log('Unable to fetch employee image', imageError);
+            }
+          }
+        } catch (error) {
+          console.log('Unable to fetch user data', error);
+        }
+      };
+    
+      fetchUserData();
+    }, [currentUser.id, avatarImage]) // Only trigger on currentUser.id changes
   );
   
   return (
@@ -131,12 +139,10 @@ function CustomDrawerContent(props) {
           <TouchableOpacity activeOpacity={0.8}>
             <View style={styles.userInfoSection}>
               <View style={{flexDirection: 'row', marginTop: 15}}>
-                <Avatar.Image
-                  source={{
-                    uri: avatarImage,
-                  }}
+              <Avatar.Image
+                  source={avatarImage ? { uri: avatarImage } : require('../assets/images/FarmProfilePlaceholder.png')}
                   size={50}
-                  style={{marginTop: 5}}
+                  style={{ marginTop: 5 }}
                 />
                 <View style={{marginLeft: 10, flexDirection: 'column'}}>
                   {currentUser.role_type === 'farm' ?
@@ -159,9 +165,9 @@ function CustomDrawerContent(props) {
       <View style={styles.bottomDrawerSection}>
         <DrawerItem
           icon={({color, size}) => (
-            <Icon name="exit-to-app" color="#ECE3CE" size={size} />
+            <Icon name="exit-to-app" color="white" size={size} />
           )}
-          labelStyle={{ color: "#ECE3CE" }}
+          labelStyle={{ color: "white" }}
           label="Sign Out"
           onPress={handleLogout}
         />
@@ -174,14 +180,14 @@ export default CustomDrawerContent;
 const styles = StyleSheet.create({
   drawerContent: {
     flex: 1,
-    backgroundColor: '#4F6F52',
+    backgroundColor: '#3A4D39',
     shadowRadius: 30,
     shadowColor: 'black',
     shadowOpacity: 0.4,
   },
   userInfoSection: {
     paddingLeft: 20,
-    backgroundColor: '#4F6F52',
+    backgroundColor: '#3A4D39',
     borderTopColor: '#dedede',
     borderTopWidth: 1,
   },
@@ -189,12 +195,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 3,
     fontWeight: 'bold',
-    color: "#ECE3CE",
+    color: "white",
   },
   caption: {
     fontSize: 13,
     lineHeight: 14,
-    color: "#ECE3CE",
+    color: "white",
     width: '100%',
   },
   row: {
@@ -225,7 +231,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderBottomColor: '#dedede',
     borderBottomWidth: 1,
-    backgroundColor: '#4F6F52',
+    backgroundColor: '#3A4D39',
     shadowRadius: 30,
     shadowColor: 'black',
     shadowOpacity: 0.4,

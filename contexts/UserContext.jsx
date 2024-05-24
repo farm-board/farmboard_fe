@@ -23,11 +23,13 @@ export const UserProvider = ({ children }) => {
   useEffect(() => {
     if (currentUser) {
       if (currentUser.role_type === "farm") {
+        setLoading(true);
         axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`)
         .then(response => {
           // Update the setupComplete state
           console.log("setup Complete:", response.data.data.attributes.setup_complete);
           setSetupComplete(response.data.data.attributes.setup_complete);
+          setLoading(false);
         })
         .catch(error => {
           console.log('Unable to fetch user data', error);
@@ -35,11 +37,13 @@ export const UserProvider = ({ children }) => {
       } 
   
       if (currentUser.role_type === "employee") {
+        setLoading(true);
         axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`)
         .then(response => {
           // Update the setupComplete state
           console.log("setup complete:", response.data);
           setSetupComplete(response.data.data.attributes.setup_complete);
+          setLoading(false);
         })
         .catch(error => {
           console.log('Unable to fetch user data', error);

@@ -35,17 +35,17 @@ function HomeStackNav() {
   return (
     <Stack.Navigator screenOptions={{
       drawerStyle: {
-        backgroundColor: '#739072'
+        backgroundColor: '#4F6F52'
       },
       drawerLabelStyle: {  
-        color: '#ECE3CE'
+        color: 'white'
       },
       headerStyle: {
-        backgroundColor: '#739072',
+        backgroundColor: '#4F6F52',
       },
-      headerTintColor: '#ECE3CE',
+      headerTintColor: 'white',
       style: {
-        backgroundColor: '#739072'
+        backgroundColor: '#4F6F52'
       }
       }}>
       <>
@@ -57,7 +57,7 @@ function HomeStackNav() {
                 <MaterialCommunityIcons
                   name="menu"
                   size={30}
-                  color="#ECE3CE"
+                  color="white"
                   style={{ marginLeft: 10 }}
                 />
               </TouchableOpacity>
@@ -72,7 +72,7 @@ function HomeStackNav() {
                   <MaterialCommunityIcons
                     name="menu"
                     size={30}
-                    color="#ECE3CE"
+                    color="white"
                     style={{ marginLeft: 10 }}
                   />
                 </TouchableOpacity>
@@ -110,17 +110,17 @@ function FarmProfileStackNav() {
   return (
     <Stack.Navigator screenOptions={{
       drawerStyle: {
-        backgroundColor: '#739072'
+        backgroundColor: '#4F6F52'
       },
       drawerLabelStyle: {  
-        color: '#ECE3CE'
+        color: 'white'
       },
       headerStyle: {
-        backgroundColor: '#739072',
+        backgroundColor: '#4F6F52',
       },
-      headerTintColor: '#ECE3CE',
+      headerTintColor: 'white',
       style: {
-        backgroundColor: '#739072'
+        backgroundColor: '#4F6F52'
       }
       }}>
       <>
@@ -132,7 +132,7 @@ function FarmProfileStackNav() {
                 <MaterialCommunityIcons
                   name="menu"
                   size={30}
-                  color="#ECE3CE"
+                  color="white"
                   style={{ marginLeft: 10 }}
                 />
               </TouchableOpacity>
@@ -147,7 +147,7 @@ function FarmProfileStackNav() {
                   <MaterialCommunityIcons
                     name="arrow-left"
                     size={30}
-                    color="#ECE3CE"
+                    color="white"
                     style={{ marginLeft: 10 }}
                   />
                 </TouchableOpacity>
@@ -163,7 +163,7 @@ function FarmProfileStackNav() {
                   <MaterialCommunityIcons
                     name="arrow-left"
                     size={30}
-                    color="#ECE3CE"
+                    color="white"
                     style={{ marginLeft: 10 }}
                   />
                 </TouchableOpacity>
@@ -179,7 +179,7 @@ function FarmProfileStackNav() {
                   <MaterialCommunityIcons
                     name="arrow-left"
                     size={30}
-                    color="#ECE3CE"
+                    color="white"
                     style={{ marginLeft: 10 }}
                   />
                 </TouchableOpacity>
@@ -196,7 +196,7 @@ function FarmProfileStackNav() {
                   <MaterialCommunityIcons
                     name="arrow-left"
                     size={30}
-                    color="#ECE3CE"
+                    color="white"
                     style={{ marginLeft: 10 }}
                   />
                 </TouchableOpacity>
@@ -235,17 +235,17 @@ function EmployeeProfileStackNav() {
   return (
     <Stack.Navigator screenOptions={{
       drawerStyle: {
-        backgroundColor: '#739072'
+        backgroundColor: '#4F6F52'
       },
       drawerLabelStyle: {  
-        color: '#ECE3CE'
+        color: 'white'
       },
       headerStyle: {
-        backgroundColor: '#739072',
+        backgroundColor: '#4F6F52',
       },
-      headerTintColor: '#ECE3CE',
+      headerTintColor: 'white',
       style: {
-        backgroundColor: '#739072'
+        backgroundColor: '#4F6F52'
       }
       }}>
       <>
@@ -257,7 +257,7 @@ function EmployeeProfileStackNav() {
                 <MaterialCommunityIcons
                   name="menu"
                   size={30}
-                  color="#ECE3CE"
+                  color="white"
                   style={{ marginLeft: 10 }}
                 />
               </TouchableOpacity>
@@ -272,7 +272,7 @@ function EmployeeProfileStackNav() {
                   <MaterialCommunityIcons
                     name="arrow-left"
                     size={30}
-                    color="#ECE3CE"
+                    color="white"
                     style={{ marginLeft: 10 }}
                   />
                 </TouchableOpacity>
@@ -288,7 +288,7 @@ function EmployeeProfileStackNav() {
                   <MaterialCommunityIcons
                     name="arrow-left"
                     size={30}
-                    color="#ECE3CE"
+                    color="white"
                     style={{ marginLeft: 10 }}
                   />
                 </TouchableOpacity>
@@ -305,7 +305,7 @@ function EmployeeProfileStackNav() {
                   <MaterialCommunityIcons
                     name="arrow-left"
                     size={30}
-                    color="#ECE3CE"
+                    color="white"
                     style={{ marginLeft: 10 }}
                   />
                 </TouchableOpacity>
@@ -322,7 +322,7 @@ function EmployeeProfileStackNav() {
                   <MaterialCommunityIcons
                     name="arrow-left"
                     size={30}
-                    color="#ECE3CE"
+                    color="white"
                     style={{ marginLeft: 10 }}
                   />
                 </TouchableOpacity>
@@ -341,17 +341,17 @@ function FeedStackNav() {
   return (
     <Stack.Navigator screenOptions={{
       drawerStyle: {
-        backgroundColor: '#739072'
+        backgroundColor: '#4F6F52'
       },
       drawerLabelStyle: {  
-        color: '#ECE3CE'
+        color: 'white'
       },
       headerStyle: {
-        backgroundColor: '#739072',
+        backgroundColor: '#4F6F52',
       },
-      headerTintColor: '#ECE3CE',
+      headerTintColor: 'white',
       style: {
-        backgroundColor: '#739072'
+        backgroundColor: '#4F6F52'
       },
       headerLeft: () => {
         return (
@@ -359,7 +359,7 @@ function FeedStackNav() {
             <MaterialCommunityIcons
               name="menu"
               size={30}
-              color="#ECE3CE"
+              color="white"
               style={{ marginLeft: 10 }}
             />
           </TouchableOpacity>
@@ -391,7 +391,7 @@ function FeedStackNav() {
                 <MaterialCommunityIcons
                   name="arrow-left"
                   size={30}
-                  color="#ECE3CE"
+                  color="white"
                   style={{ marginLeft: 10 }}
                 />
               </TouchableOpacity>
@@ -406,42 +406,47 @@ function FeedStackNav() {
 
 
 function DrawerNavigator() {
-  const { currentUser, setupComplete } = useContext(UserContext);
+  const { currentUser, setupComplete, loading } = useContext(UserContext);
   const Drawer = createDrawerNavigator();
-  return (
-    setupComplete ? (
-      currentUser.role_type === 'farm' ?
-    <Drawer.Navigator 
-    drawerContent={props => <CustomDrawerContent {...props} />}
-    screenOptions={{
-      headerShown: false,
-      drawerStyle: {
-        backgroundColor: '#739072'
-      },
-    }}>
-      <Drawer.Screen name="Home Stack" component={HomeStackNav} />
-      <Drawer.Screen name="Profile Stack" component={FarmProfileStackNav} />
-      <Drawer.Screen name="Feed Stack" component={FeedStackNav} />
-    </Drawer.Navigator>
-    : currentUser.role_type === 'employee' ?
-    <Drawer.Navigator 
-    drawerContent={props => <CustomDrawerContent {...props} />}
-    screenOptions={{
-      headerShown: false,
-      drawerStyle: {
-        backgroundColor: '#739072'
-      },
-    }}>
-      <Drawer.Screen name="Feed Stack" component={FeedStackNav} />
-      <Drawer.Screen name="Profile Stack" component={EmployeeProfileStackNav} />
-    </Drawer.Navigator>
-    : null
-  ) :
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Setup" component={SetupScreen} />
-    </Stack.Navigator>
-  );
-}
+
+    if (loading) {
+      return null;
+    }
+
+    return (
+      setupComplete ? (
+        currentUser.role_type === 'farm' ?
+      <Drawer.Navigator 
+      drawerContent={props => <CustomDrawerContent {...props} />}
+      screenOptions={{
+        headerShown: false,
+        drawerStyle: {
+          backgroundColor: '#333'
+        },
+      }}>
+        <Drawer.Screen name="Home Stack" component={HomeStackNav} />
+        <Drawer.Screen name="Profile Stack" component={FarmProfileStackNav} />
+        <Drawer.Screen name="Feed Stack" component={FeedStackNav} />
+      </Drawer.Navigator>
+      : currentUser.role_type === 'employee' ?
+      <Drawer.Navigator 
+      drawerContent={props => <CustomDrawerContent {...props} />}
+      screenOptions={{
+        headerShown: false,
+        drawerStyle: {
+          backgroundColor: '#333'
+        },
+      }}>
+        <Drawer.Screen name="Feed Stack" component={FeedStackNav} />
+        <Drawer.Screen name="Profile Stack" component={EmployeeProfileStackNav} />
+      </Drawer.Navigator>
+      : null
+    ) :
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Setup" component={SetupScreen} />
+      </Stack.Navigator>
+    );
+};
 
 
 function App() {
@@ -465,6 +470,7 @@ function App() {
           <>
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="SignUp" component={SignupScreen} />
+            <Stack.Screen name="Setup" component={SetupScreen} />
             <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
             <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
           </>

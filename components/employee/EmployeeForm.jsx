@@ -58,7 +58,6 @@ export default function EmployeeForm() {
     .then(response => {
       console.log(response.data);
       setSetupComplete(true);
-      navigation.navigate('Employee', { screen: 'Profile Stack' });
     })
     .catch(error => {
       console.log('Unable to register user', error);

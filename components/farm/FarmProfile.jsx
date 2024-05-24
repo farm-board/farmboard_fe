@@ -83,17 +83,23 @@ export default function FarmProfile() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [farmResponse, imageResponse] = await Promise.all([
-          axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`),
-          axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/image`),
-        ]);
-  
+        // Fetch farm data
+        const farmResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`);
         console.log('current farm:', farmResponse.data.data.attributes);
         setFarm(farmResponse.data.data.attributes);
-        setProfilePhoto(imageResponse.data.image_url);
+  
+        // Fetch profile photo separately
+        try {
+          const imageResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/image`);
+          setProfilePhoto(imageResponse.data.image_url);
+        } catch (imageError) {
+          console.error('Error fetching profile photo:', imageError);
+          setProfilePhoto(null); // Handle the absence of profile photo appropriately
+        }
   
         fetchGalleryImages();
         fetchAccommodations();
+  
         const postingsResponse = await fetchPostings();
         if (postingsResponse) {
           console.log('Postings:', postingsResponse.data.data);
@@ -117,17 +123,23 @@ export default function FarmProfile() {
     React.useCallback(() => {
       const fetchData = async () => {
         try {
-          const [farmResponse, imageResponse] = await Promise.all([
-            axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`),
-            axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/image`),
-          ]);
-    
+        // Fetch farm data
+          const farmResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`);
           console.log('current farm:', farmResponse.data.data.attributes);
           setFarm(farmResponse.data.data.attributes);
-          setProfilePhoto(imageResponse.data.image_url);
+
+          // Fetch profile photo separately
+          try {
+            const imageResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/image`);
+            setProfilePhoto(imageResponse.data.image_url);
+          } catch (imageError) {
+            console.error('Error fetching profile photo:', imageError);
+            setProfilePhoto(null); // Handle the absence of profile photo appropriately
+          }
     
           fetchGalleryImages();
           fetchAccommodations();
+
           const postingsResponse = await fetchPostings();
           if (postingsResponse) {
             console.log('Postings:', postingsResponse.data.data);
@@ -260,7 +272,7 @@ export default function FarmProfile() {
             <MaterialCommunityIcons
               name="pencil-outline"
               size={25}
-              color={colors.highlight}
+              color="white"
             />
           </TouchableOpacity>
         <View style={styles.leftContent}>
@@ -270,12 +282,12 @@ export default function FarmProfile() {
         </View>
         <View style={styles.rightContent}>
           <Text style={styles.farmName}>
-            <StyledText big bold tanColor >
+            <StyledText big bold >
               {`${farm.name}`}
             </StyledText>
           </Text>
           <Text style={styles.farmAddress}>
-            <StyledText tanColor >
+            <StyledText >
               {`${farm.city}, ${farm.state}`}
             </StyledText>
           </Text>
@@ -290,32 +302,32 @@ export default function FarmProfile() {
         </View>
         : null }
       <View style={styles.farmBioContainer}>
-        <StyledText big tanColor style={styles.farmBioTitle}>
+        <StyledText big style={styles.farmBioTitle}>
           About
         </StyledText>
-        <StyledText small tanColor style={styles.farmBioText}>
+        <StyledText small style={styles.farmBioText}>
           {`${farm.bio}`}
         </StyledText>
       </View>
       {accommodations !== null ?
       <View style={styles.accommodationsContainer}>
         <Text style={styles.accommodationTitle}>
-          <StyledText big bold tanColor style={styles.accommodationTitle}>
+          <StyledText big bold style={styles.accommodationTitle}>
             Accommodations
           </StyledText>
         </Text>
         <Text style={styles.accommodationListItem}>
-          <StyledText small tanColor>
+          <StyledText small>
           Offers Housing: {accommodations.housing === true ? "Yes" : "No"}
           </StyledText>
         </Text>
         <Text style={styles.accommodationListItem}>
-          <StyledText small tanColor>
+          <StyledText small>
             Offers Meals: {accommodations.meals === true ? "Yes" : "No"}
           </StyledText>
         </Text>
         <Text style={styles.accommodationListItem}>
-          <StyledText small tanColor>
+          <StyledText small>
             Offers Transporation: {accommodations.transportation === true ? "Yes" : "No"}
           </StyledText>
         </Text>
@@ -323,7 +335,7 @@ export default function FarmProfile() {
       : null }
       <View style={styles.postingsContainer}>
         {postings.length === 0 ?
-        <StyledText tanColor bold style={styles.postingsNotFoundText}>
+        <StyledText bold style={styles.postingsNotFoundText}>
           You do not currently have any active postings. Click on the button below to add a new job posting to your farm.
         </StyledText> 
         : null }
@@ -456,7 +468,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: 5,
-    backgroundColor: '#4F6F52',
+    backgroundColor: '#3A4D39',
     maxWidth: '100%',
     shadowRadius: 20,
     shadowColor: 'black',
@@ -494,7 +506,7 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     paddingHorizontal: 25,
     paddingVertical: 10,
-    backgroundColor: '#4F6F52',
+    backgroundColor: '#3A4D39',
     marginVertical: 10,
     shadowRadius: 20,
     shadowColor: 'black',
@@ -505,7 +517,7 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     paddingHorizontal: 25,
     paddingVertical: 10,
-    backgroundColor: '#4F6F52',
+    backgroundColor: '#3A4D39',
     minWidth: '100%',
     shadowRadius: 20,
     shadowColor: 'black',
@@ -531,7 +543,7 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   editButton: {
-    backgroundColor: "#739072",
+    backgroundColor: "#4F6F52",
     borderRadius: 24,
     padding: 8,
     position: "absolute",
@@ -547,7 +559,7 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     paddingHorizontal: 25,
     paddingVertical: 10,
-    backgroundColor: '#4F6F52',
+    backgroundColor: '#3A4D39',
     marginVertical: 10,
     shadowRadius: 20,
     shadowColor: 'black',
@@ -563,7 +575,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   addPostingButton: {
-    backgroundColor: '#ECE3CE',
+    backgroundColor: 'white',
     alignSelf: 'center',
     padding: 10,
     borderRadius: 8,
@@ -582,7 +594,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   postingContainer: {
-    backgroundColor: '#ECE3CE',
+    backgroundColor: 'white',
     padding: 10,
     borderRadius: 8,
     marginBottom: 25,
@@ -634,7 +646,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   skillText: {
-    color: '#ECE3CE',
+    color: 'white',
     fontSize: 15,
   },
   skillContainer: {
@@ -656,7 +668,7 @@ const styles = StyleSheet.create({
     minWidth: '100%',
   },
   showMoreButtonText: {
-    color: "#ECE3CE",
+    color: "white",
     fontSize: 16,
   },
   editPostingButton: {

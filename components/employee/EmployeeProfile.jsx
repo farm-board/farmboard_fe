@@ -19,46 +19,90 @@ export default function EmployeeProfile() {
   const [expanded, setExpanded] = useState(false); 
 
   useEffect(() => {
-    setLoading(true); 
-    Promise.all([
-      axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`),
-      axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/experiences`),
-      axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/references`),
-      axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/image`),
-    ])
-    .then(([employeeResponse, experiencesResponse, referenceResponse, imageResponse ]) => {
-      setEmployee(employeeResponse.data.data.attributes);
-      setExperiences(experiencesResponse.data.data); 
-      setProfilePhoto(imageResponse.data.image_url);
-      setLoading(false); 
-      setReferences(referenceResponse.data.data); 
-    })
-    .catch(error => {
-      console.error('There was an error fetching the employee or experiences:', error);
-      setLoading(false); // Set loading state to false in case of error
-    });
+    const fetchEmployeeData = async () => {
+      setLoading(true);
+  
+      try {
+        // Fetch employee data
+        const employeeResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`);
+        setEmployee(employeeResponse.data.data.attributes);
+      } catch (employeeError) {
+        console.error('Error fetching employee data:', employeeError);
+      }
+  
+      try {
+        // Fetch experiences data
+        const experiencesResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/experiences`);
+        setExperiences(experiencesResponse.data.data);
+      } catch (experiencesError) {
+        console.error('Error fetching experiences data:', experiencesError);
+      }
+  
+      try {
+        // Fetch references data
+        const referenceResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/references`);
+        setReferences(referenceResponse.data.data);
+      } catch (referenceError) {
+        console.error('Error fetching references data:', referenceError);
+      }
+  
+      try {
+        // Fetch profile photo
+        const imageResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/image`);
+        setProfilePhoto(imageResponse.data.image_url);
+      } catch (imageError) {
+        console.error('Error fetching profile photo:', imageError);
+        setProfilePhoto(null); // Handle the absence of profile photo appropriately
+      }
+  
+      setLoading(false);
+    };
+  
+    fetchEmployeeData();
   }, [currentUser.id]);
 
   useFocusEffect(
     React.useCallback(() => {
-      setLoading(true); 
-      Promise.all([
-        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`),
-        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/experiences`),
-        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/references`),
-        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/image`),
-      ])
-      .then(([employeeResponse, experiencesResponse, referenceResponse, imageResponse ]) => {
-        setEmployee(employeeResponse.data.data.attributes);
-        setExperiences(experiencesResponse.data.data); 
-        setProfilePhoto(imageResponse.data.image_url);
-        setLoading(false); 
-        setReferences(referenceResponse.data.data); 
-      })
-      .catch(error => {
-        console.error('There was an error fetching the employee or experiences:', error);
-        setLoading(false); // Set loading state to false in case of error
-      });
+      const fetchEmployeeData = async () => {
+        setLoading(true);
+    
+        try {
+          // Fetch employee data
+          const employeeResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`);
+          setEmployee(employeeResponse.data.data.attributes);
+        } catch (employeeError) {
+          console.error('Error fetching employee data:', employeeError);
+        }
+    
+        try {
+          // Fetch experiences data
+          const experiencesResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/experiences`);
+          setExperiences(experiencesResponse.data.data);
+        } catch (experiencesError) {
+          console.error('Error fetching experiences data:', experiencesError);
+        }
+    
+        try {
+          // Fetch references data
+          const referenceResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/references`);
+          setReferences(referenceResponse.data.data);
+        } catch (referenceError) {
+          console.error('Error fetching references data:', referenceError);
+        }
+    
+        try {
+          // Fetch profile photo
+          const imageResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/image`);
+          setProfilePhoto(imageResponse.data.image_url);
+        } catch (imageError) {
+          console.error('Error fetching profile photo:', imageError);
+          setProfilePhoto(null); // Handle the absence of profile photo appropriately
+        }
+    
+        setLoading(false);
+      };
+    
+      fetchEmployeeData();
     }, [currentUser.id]) // Only trigger on currentUser.id changes
   );
 
