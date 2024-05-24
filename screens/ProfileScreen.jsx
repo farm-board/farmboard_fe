@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: -10,
     flex: 1,
-    backgroundColor: '#4F6F52',
+    backgroundColor: '#3A4D39',
   },
   content: {
     marign: 0,
