@@ -1,18 +1,18 @@
-import React, { useContext, useState, useEffect } from 'react'
-import {View, StyleSheet, Text} from 'react-native';
-import {DrawerContentScrollView, DrawerItem} from '@react-navigation/drawer';
-import {Avatar, Title} from 'react-native-paper';
-import {TouchableOpacity} from 'react-native-gesture-handler';
-import {useNavigation, useFocusEffect} from '@react-navigation/native';
+import React, { useContext, useState, useEffect } from 'react';
+import { View, StyleSheet, Text } from 'react-native';
+import { DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
+import { Avatar, Title } from 'react-native-paper';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { UserContext } from '../contexts/UserContext'
+import { UserContext } from '../contexts/UserContext';
 import axios from 'axios';
 
-const DrawerLayout = ({icon, label, navigateTo}) => {
+const DrawerLayout = ({ icon, label, navigateTo }) => {
   const navigation = useNavigation();
   return (
     <DrawerItem
-      icon={({color, size}) => <Icon name={icon} color="#ECE3CE" size={size} />}
+      icon={({ color, size }) => <Icon name={icon} color="#ECE3CE" size={size} />}
       labelStyle={{ color: "#ECE3CE" }}
       label={label}
       onPress={() => {
@@ -39,111 +39,122 @@ function CustomDrawerContent(props) {
   const [userData, setUserData] = useState({});
   const [avatarImage, setAvatarImage] = useState('');
   const navigation = useNavigation();
-  const{currentUser, logout} = useContext(UserContext);
+  const { currentUser, logout } = useContext(UserContext);
 
   const DrawerList = currentUser.role_type === 'farm' ?
-  [
-    {icon: 'home-outline', label: 'Home', navigateTo: 'Home Stack'},
-    {icon: 'account-multiple', label: 'Profile', navigateTo: 'Profile Stack'},
-    {icon: 'clipboard-text-multiple-outline', label: 'Feed', navigateTo: 'Feed Stack'}
-  ]
-  : currentUser.role_type === 'employee' ?
-  [
-    {icon: 'account-multiple', label: 'Profile', navigateTo: 'Profile Stack'},
-    {icon: 'clipboard-text-multiple-outline', label: 'Feed', navigateTo: 'Feed Stack'}
-  ]
-  : [];
+    [
+      { icon: 'home-outline', label: 'Home', navigateTo: 'Home Stack' },
+      { icon: 'account-multiple', label: 'Profile', navigateTo: 'Profile Stack' },
+      { icon: 'clipboard-text-multiple-outline', label: 'Feed', navigateTo: 'Feed Stack' }
+    ]
+    : currentUser.role_type === 'employee' ?
+      [
+        { icon: 'account-multiple', label: 'Profile', navigateTo: 'Profile Stack' },
+        { icon: 'clipboard-text-multiple-outline', label: 'Feed', navigateTo: 'Feed Stack' }
+      ]
+      : [];
 
-  handleLogout = () => { 
+  const handleLogout = () => {
     logout(navigation);
-  }
+  };
 
   useEffect(() => {
-    currentUser.role_type === 'farm' ? 
-      Promise.all([
-        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`),
-        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/image`)
-      ])
-      .then(([farmResponse, imageResponse]) => {
-        console.log('drawer farm data:', farmResponse.data);
-        console.log('drawer image data:', imageResponse.data);
-        setUserData(farmResponse.data.data.attributes);
-        setAvatarImage(imageResponse.data.image_url);
-      })
-      .catch(error => {
-        console.log('Unable to fetch farm data', error);
-      }) 
-    : currentUser.role_type === 'employee' ?
-    Promise.all([
-      axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`),
-      axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/image`)
-      ])
-      .then(([employeeResponse, imageResponse]) => {
-        console.log('drawer employee data:', employeeResponse.data);
-        console.log('drawer image data:', imageResponse.data);
-        setUserData(employeeResponse.data.data.attributes);
-        setAvatarImage(imageResponse.data.image_url);
-      })
-      .catch(error => {
-        console.log('Unable to fetch farm data', error);
-      }) 
-    : null;
-  }, [currentUser.id]);
+    const fetchUserData = async () => {
+      try {
+        if (currentUser.role_type === 'farm') {
+          const farmResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`);
+          console.log('drawer farm data:', farmResponse.data);
+          setUserData(farmResponse.data.data.attributes);
+  
+          try {
+            const imageResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/image`);
+            console.log('drawer image data:', imageResponse.data);
+            setAvatarImage(imageResponse.data.image_url);
+          } catch (imageError) {
+            console.log('Unable to fetch farm image', imageError);
+          }
+        } else if (currentUser.role_type === 'employee') {
+          const employeeResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`);
+          console.log('drawer employee data:', employeeResponse.data);
+          setUserData(employeeResponse.data.data.attributes);
+  
+          try {
+            const imageResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/image`);
+            console.log('drawer image data:', imageResponse.data);
+            setAvatarImage(imageResponse.data.image_url);
+          } catch (imageError) {
+            console.log('Unable to fetch employee image', imageError);
+          }
+        }
+      } catch (error) {
+        console.log('Unable to fetch user data', error);
+      }
+    };
+  
+    fetchUserData();
+  }, [currentUser.id, avatarImage]);
 
   useFocusEffect(
     React.useCallback(() => {
-      currentUser.role_type === 'farm' ? 
-        Promise.all([
-          axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`),
-          axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/image`)
-        ])
-        .then(([farmResponse, imageResponse]) => {
-          console.log('drawer farm data:', farmResponse.data);
-          console.log('drawer image data:', imageResponse.data);
-          setUserData(farmResponse.data.data.attributes);
-          setAvatarImage(imageResponse.data.image_url);
-        })
-        .catch(error => {
-          console.log('Unable to fetch farm data', error);
-        }) 
-      : currentUser.role_type === 'employee' ?
-      Promise.all([
-        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`),
-        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/image`)
-        ])
-        .then(([employeeResponse, imageResponse]) => {
-          console.log('drawer employee data:', employeeResponse.data);
-          console.log('drawer image data:', imageResponse.data);
-          setUserData(employeeResponse.data.data.attributes);
-          setAvatarImage(imageResponse.data.image_url);
-        })
-        .catch(error => {
-          console.log('Unable to fetch farm data', error);
-        }) 
-      : null;
-    }, [currentUser.id]) // Only trigger on currentUser.id changes
+      const fetchUserData = async () => {
+        try {
+          if (currentUser.role_type === 'farm') {
+            const farmResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`);
+            console.log('drawer farm data:', farmResponse.data);
+            setUserData(farmResponse.data.data.attributes);
+    
+            try {
+              const imageResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/image`);
+              console.log('drawer image data:', imageResponse.data);
+              setAvatarImage(imageResponse.data.image_url);
+            } catch (imageError) {
+              console.log('Unable to fetch farm image', imageError);
+            }
+          } else if (currentUser.role_type === 'employee') {
+            const employeeResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`);
+            console.log('drawer employee data:', employeeResponse.data);
+            setUserData(employeeResponse.data.data.attributes);
+    
+            try {
+              const imageResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/image`);
+              console.log('drawer image data:', imageResponse.data);
+              setAvatarImage(imageResponse.data.image_url);
+            } catch (imageError) {
+              console.log('Unable to fetch employee image', imageError);
+            }
+          }
+        } catch (error) {
+          console.log('Unable to fetch user data', error);
+        }
+      };
+    
+      fetchUserData();
+    }, [currentUser.id, avatarImage]) // Only trigger on currentUser.id changes
   );
-  
+
+  const getUserDisplayName = () => {
+    if (currentUser.role_type === 'farm') {
+      return userData.name;
+    } else if (currentUser.role_type === 'employee') {
+      return `${userData.first_name} ${userData.last_name}`;
+    }
+    return '';
+  };
+
   return (
-    <View style={{flex: 1}}>
+    <View style={{ flex: 1 }}>
       <DrawerContentScrollView {...props}>
         <View style={styles.drawerContent}>
           <TouchableOpacity activeOpacity={0.8}>
             <View style={styles.userInfoSection}>
-              <View style={{flexDirection: 'row', marginTop: 15}}>
+              <View style={{ flexDirection: 'row', marginTop: 15 }}>
                 <Avatar.Image
-                  source={{
-                    uri: avatarImage,
-                  }}
+                  source={avatarImage ? { uri: avatarImage } : require('../assets/images/FarmProfilePlaceholder.png')}
                   size={50}
-                  style={{marginTop: 5}}
+                  style={{ marginTop: 5 }}
                 />
-                <View style={{marginLeft: 10, flexDirection: 'column'}}>
-                  {currentUser.role_type === 'farm' ?
-                  <Title style={styles.title}>{userData.name}</Title>
-                  : currentUser.role_type === 'employee' ?
-                  <Title style={styles.title}>{userData.first_name} {userData.last_name}</Title>
-                  : null}
+                <View style={{ marginLeft: 10, flexDirection: 'column' }}>
+                  <Title style={styles.title}>{getUserDisplayName()}</Title>
                   <Text style={styles.caption} numberOfLines={1}>
                     {currentUser.email}
                   </Text>
@@ -152,13 +163,13 @@ function CustomDrawerContent(props) {
             </View>
           </TouchableOpacity>
           <View style={styles.drawerSection}>
-            <DrawerItems drawerList={DrawerList}/>
+            <DrawerItems drawerList={DrawerList} />
           </View>
         </View>
       </DrawerContentScrollView>
       <View style={styles.bottomDrawerSection}>
         <DrawerItem
-          icon={({color, size}) => (
+          icon={({ color, size }) => (
             <Icon name="exit-to-app" color="#ECE3CE" size={size} />
           )}
           labelStyle={{ color: "#ECE3CE" }}

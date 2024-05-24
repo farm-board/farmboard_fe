@@ -83,17 +83,23 @@ export default function FarmProfile() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [farmResponse, imageResponse] = await Promise.all([
-          axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`),
-          axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/image`),
-        ]);
-  
+        // Fetch farm data
+        const farmResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`);
         console.log('current farm:', farmResponse.data.data.attributes);
         setFarm(farmResponse.data.data.attributes);
-        setProfilePhoto(imageResponse.data.image_url);
+  
+        // Fetch profile photo separately
+        try {
+          const imageResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/image`);
+          setProfilePhoto(imageResponse.data.image_url);
+        } catch (imageError) {
+          console.error('Error fetching profile photo:', imageError);
+          setProfilePhoto(null); // Handle the absence of profile photo appropriately
+        }
   
         fetchGalleryImages();
         fetchAccommodations();
+  
         const postingsResponse = await fetchPostings();
         if (postingsResponse) {
           console.log('Postings:', postingsResponse.data.data);
@@ -117,17 +123,23 @@ export default function FarmProfile() {
     React.useCallback(() => {
       const fetchData = async () => {
         try {
-          const [farmResponse, imageResponse] = await Promise.all([
-            axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`),
-            axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/image`),
-          ]);
-    
+        // Fetch farm data
+          const farmResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`);
           console.log('current farm:', farmResponse.data.data.attributes);
           setFarm(farmResponse.data.data.attributes);
-          setProfilePhoto(imageResponse.data.image_url);
+
+          // Fetch profile photo separately
+          try {
+            const imageResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/image`);
+            setProfilePhoto(imageResponse.data.image_url);
+          } catch (imageError) {
+            console.error('Error fetching profile photo:', imageError);
+            setProfilePhoto(null); // Handle the absence of profile photo appropriately
+          }
     
           fetchGalleryImages();
           fetchAccommodations();
+
           const postingsResponse = await fetchPostings();
           if (postingsResponse) {
             console.log('Postings:', postingsResponse.data.data);
