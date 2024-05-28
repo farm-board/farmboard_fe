@@ -30,7 +30,7 @@ const GalleryEdit = ({
               style={styles.closeButton} 
               onPress={() => handleDeleteImage(item.id)}
             >
-              <MaterialCommunityIcons name="close" size={24} color={colors.highlight} />
+              <MaterialCommunityIcons name="close" size={24} color={"white"} />
             </TouchableOpacity>
           </View>
         )}
@@ -49,11 +49,11 @@ const styles = StyleSheet.create({
     top: 15,
     right: 15, 
     padding: 10, 
-    backgroundColor: "#739072", 
+    backgroundColor: "#3A4D39", 
     borderRadius: 24,
   },
   addImageButton: {
-    backgroundColor: '#ECE3CE',
+    backgroundColor: 'white',
     alignSelf: 'center',
     padding: 10,
     borderRadius: 8,

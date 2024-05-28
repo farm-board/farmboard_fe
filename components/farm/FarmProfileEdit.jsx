@@ -348,7 +348,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   avatarEdit: {
-    backgroundColor: '#4F6F52',
+    backgroundColor: '#3A4D39',
     padding: 30,
     borderRadius: 100,
   },
@@ -356,7 +356,7 @@ const styles = StyleSheet.create({
     color: '#3A4D39',
   },
   inputContainer: { 
-    backgroundColor: '#4F6F52',
+    backgroundColor: '#3A4D39',
     width: '100%',
     padding: 20,
   },
@@ -391,14 +391,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'space-between',
     maxWidth: '100%',
-    backgroundColor: '#4F6F52',
+    backgroundColor: '#3A4D39',
   },
   galleryPhotosNotFoundContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
-    backgroundColor: '#4F6F52',
+    backgroundColor: '#3A4D39',
     padding: 20,
   },
   galleryPhotosNotFoundText: {
@@ -406,7 +406,7 @@ const styles = StyleSheet.create({
   },
   addImageContainer: {
     width: '100%',
-    backgroundColor: '#4F6F52',
+    backgroundColor: '#3A4D39',
   },
   addImageButton: {
     backgroundColor: '#ECE3CE',

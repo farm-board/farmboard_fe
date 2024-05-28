@@ -42,14 +42,13 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: -10,
     flex: 1,
-    backgroundColor: '#3A4D39',
+    backgroundColor: '#4F6F52',
   },
   content: {
     marign: 0,
     height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    marginHorizontal: 10,
   },
   textCenter: {
     textAlign: 'center',

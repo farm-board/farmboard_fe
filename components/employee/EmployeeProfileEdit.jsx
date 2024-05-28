@@ -328,9 +328,10 @@ const styles = StyleSheet.create({
     marginTop: 25,
   },
   avatarEdit: {
-    backgroundColor: '#4F6F52',
+    backgroundColor: '#3A4D39',
     padding: 30,
     borderRadius: 100,
+    marginBottom: 25,
   },
   inputContainer: {
     width: '100%',
@@ -339,7 +340,7 @@ const styles = StyleSheet.create({
     color: '#3A4D39',
   },
   inputContainer: { 
-    backgroundColor: '#4F6F52',
+    backgroundColor: '#3A4D39',
     width: '100%',
     padding: 20,
   },
