@@ -23,10 +23,10 @@ const styles = StyleSheet.create({
   },
   headText: {
     flex: 1,
-    color: "#ECE3CE",
+    color: "white",
   },
   optionText: {
-    color: "#ECE3CE" + "aa",
+    color: "white",
   },
 });
 

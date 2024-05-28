@@ -83,7 +83,7 @@ export default function EmployeeProfileEdit() {
   const deleteReference = async (referenceId) => {
     try {
       await axios.delete(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/references/${referenceId}`);
-      fetchReferences();
+      fetchExperiences();
     } catch (error) {
       console.error('Error deleting references:', error);
     }
@@ -217,11 +217,6 @@ export default function EmployeeProfileEdit() {
             <StyledText style={styles.existingData}>{data.zip_code}</StyledText>
           </ProfileInfo>
           </Animated.View>
-          <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.inputItem}>
-          <ProfileInfo label="Age" icon="cake">
-            <StyledText style={styles.existingData}>{data.age}</StyledText>
-          </ProfileInfo>
-          </Animated.View>
           <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputItem}>
           <ProfileInfo label="About" icon="pencil-outline">
             <StyledText style={styles.existingData}>
@@ -238,7 +233,7 @@ export default function EmployeeProfileEdit() {
               Experience Info
             </SectionHeader>
             {experiences.map((experience, index) => (
-              <Animated.View key={index} entering={FadeInDown.duration(1000).springify()} style={styles.inputItem}>
+              <Animated.View key={index} entering={FadeInDown.duration(1000).springify()} style={styles.inputItemTwo}>
                 <ProfileInfo label="Company Name" icon="briefcase-outline">
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                     <StyledText style={styles.existingData}>
@@ -259,6 +254,9 @@ export default function EmployeeProfileEdit() {
                 onPress={() => navigation.navigate("Employee Profile Add Experiences")}
               >
                 <Text style={styles.addButtonText}>Add Experience</Text>
+                <View style={styles.submitArrow}>
+                <MaterialCommunityIcons name="arrow-right" size={24} color="white" />
+            </View>
               </TouchableOpacity>
             )}
           </View>
@@ -270,7 +268,7 @@ export default function EmployeeProfileEdit() {
               Reference Info
             </SectionHeader>
             {references.map((reference, index) => (
-              <Animated.View key={index} entering={FadeInDown.duration(1000).springify()} style={styles.inputItem}>
+              <Animated.View key={index} entering={FadeInDown.duration(1000).springify()} style={styles.inputItemTwo}>
                 <ProfileInfo label="Reference Name" icon="account-outline">
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                     <StyledText style={styles.existingData}>
@@ -291,6 +289,9 @@ export default function EmployeeProfileEdit() {
                 onPress={() => navigation.navigate("Employee Profile Add References")}
               >
                 <Text style={styles.addButtonText}>Add Reference</Text>
+                <View style={styles.submitArrow}>
+                <MaterialCommunityIcons name="arrow-right" size={24} color="white" />
+            </View>
               </TouchableOpacity>
             )}
           </View>
@@ -329,6 +330,7 @@ const styles = StyleSheet.create({
   },
   avatarEdit: {
     backgroundColor: '#3A4D39',
+
     padding: 30,
     borderRadius: 100,
     marginBottom: 25,
@@ -337,7 +339,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   existingData: {
-    color: '#3A4D39',
+    color: 'black',
   },
   inputContainer: { 
     backgroundColor: '#3A4D39',
@@ -346,6 +348,10 @@ const styles = StyleSheet.create({
   },
   inputItem: {
     minWidth: '100%',
+  },
+  inputItemTwo: {
+    minWidth: '100%',
+    marginBottom: 20,
   },
   header: {
     flexDirection: 'row',
@@ -360,17 +366,23 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   addButton: {
-    backgroundColor: '#ECE3CE',
+    backgroundColor: '#ffb900',
+    borderRadius: 20,
     paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 10, // Adjust the margin top as needed
+    paddingHorizontal: 100,
   },
   addButtonText: {
-    color: '#4F6F52',
     fontSize: 16,
     fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#333',
+  },
+  submitArrow: {
+    backgroundColor: "#333",
+    borderRadius: 30,
+    padding: 2,
+    position: "absolute",
+    right: 15,
+    top: 5,
   },
 });

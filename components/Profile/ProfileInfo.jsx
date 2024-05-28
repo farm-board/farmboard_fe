@@ -9,7 +9,7 @@ const ProfileInfo = ({ children, label, style, icon }) => {
   return (
     <View
       style={[
-        { backgroundColor: colors?.highlight },
+        { backgroundColor: "white" },
         styles.profileInfo,
         style,
       ]}
