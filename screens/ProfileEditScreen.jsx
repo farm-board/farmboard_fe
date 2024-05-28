@@ -35,7 +35,7 @@ export default function ProfileEditScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#739072',
+    backgroundColor: '#4F6F52',
   },
   backgroundImage: {
     position: 'absolute',

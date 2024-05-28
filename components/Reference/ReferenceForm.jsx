@@ -64,6 +64,7 @@ export default function ReferenceForm( { setReferences }) {
               placeholder="First Name"
               icon="account-outline"
               label="First Name:"
+              labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
               onChangeText={(text) => setData({...data, first_name: text})}
             />
         </Animated.View>
@@ -72,6 +73,7 @@ export default function ReferenceForm( { setReferences }) {
               placeholder="Last Name"
               icon="account-outline"
               label="Last Name:"
+              labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
               onChangeText={(text) => setData({...data, last_name: text})}
             />
         </Animated.View>
@@ -80,6 +82,7 @@ export default function ReferenceForm( { setReferences }) {
               placeholder="Phone Number"
               icon="city-variant-outline"
               label="Phone Number:"
+              labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
               onChangeText={(text) => setData({...data, phone: text})}
             />
         </Animated.View>
@@ -88,6 +91,7 @@ export default function ReferenceForm( { setReferences }) {
               placeholder="Email"
               icon="star-box-outline"
               label="Email:"
+              labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
               onChangeText={(text) => setData({...data, email: text})}
             />
         </Animated.View>
@@ -96,6 +100,7 @@ export default function ReferenceForm( { setReferences }) {
               placeholder="Relationship"
               icon="star-box-outline"
               label="Relationship:"
+              labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
               onChangeText={(text) => setData({...data, relationship: text})}
             />
         </Animated.View>
@@ -104,6 +109,9 @@ export default function ReferenceForm( { setReferences }) {
               <Text style={styles.submitButtonText}>
                 Add Reference
               </Text>
+              <View style={styles.submitArrow}>
+                <MaterialCommunityIcons name="arrow-right" size={24} color="white" />
+            </View>
             </TouchableOpacity>
         </Animated.View>
     </View>
@@ -139,19 +147,31 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   submitButtonContainer: {
-    width: '100%',
-    marginBottom: 3,
+    minWidth: '100%',
+    alignItems: 'center',
+    marginBottom: 20,
+    paddingTop: 15,
   },
   submitButton: {
-    backgroundColor: '#ECE3CE',
-    padding: 10,
-    borderRadius: 8,
+    backgroundColor: '#ffb900',
+    borderRadius: 50,
+    paddingVertical: 30,
+    paddingHorizontal: 100,
+    width: '100%',
   },
   submitButtonText: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: 'bold',
-    color: '#3A4D39',
     textAlign: 'center',
+    color: '#333',
+  },
+  submitArrow: {
+    backgroundColor: "#333",
+    borderRadius: 30,
+    padding: 15,
+    position: "absolute",
+    right: 15,
+    top: 13,
   },
   header: {
     flexDirection: 'row',

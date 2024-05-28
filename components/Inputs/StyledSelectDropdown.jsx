@@ -4,10 +4,10 @@ import StyledText from "../Texts/StyledText";
 import SelectDropdown from 'react-native-select-dropdown';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-const StyledSelectDropdown = ({ label, style, value, listData, onSelect, fieldPlaceholder, ...props }) => {
+const StyledSelectDropdown = ({ label, style, value, listData, onSelect, fieldPlaceholder, labelStyle, ...props }) => {
   return (
     <View style={styles.container}>
-       <StyledText small>{label} </StyledText>
+       <StyledText style={[styles.label, labelStyle]}>{label}</StyledText>
     <SelectDropdown
       data={listData}
       onSelect={onSelect}
@@ -85,6 +85,11 @@ const styles = StyleSheet.create({
   dropdownItemIconStyle: {
     fontSize: 28,
     marginRight: 8,
+  },
+  label: {
+    marginBottom: 5,
+    color: 'white',
+    fontSize: 18,
   },
 });
 
