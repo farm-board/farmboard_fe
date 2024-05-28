@@ -170,6 +170,7 @@ export default function EmployeeProfileEditDetails() {
               icon="account-outline"
               label="First Name:"
               value={data.first_name}
+              labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
               onChangeText={(text) => setData({...data, first_name: text})}
             />
         </Animated.View>
@@ -179,6 +180,7 @@ export default function EmployeeProfileEditDetails() {
               icon="account-outline"
               label="Last Name:"
               value={data.last_name}
+              labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
               onChangeText={(text) => setData({...data, last_name: text})}
             />
         </Animated.View>
@@ -188,6 +190,7 @@ export default function EmployeeProfileEditDetails() {
               icon="city-variant-outline"
               label="City:"
               value={data.city}
+              labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
               onChangeText={(text) => setData({...data, city: text})}
             />
         </Animated.View>
@@ -197,6 +200,7 @@ export default function EmployeeProfileEditDetails() {
             fieldPlaceholder="State"
             label="State:"
             value={data.state}
+            labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
             onSelect={(selectedItem) => {
               setData({...data, state: selectedItem})
             }}
@@ -209,6 +213,7 @@ export default function EmployeeProfileEditDetails() {
               label="Zip Code:"
               keyboardType="numeric"
               value={data.zip_code}
+              labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
               onChangeText={(text) => setData({...data, zip_code: text})}
             />
         </Animated.View>
@@ -218,6 +223,7 @@ export default function EmployeeProfileEditDetails() {
               icon="phone"
               label="Phone:"
               value={data.phone}
+              labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
               onChangeText={(text) => setData({...data, phone: text})}
             />
         </Animated.View>
@@ -227,38 +233,34 @@ export default function EmployeeProfileEditDetails() {
               icon="email"
               label="Email:"
               value={data.email}
+              labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
               onChangeText={(text) => setData({...data, email: text})}
             />
         </Animated.View>
-          <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputContainer}>
-            <StyledTextInput
-              placeholder="Age"
-              icon="cake"
-              label="Age:"
-              value={data.age}
-              onChangeText={(text) => setData({...data, age: text})}
-            />
         <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputContainer}>
           <StyledTextInput
             placeholder="Bio"
             icon="pencil-outline"
             multiline={true}
             label="Bio:"
+            labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
             value={data.bio}
             onChangeText={(text) => setData({...data, bio: text})}
           />
         </Animated.View>
-        </Animated.View>
         <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} >
-        <Text style={{ alignSelf: 'flex-start', color: 'white', marginBottom: 5 }}>Relevant Skills:</Text>
+        <Text style={{ alignSelf: 'flex-start', color: 'white', marginBottom: 5, fontSize: 18, }}>Relevant Skills:</Text>
             <SkillSelect selectedItems={selectedItems} onSelectedItemsChange={onSelectedItemsChange} />
         </Animated.View>
         {/* Submit button */}
         <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.submitButtonContainer}>
             <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
               <Text style={styles.submitButtonText}>
-                Submit
+                Save Changes
               </Text>
+              <View style={styles.submitArrow}>
+                <MaterialCommunityIcons name="arrow-right" size={24} color="white" />
+              </View>
             </TouchableOpacity>
         </Animated.View>
       </View>
@@ -304,18 +306,30 @@ const styles = StyleSheet.create({
   },
   submitButtonContainer: {
     width: '100%',
-    marginBottom: 3,
+    alignItems: 'center',
+    marginBottom: 20,
+    paddingTop: 15,
   },
   submitButton: {
-    backgroundColor: '#ECE3CE',
-    padding: 10,
-    borderRadius: 8,
+    backgroundColor: '#ffb900',
+    borderRadius: 50,
+    paddingVertical: 30,
+    paddingHorizontal: 100,
+    width: '100%',
   },
   submitButtonText: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: 'bold',
-    color: '#3A4D39',
     textAlign: 'center',
+    color: '#333',
+  },
+  submitArrow: {
+    backgroundColor: "#333",
+    borderRadius: 30,
+    padding: 15,
+    position: "absolute",
+    right: 15,
+    top: 13,
   },
   toggleButton: {
     backgroundColor: '#ECE3CE',

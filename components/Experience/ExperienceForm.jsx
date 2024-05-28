@@ -47,6 +47,7 @@ export default function ExperienceForm({ setExperiences }) {
             placeholder="Company Name"
             icon="account-outline"
             label="Company Name:"
+            labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
             onChangeText={(text) => setData({...data, company_name: text})}
           />
         </Animated.View>
@@ -55,6 +56,7 @@ export default function ExperienceForm({ setExperiences }) {
             placeholder="Date Started"
             icon="account-outline"
             label="Date Started:"
+            labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
             onChangeText={(text) => setData({...data, started_at: text})}
           />
         </Animated.View>
@@ -63,6 +65,7 @@ export default function ExperienceForm({ setExperiences }) {
             placeholder="Date Ended"
             icon="city-variant-outline"
             label="Date Ended:"
+            labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
             onChangeText={(text) => setData({...data, ended_at: text})}
           />
         </Animated.View>
@@ -72,6 +75,7 @@ export default function ExperienceForm({ setExperiences }) {
             icon="star-box-outline"
             multiline={true}
             label="Description:"
+            labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
             onChangeText={(text) => setData({...data, description: text})}
           />
         </Animated.View>
@@ -80,6 +84,9 @@ export default function ExperienceForm({ setExperiences }) {
               <Text style={styles.submitButtonText}>
                 Add Experience
               </Text>
+              <View style={styles.submitArrow}>
+                <MaterialCommunityIcons name="arrow-right" size={24} color="white" />
+            </View>
             </TouchableOpacity>
         </Animated.View>
     </View>
@@ -114,21 +121,6 @@ const styles = StyleSheet.create({
     marginTop: 25,
     width: '100%',
   },
-  submitButtonContainer: {
-    width: '100%',
-    marginBottom: 3,
-  },
-  submitButton: {
-    backgroundColor: '#ECE3CE',
-    padding: 10,
-    borderRadius: 8,
-  },
-  submitButtonText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#3A4D39',
-    textAlign: 'center',
-  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -140,5 +132,31 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     padding: 10,
+  },
+  submitButtonContainer: {
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: 20,
+    paddingTop: 15,
+  },
+  submitButton: {
+    backgroundColor: '#ffb900',
+    borderRadius: 50,
+    paddingVertical: 30,
+    paddingHorizontal: 100,
+  },
+  submitButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#333',
+  },
+  submitArrow: {
+    backgroundColor: "#333",
+    borderRadius: 30,
+    padding: 15,
+    position: "absolute",
+    right: 15,
+    top: 13,
   },
 });
