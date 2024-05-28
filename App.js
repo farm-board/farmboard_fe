@@ -384,7 +384,7 @@ function FeedStackNav() {
         />
         <Stack.Screen name="Farm Profile View" component={FarmViewProfileScreen}
         options={{ 
-          title: 'Postings Profile',
+          title: 'Farm Profile',
           headerLeft: () => {
             return (
               <TouchableOpacity onPress={() => navigation.navigate('Feed')}>

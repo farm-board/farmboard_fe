@@ -14,7 +14,7 @@ export default function ViewFarmProfile() {
   const {currentUser} = useContext(UserContext);
   const [farm, setFarm] = useState({});
   const [accommodations, setAccommodations] = useState(null);
-  const [expanded, setExpanded] = useState(false); 
+  const [expandedMap, setExpandedMap] = useState({}); 
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [galleryImages, setGalleryImages] = useState([]);
   const [postings, setPostings] = useState([]);
@@ -44,6 +44,13 @@ export default function ViewFarmProfile() {
     });
   }, [currentUser.id]);
   
+  const toggleExpanded = (postingId) => {
+    setExpandedMap(prevState => ({
+      ...prevState,
+      [postingId]: !prevState[postingId],
+    }));
+  };
+  
   if (farm === undefined) {
     return <Text>Loading...</Text>;
   }
@@ -58,12 +65,12 @@ export default function ViewFarmProfile() {
         </View>
         <View style={styles.rightContent}>
           <Text style={styles.farmName}>
-            <StyledText big bold tanColor >
+            <StyledText big bold >
               {`${farm.name}`}
             </StyledText>
           </Text>
           <Text style={styles.farmAddress}>
-            <StyledText tanColor >
+            <StyledText>
               {`${farm.city}, ${farm.state}`}
             </StyledText>
           </Text>
@@ -78,32 +85,32 @@ export default function ViewFarmProfile() {
         </View>
         : null }
       <View style={styles.farmBioContainer}>
-        <StyledText big tanColor style={styles.farmBioTitle}>
+        <StyledText big style={styles.farmBioTitle}>
           About
         </StyledText>
-        <StyledText small tanColor style={styles.farmBioText}>
+        <StyledText small style={styles.farmBioText}>
           {`${farm.bio}`}
         </StyledText>
       </View>
       {accommodations !== null ?
       <View style={styles.accommodationsContainer}>
         <Text style={styles.accommodationTitle}>
-          <StyledText big bold tanColor style={styles.accommodationTitle}>
+          <StyledText big bold style={styles.accommodationTitle}>
             Accommodations
           </StyledText>
         </Text>
         <Text style={styles.accommodationListItem}>
-          <StyledText small tanColor>
+          <StyledText>
           Offers Housing: {accommodations.housing === true ? "Yes" : "No"}
           </StyledText>
         </Text>
         <Text style={styles.accommodationListItem}>
-          <StyledText small tanColor>
+          <StyledText>
             Offers Meals: {accommodations.meals === true ? "Yes" : "No"}
           </StyledText>
         </Text>
         <Text style={styles.accommodationListItem}>
-          <StyledText small tanColor>
+          <StyledText>
             Offers Transporation: {accommodations.transportation === true ? "Yes" : "No"}
           </StyledText>
         </Text>
@@ -111,13 +118,13 @@ export default function ViewFarmProfile() {
       : null }
       <View style={styles.postingsContainer}>
         {postings.length === 0 ?
-        <StyledText tanColor bold style={styles.postingsNotFoundText}>
+        <StyledText bold style={styles.postingsNotFoundText}>
           This Farm has no postings at this time.
         </StyledText> 
         : null }
         {postings.length > 0 ?
         <>
-          <StyledText tanColor bold big style={styles.postingActiveTitle}>
+          <StyledText bold style={styles.postingActiveTitle}>
             This Farms Postings:
           </StyledText> 
           {postings.map((posting) => {
@@ -160,24 +167,30 @@ export default function ViewFarmProfile() {
                   </StyledText>
                 </View>
                 <View style={styles.midModalContainer}>
-                {expanded && <StyledText bold style={styles.postingItem}>Required Skills:</StyledText>}
-                <View style={styles.skillContainer}>
-                  {posting?.skill_requirements && posting?.skill_requirements.slice(0, expanded ? posting?.skill_requirements.length : 0).map((skill, index) => (
-                    <View key={index} style={styles.skillBubble}>
-                      <Text style={styles.skillText}>{skill}</Text>
-                    </View>
-                  ))}
-                </View>
+                  {expandedMap[posting.id] && (
+                  <StyledText bold style={styles.postingItem}>Required Skills:</StyledText>
+                  )}
+                {expandedMap[posting.id] && (
+                  <View style={styles.skillContainer}>
+                    {posting?.skill_requirements && posting?.skill_requirements.map((skill, index) => (
+                      <View key={index} style={styles.skillBubble}>
+                        <Text style={styles.skillText}>{skill}</Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
                 {posting?.skill_requirements && posting?.skill_requirements.length > 0 && (
-                  <TouchableOpacity onPress={() => setExpanded(!expanded)} style={styles.showMoreButton}>
-                    <StyledText bold style={styles.showMoreButtonText}>{expanded ? 'Hide Skills' : 'Show Skills'}</StyledText>
+                  <TouchableOpacity onPress={() => toggleExpanded(posting.id)} style={styles.showMoreButton}>
+                    <StyledText bold style={styles.showMoreButtonText}>
+                      {expandedMap[posting.id] ? 'Hide Skills' : 'Show Skills'}
+                    </StyledText>
                   </TouchableOpacity>
                 )}
               </View>
                 <StyledText bold style={styles.postingItem}>
                   Description:
                 </StyledText>
-                <StyledText style={styles.postingItem}>
+                <StyledText style={styles.postingItemDescription}>
                   {posting.description}
                 </StyledText>
               </View>
@@ -211,7 +224,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: 5,
-    backgroundColor: '#4F6F52',
+    backgroundColor: '#3A4D39',
     maxWidth: '100%',
     shadowRadius: 20,
     shadowColor: 'black',
@@ -238,18 +251,18 @@ const styles = StyleSheet.create({
   },
   farmBioText: {
     letterSpacing: 1,
-    fontSize: 13,
+    fontSize: 15,
     marginVertical: 5,
   },
   farmBioTitle: {
     letterSpacing: 1,
-    fontSize: 15,
+    fontSize: 20,
   },
   farmBioContainer: {
     letterSpacing: 1,
     paddingHorizontal: 25,
     paddingVertical: 10,
-    backgroundColor: '#4F6F52',
+    backgroundColor: '#3A4D39',
     marginVertical: 10,
     shadowRadius: 20,
     shadowColor: 'black',
@@ -260,7 +273,7 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     paddingHorizontal: 25,
     paddingVertical: 10,
-    backgroundColor: '#4F6F52',
+    backgroundColor: '#3A4D39',
     minWidth: '100%',
     shadowRadius: 20,
     shadowColor: 'black',
@@ -271,13 +284,13 @@ const styles = StyleSheet.create({
   },
   accommodationTitle: {
     letterSpacing: 1,
-    fontSize: 15,
+    fontSize: 20,
     paddingBottom: 5,
   },
   accommodationListItem: {
     letterSpacing: 1,
     marginVertical: 5,
-    fontSize: 13,
+    fontSize: 15,
   },
   paddingBottom5: {
     paddingBottom: 5,
@@ -286,7 +299,7 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   editButton: {
-    backgroundColor: "#739072",
+    backgroundColor: "#4F6F52",
     borderRadius: 24,
     padding: 8,
     position: "absolute",
@@ -302,7 +315,7 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     paddingHorizontal: 25,
     paddingVertical: 10,
-    backgroundColor: '#4F6F52',
+    backgroundColor: '#3A4D39',
     marginVertical: 10,
     shadowRadius: 20,
     shadowColor: 'black',
@@ -318,7 +331,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   addPostingButton: {
-    backgroundColor: '#ECE3CE',
+    backgroundColor: 'white',
     alignSelf: 'center',
     padding: 10,
     borderRadius: 8,
@@ -335,9 +348,11 @@ const styles = StyleSheet.create({
   postingActiveTitle: {
     textAlign: 'center',
     marginBottom: 20,
+    marginTop: 10,
+    fontSize: 25,
   },
   postingContainer: {
-    backgroundColor: '#ECE3CE',
+    backgroundColor: 'white',
     padding: 10,
     borderRadius: 8,
     marginBottom: 25,
@@ -347,20 +362,31 @@ const styles = StyleSheet.create({
   },
   postingTitle: {
     color: '#3A4D39',
+    fontSize: 20,
     marginVertical: 10,
     marginRight: 40,
   },
   postingItem: {
     color: '#3A4D39',
-    marginRight: 10,
     marginTop: 5,
+    fontSize: 18,
+    paddingHorizontal: 5,
+  },
+  postingItemDescription: {
+    color: '#3A4D39',
+    letterSpacing: 1,
+    marginTop: 5,
+    fontSize: 16,
+    paddingHorizontal: 5,
+    marginBottom: 10,
   },
   applicantNumber: {
     color: '#3A4D39',
     marginRight: 10,
-    marginTop: 15,
+    marginTop: 10,
     textAlign: 'center',
     fontWeight: 'bold',
+    fontSize: 16,
   },
   itemRow: {
     flexDirection: 'row',
@@ -376,14 +402,15 @@ const styles = StyleSheet.create({
   },
   skillBubble: {
     backgroundColor: '#4F6F52',
-    borderRadius: 20,
-    paddingVertical: 5,
-    paddingHorizontal: 10,
+    borderRadius: 15,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
     marginRight: 10,
     marginBottom: 10,
   },
   skillText: {
-    color: '#ECE3CE',
+    color: 'white',
+    fontSize: 16,
   },
   skillContainer: {
     flexDirection: 'row',
@@ -398,13 +425,14 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 8,
     marginBottom: 5,
+    marginTop: 10,
     alignItems: 'center',
     justifyContent: 'center',
     minWidth: '100%',
   },
   showMoreButtonText: {
-    color: "#ECE3CE",
-    fontSize: 16,
+    color: "white",
+    fontSize: 18,
   },
   editPostingButton: {
     backgroundColor: '#4F6F52',
@@ -416,7 +444,7 @@ const styles = StyleSheet.create({
   },
   editPostingText: {
     fontSize: 16,
-    color: "#ECE3CE",
+    color: "white",
     textAlign: 'center',
   },
   modalContainer: {
@@ -428,11 +456,11 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 25,
     fontWeight: 'bold',
-    color: '#ECE3CE',
+    color: 'white',
   },
   modalDetails: {
     fontSize: 18,
-    color: '#ECE3CE',
+    color: 'white',
     marginBottom: 20,
   },
   modalSectionContainer: {
@@ -460,7 +488,7 @@ const styles = StyleSheet.create({
   },
   ViewApplicantButton: {
     alignSelf: 'center',
-    backgroundColor: '#ECE3CE',
+    backgroundColor: 'white',
     padding: 10,
     borderRadius: 8,
     marginBottom: 20,

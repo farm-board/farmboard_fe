@@ -157,12 +157,12 @@ export default function FarmHome() {
           <MaterialCommunityIcons
             name="arrow-left"
             size={30}
-            color="#ECE3CE"
+            color="white"
             onPress={() => setModalVisible(false)}
           />
         </TouchableOpacity>
           <Animated.Text entering={FadeInUp.duration(1000).springify()}>
-            <StyledText bold tanColor>
+            <StyledText bold big >
               Applicants
             </StyledText>
           </Animated.Text>
@@ -178,7 +178,7 @@ export default function FarmHome() {
               </View>
               <View style={styles.rightContent}>
                 <Text style={styles.farmName}>
-                  <StyledText big bold tanColor>{applicant.first_name} {applicant.last_name}</StyledText>
+                  <StyledText big bold >{applicant.first_name} {applicant.last_name}</StyledText>
                 </Text>
                 <Text style={styles.farmAddress}>
                   <StyledText>{applicant.city}, {applicant.state}</StyledText>
@@ -186,7 +186,7 @@ export default function FarmHome() {
               </View>
             </View>
               <Text style={styles.postingPosted}>
-                <StyledText small bold tanColor >Applied {calculateDaysAgo(applicant.created_at)} </StyledText>
+                <StyledText bold >Applied {calculateDaysAgo(applicant.created_at)} </StyledText>
               </Text>
             <View>
               <TouchableOpacity style={styles.ViewApplicantButton} 
@@ -205,7 +205,7 @@ export default function FarmHome() {
     <View style={styles.container}>
       <View style={styles.postingsContainer}>
         {postings.length === 0 ?
-        <StyledText tanColor bold style={styles.postingsNotFoundText}>
+        <StyledText bold style={styles.postingsNotFoundText}>
           You do not currently have any active postings. Click on the button below to add a new job posting to your farm.
         </StyledText> 
         : null }
@@ -214,14 +214,14 @@ export default function FarmHome() {
         </TouchableOpacity>
         {postings.length > 0 ?
         <>
-          <StyledText tanColor bold big style={styles.postingActiveTitle}>
+          <StyledText bold big style={styles.postingActiveTitle}>
             Your Current Postings:
           </StyledText> 
           {postings.map((posting) => {
             return (
               <View style={styles.postingContainer} key={posting.id}>
                 <TouchableOpacity 
-                  style={styles.deletePostingButton} 
+                  style={styles.editPostingPencil} 
                   onPress={() => handlePostingEdit(posting.id)}
                 >
                   <MaterialCommunityIcons name="pencil-outline" size={24} color='#3A4D39' />
@@ -286,9 +286,10 @@ export default function FarmHome() {
                 <StyledText bold style={styles.postingItem}>
                   Description:
                 </StyledText>
-                <StyledText style={styles.postingItem}>
+                <StyledText style={styles.postingItemDescription}>
                   {posting.attributes.description}
                 </StyledText>
+                <View style={styles.divider}></View>
                   {applicantsMap[posting.id] > 0 ?
                   <View>
                   <StyledText style={styles.applicantNumber}>
@@ -298,7 +299,7 @@ export default function FarmHome() {
                     style={styles.editPostingButton} 
                     onPress={() => setModalVisible(true, posting.id)} // Pass posting ID to setModalVisible
                   >
-                    <StyledText bold style={styles.editPostingText}>
+                    <StyledText bold style={styles.ViewApplicantPostingButtonText}>
                       {applicantsMap[posting.id] === 1 ? 'View Applicant' : 'View Applicants'}
                     </StyledText>
                   </TouchableOpacity>
@@ -366,15 +367,15 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     padding: 8,
     position: "absolute",
-    right: 15,
-    top: 15,
+    right: 20,
+    top: 20,
   },
   postingsContainer: {
     letterSpacing: 1,
     paddingHorizontal: 25,
     paddingVertical: 10,
     paddingBottom: 20,
-    backgroundColor: '#4F6F52',
+    backgroundColor: '#3A4D39',
     shadowRadius: 20,
     shadowColor: 'black',
     shadowOpacity: 0.1,
@@ -387,9 +388,12 @@ const styles = StyleSheet.create({
   },
   postingsNotFoundText: {
     textAlign: 'center',
+    fontSize: 18,
+    marginBottom: 20,
+    marginTop: 20,
   },
   addPostingButton: {
-    backgroundColor: '#ECE3CE',
+    backgroundColor: 'white',
     alignSelf: 'center',
     padding: 10,
     borderRadius: 8,
@@ -408,7 +412,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   postingContainer: {
-    backgroundColor: '#ECE3CE',
+    backgroundColor: 'white',
     padding: 10,
     borderRadius: 8,
     marginBottom: 25,
@@ -418,35 +422,45 @@ const styles = StyleSheet.create({
   },
   postingTitle: {
     color: '#3A4D39',
+    fontSize: 20,
     marginVertical: 10,
     marginRight: 40,
   },
   postingItem: {
     color: '#3A4D39',
-    marginRight: 10,
     marginTop: 5,
+    fontSize: 18,
+    paddingHorizontal: 5,
+  },
+  postingItemDescription: {
+    color: '#3A4D39',
+    letterSpacing: 1,
+    marginTop: 5,
+    fontSize: 16,
+    paddingHorizontal: 5,
+    marginBottom: 10,
   },
   postingPosted: {
-    fontSize: 12,
-    marginBottom: 10,
-    marginTop: -5,
-    color: '#ECE3CE',
+    fontSize: 14,
+    color: 'white',
     textAlign: 'center',
+    marginBottom: 10,
   },
   applicantNumber: {
     color: '#3A4D39',
     marginRight: 10,
-    marginTop: 15,
+    marginTop: 10,
     textAlign: 'center',
     fontWeight: 'bold',
+    fontSize: 16,
   },
   itemRow: {
     flexDirection: 'row',
   },
-  deletePostingButton: {
+  editPostingPencil: {
     position: 'absolute',
-    top: 10,
-    right: 10,
+    top: 15,
+    right: 15,
     padding: 5,
   },
   skillsContainer: {
@@ -454,15 +468,15 @@ const styles = StyleSheet.create({
   },
   skillBubble: {
     backgroundColor: '#4F6F52',
-    borderRadius: 20,
+    borderRadius: 15,
     paddingVertical: 10,
     paddingHorizontal: 15,
     marginRight: 10,
     marginBottom: 10,
   },
   skillText: {
-    color: '#ECE3CE',
-    fontSize: 15,
+    color: 'white',
+    fontSize: 16,
   },
   skillContainer: {
     flexDirection: 'row',
@@ -483,8 +497,8 @@ const styles = StyleSheet.create({
     minWidth: '100%',
   },
   showMoreButtonText: {
-    color: "#ECE3CE",
-    fontSize: 16,
+    color: "white",
+    fontSize: 18,
   },
   editPostingButton: {
     backgroundColor: '#4F6F52',
@@ -499,24 +513,29 @@ const styles = StyleSheet.create({
     color: "#ECE3CE",
     textAlign: 'center',
   },
+  ViewApplicantPostingButtonText: {
+    fontSize: 18,
+    color: "white",
+    textAlign: 'center',
+  },
   modalContainer: {
     paddingTop: 60,
     alignItems: 'center',
-    backgroundColor: '#739072',
+    backgroundColor: '#4F6F52',
     minHeight: '100%',
   },
   modalTitle: {
     fontSize: 25,
     fontWeight: 'bold',
-    color: '#ECE3CE',
+    color: 'white',
   },
   modalDetails: {
     fontSize: 18,
-    color: '#ECE3CE',
+    color: 'white',
     marginBottom: 20,
   },
   modalSectionContainer: {
-    backgroundColor: '#4F6F52',
+    backgroundColor: '#3A4D39',
     marginBottom: 10,
     shadowRadius: 20,
     shadowColor: 'black',
@@ -528,7 +547,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 5,
     paddingBottom: 10,
-    backgroundColor: '#4F6F52',
+    backgroundColor: '#3A4D39',
     minWidth: '100%',
   },
   modalLeftContent: {
@@ -540,7 +559,7 @@ const styles = StyleSheet.create({
   },
   ViewApplicantButton: {
     alignSelf: 'center',
-    backgroundColor: '#ECE3CE',
+    backgroundColor: 'white',
     padding: 10,
     borderRadius: 8,
     marginBottom: 20,

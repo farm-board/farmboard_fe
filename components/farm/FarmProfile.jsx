@@ -224,12 +224,12 @@ export default function FarmProfile() {
           <MaterialCommunityIcons
             name="arrow-left"
             size={30}
-            color="#ECE3CE"
+            color="white"
             onPress={() => setModalVisible(false)}
           />
         </TouchableOpacity>
           <Animated.Text entering={FadeInUp.duration(1000).springify()}>
-            <StyledText bold tanColor>
+            <StyledText bold big>
               Applicants
             </StyledText>
           </Animated.Text>
@@ -244,19 +244,21 @@ export default function FarmProfile() {
               </View>
               <View style={styles.rightContent}>
                 <Text style={styles.farmName}>
-                  <StyledText big bold tanColor>{applicant.first_name} {applicant.last_name}</StyledText>
+                  <StyledText big bold>{applicant.first_name} {applicant.last_name}</StyledText>
                 </Text>
                 <Text style={styles.farmAddress}>
                   <StyledText>{applicant.city}, {applicant.state}</StyledText>
                 </Text>
               </View>
             </View>
-            <Text style={styles.postingPosted}>Applied {calculateDaysAgo(applicant.created_at)}</Text>
+              <Text style={styles.postingPosted}>
+                <StyledText bold >Applied {calculateDaysAgo(applicant.created_at)} </StyledText>
+              </Text>
             <View>
               <TouchableOpacity style={styles.ViewApplicantButton} 
                 onPress={() => handleEmployeeProfileView(applicant.id)}  
               >
-                <StyledText bold style={styles.ViewApplicantButtonText}>View Applicant Proflie</StyledText>
+                <StyledText bold style={styles.ViewApplicantButtonText}>View Applicant Profile</StyledText>
               </TouchableOpacity>
             </View>
           </View>
@@ -302,10 +304,10 @@ export default function FarmProfile() {
         </View>
         : null }
       <View style={styles.farmBioContainer}>
-        <StyledText big style={styles.farmBioTitle}>
+        <StyledText bold style={styles.farmBioTitle}>
           About
         </StyledText>
-        <StyledText small style={styles.farmBioText}>
+        <StyledText style={styles.farmBioText}>
           {`${farm.bio}`}
         </StyledText>
       </View>
@@ -317,17 +319,17 @@ export default function FarmProfile() {
           </StyledText>
         </Text>
         <Text style={styles.accommodationListItem}>
-          <StyledText small>
+          <StyledText>
           Offers Housing: {accommodations.housing === true ? "Yes" : "No"}
           </StyledText>
         </Text>
         <Text style={styles.accommodationListItem}>
-          <StyledText small>
+          <StyledText>
             Offers Meals: {accommodations.meals === true ? "Yes" : "No"}
           </StyledText>
         </Text>
         <Text style={styles.accommodationListItem}>
-          <StyledText small>
+          <StyledText>
             Offers Transporation: {accommodations.transportation === true ? "Yes" : "No"}
           </StyledText>
         </Text>
@@ -344,7 +346,7 @@ export default function FarmProfile() {
         </TouchableOpacity>
         {postings.length > 0 ?
         <>
-          <StyledText tanColor bold big style={styles.postingActiveTitle}>
+          <StyledText bold big style={styles.postingActiveTitle}>
             Your Current Postings:
           </StyledText> 
           {postings.map((posting) => {
@@ -416,9 +418,10 @@ export default function FarmProfile() {
                 <StyledText bold style={styles.postingItem}>
                   Description:
                 </StyledText>
-                <StyledText style={styles.postingItem}>
+                <StyledText style={styles.postingItemDescription}>
                   {posting.attributes.description}
                 </StyledText>
+                <View style={styles.divider}></View>
                   {applicantsMap[posting.id] > 0 ?
                   <View>
                   <StyledText style={styles.applicantNumber}>
@@ -428,7 +431,7 @@ export default function FarmProfile() {
                     style={styles.editPostingButton} 
                     onPress={() => setModalVisible(true, posting.id)}
                   >
-                    <StyledText bold style={styles.editPostingText}>{applicantsMap[posting.id] === 1 ? 'View Applicant' : 'View Applicants'}</StyledText>
+                    <StyledText bold style={styles.ViewApplicantPostingButtonText}>{applicantsMap[posting.id] === 1 ? 'View Applicant' : 'View Applicants'}</StyledText>
                   </TouchableOpacity>
                   </View>
                   : 
@@ -495,12 +498,12 @@ const styles = StyleSheet.create({
   },
   farmBioText: {
     letterSpacing: 1,
-    fontSize: 13,
+    fontSize: 15,
     marginVertical: 5,
   },
   farmBioTitle: {
     letterSpacing: 1,
-    fontSize: 15,
+    fontSize: 20,
   },
   farmBioContainer: {
     letterSpacing: 1,
@@ -528,13 +531,13 @@ const styles = StyleSheet.create({
   },
   accommodationTitle: {
     letterSpacing: 1,
-    fontSize: 15,
+    fontSize: 20,
     paddingBottom: 5,
   },
   accommodationListItem: {
     letterSpacing: 1,
     marginVertical: 5,
-    fontSize: 13,
+    fontSize: 15,
   },
   paddingBottom5: {
     paddingBottom: 5,
@@ -604,26 +607,37 @@ const styles = StyleSheet.create({
   },
   postingTitle: {
     color: '#3A4D39',
+    fontSize: 20,
     marginVertical: 10,
     marginRight: 40,
   },
   postingItem: {
     color: '#3A4D39',
-    marginRight: 10,
     marginTop: 5,
+    fontSize: 18,
+    paddingHorizontal: 5,
+  },
+  postingItemDescription: {
+    color: '#3A4D39',
+    letterSpacing: 1,
+    marginTop: 5,
+    fontSize: 16,
+    paddingHorizontal: 5,
+    marginBottom: 10,
   },
   postingPosted: {
-    fontSize: 12,
-    color: '#ECE3CE',
+    fontSize: 14,
+    color: 'white',
     textAlign: 'center',
     marginBottom: 10,
   },
   applicantNumber: {
     color: '#3A4D39',
     marginRight: 10,
-    marginTop: 15,
+    marginTop: 10,
     textAlign: 'center',
     fontWeight: 'bold',
+    fontSize: 16,
   },
   itemRow: {
     flexDirection: 'row',
@@ -639,7 +653,7 @@ const styles = StyleSheet.create({
   },
   skillBubble: {
     backgroundColor: '#4F6F52',
-    borderRadius: 20,
+    borderRadius: 15,
     paddingVertical: 10,
     paddingHorizontal: 15,
     marginRight: 10,
@@ -647,7 +661,7 @@ const styles = StyleSheet.create({
   },
   skillText: {
     color: 'white',
-    fontSize: 15,
+    fontSize: 16,
   },
   skillContainer: {
     flexDirection: 'row',
@@ -669,7 +683,7 @@ const styles = StyleSheet.create({
   },
   showMoreButtonText: {
     color: "white",
-    fontSize: 16,
+    fontSize: 18,
   },
   editPostingButton: {
     backgroundColor: '#4F6F52',
@@ -681,27 +695,32 @@ const styles = StyleSheet.create({
   },
   editPostingText: {
     fontSize: 16,
-    color: "#ECE3CE",
+    color: "white",
+    textAlign: 'center',
+  },
+  ViewApplicantPostingButtonText: {
+    fontSize: 18,
+    color: "white",
     textAlign: 'center',
   },
   modalContainer: {
     paddingTop: 60,
     alignItems: 'center',
-    backgroundColor: '#739072',
+    backgroundColor: '#4F6F52',
     minHeight: '100%',
   },
   modalTitle: {
     fontSize: 25,
     fontWeight: 'bold',
-    color: '#ECE3CE',
+    color: 'white',
   },
   modalDetails: {
     fontSize: 18,
-    color: '#ECE3CE',
+    color: 'white',
     marginBottom: 20,
   },
   modalSectionContainer: {
-    backgroundColor: '#4F6F52',
+    backgroundColor: '#3A4D39',
     marginBottom: 10,
     shadowRadius: 20,
     shadowColor: 'black',
@@ -713,7 +732,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 5,
     paddingBottom: 10,
-    backgroundColor: '#4F6F52',
+    backgroundColor: '#3A4D39',
     minWidth: '100%',
   },
   modalLeftContent: {
@@ -725,7 +744,7 @@ const styles = StyleSheet.create({
   },
   ViewApplicantButton: {
     alignSelf: 'center',
-    backgroundColor: '#ECE3CE',
+    backgroundColor: 'white',
     padding: 10,
     borderRadius: 8,
     marginBottom: 20,

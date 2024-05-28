@@ -29,7 +29,7 @@ export default function FarmViewProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#739072',
+    backgroundColor: '#4F6F52',
   },
   content: {
     marign: 0,
