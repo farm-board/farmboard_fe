@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react'
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
 import { Text, View, TextInput, TouchableOpacity, StyleSheet, Dimensions, Alert } from 'react-native'
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { UserContext } from '../../contexts/UserContext';
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
@@ -153,7 +153,7 @@ export default function FarmProfileEdit() {
       axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`),
       axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/image`),
     ])
-    .then(([farmResponse, imageResponse, accommodationResponse]) => {
+    .then(([farmResponse, imageResponse]) => {
       setData({
         ...data,
         name: farmResponse.data.data.attributes.name,
@@ -205,6 +205,7 @@ export default function FarmProfileEdit() {
     fetchAccommodationData();
   }, [currentUser.id]);
 
+
   return (
     <KeyboardAvoidingContainer style={styles.container} behavior="padding">
       <View style={styles.content}>
@@ -222,7 +223,7 @@ export default function FarmProfileEdit() {
         </View>
         : 
         <View style={styles.galleryPhotosNotFoundContainer}>
-        <StyledText tanColor bold style={styles.galleryPhotosNotFoundText}>
+        <StyledText bold style={styles.galleryPhotosNotFoundText}>
           You do not currently have any photos added to your gallery. Click on the button below to add gallery photos to your profile.
         </StyledText> 
         </View>}
@@ -274,7 +275,7 @@ export default function FarmProfileEdit() {
         <View style={styles.inputContainer}>
           { Object.keys(accommodations).length === 0 ?
             <View>
-              <StyledText tanColor bold >
+              <StyledText bold >
                 No accommodations found. Click on the button below to add accommodations to your profile.
               </StyledText>
               <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.submitButtonContainer}>
@@ -376,7 +377,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   submitButton: {
-    backgroundColor: '#ECE3CE',
+    backgroundColor: 'white',
     padding: 10,
     borderRadius: 8,
     marginTop: 20,
@@ -409,7 +410,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#3A4D39',
   },
   addImageButton: {
-    backgroundColor: '#ECE3CE',
+    backgroundColor: 'white',
     alignSelf: 'center',
     padding: 10,
     borderRadius: 8,

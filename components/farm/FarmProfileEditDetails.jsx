@@ -9,6 +9,7 @@ import StyledTextInput from "../Inputs/StyledTextInput";
 import UploadModal from '../Profile/UploadModal';
 import StyledText from '../Texts/StyledText';
 import StyledSelectDropdown from '../Inputs/StyledSelectDropdown';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 
 export default function FarmProfileEditDetails() {
@@ -80,6 +81,7 @@ export default function FarmProfileEditDetails() {
             placeholder="Name"
             icon="account-outline"
             label="Name:"
+            labelStyle={{fontSize: 18, color: 'white'}}
             value={data.name}
             onChangeText={(text) => setData({ ...data, name: text })}
           />
@@ -89,6 +91,7 @@ export default function FarmProfileEditDetails() {
             placeholder="City"
             icon="city-variant-outline"
             label="City:"
+            labelStyle={{fontSize: 18, color: 'white'}}
             value={data.city}
             onChangeText={(text) => setData({...data, city: text})}
           />
@@ -98,6 +101,7 @@ export default function FarmProfileEditDetails() {
             listData={states}
             fieldPlaceholder="State"
             label="State:"
+            labelStyle={{fontSize: 18, color: 'white'}}
             onSelect={(selectedItem) => {
               setData({...data, state: selectedItem})
             }}
@@ -108,6 +112,7 @@ export default function FarmProfileEditDetails() {
             placeholder="Zip Code"
             icon="longitude"
             label="Zip Code:"
+            labelStyle={{fontSize: 18, color: 'white'}}
             keyboardType="numeric"
             value={data.zip_code}
             onChangeText={(text) => setData({...data, zip_code: text})}
@@ -119,15 +124,19 @@ export default function FarmProfileEditDetails() {
           icon="pencil-outline"
           multiline={true}
           label="Bio:"
+          labelStyle={{fontSize: 18, color: 'white'}}
           value={data.bio}
           onChangeText={(text) => setData({...data, bio: text})}
         />
         </Animated.View>
         {/* Submit button */}
         <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.submitButtonContainer}>
-          <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-            <Text style={styles.submitButtonText}>Save Changes</Text>
-          </TouchableOpacity>
+        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+          <Text style={styles.submitButtonText}>Save Changes</Text>
+            <View style={styles.submitArrow}>
+              <MaterialCommunityIcons name="arrow-right" size={24} color="white" />
+            </View>
+        </TouchableOpacity>
         </Animated.View>
       </View>
       {/* UploadModal component */}
@@ -146,7 +155,6 @@ export default function FarmProfileEditDetails() {
 
 const styles = StyleSheet.create({
   container: {
-    paddingBottom: 25,
     paddingHorizontal: 25,
   },
   content: {
@@ -157,7 +165,6 @@ const styles = StyleSheet.create({
     minWidth: '100%',
   },
   titleTextBox: {
-    padding: 10,
   },
   text: {
     textAlign: 'center',
@@ -173,18 +180,26 @@ const styles = StyleSheet.create({
   },
   submitButtonContainer: {
     width: '100%',
-    marginBottom: 3,
+    marginTop: 15,
   },
   submitButton: {
-    backgroundColor: '#ECE3CE',
-    padding: 10,
-    borderRadius: 8,
-    marginTop: 20,
+    backgroundColor: '#ffb900',
+    borderRadius: 50,
+    paddingVertical: 30,
+    paddingHorizontal: 100,
   },
   submitButtonText: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: 'bold',
-    color: '#3A4D39',
     textAlign: 'center',
+    color: '#333',
+  },
+  submitArrow: {
+    backgroundColor: "#333",
+    borderRadius: 30,
+    padding: 15,
+    position: "absolute",
+    right: 15,
+    top: 13,
   },
 });

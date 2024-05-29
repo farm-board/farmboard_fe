@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   introText: {
-    color: '#ECE3CE',
+    color: 'white',
     fontWeight: 'bold',
     fontSize: 30,
     textAlign: 'center',
@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
   },
   button: {
     minWidth: '90%',
-    backgroundColor: '#ECE3CE',
+    backgroundColor: 'white',
     padding: 12,
     borderRadius: 20,
     marginBottom: 10,

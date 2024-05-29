@@ -10,45 +10,52 @@ const onIOS = Platform.OS == "ios";
 const StyledSwitch = ({ label, icon, style, value, onValueChange, multiline, ...props }) => {
   return (
     <View style={styles.container}>
-      <View style={styles.leftIcon}>
-        <MaterialCommunityIcons name={icon} size={30} color={colors.highlight} />
+      <View style={styles.leftContent}>
+        <View style={styles.leftIcon}>
+          <MaterialCommunityIcons name={icon} size={30} color="white" />
+        </View>
+
       </View>
-
-      <StyledText big style={styles.text}>{label} </StyledText>
-
-      <Switch
-        value={value}
-        trackColor={{false: '#767577', true: colors.highlight }}
-        thumbColor={colors.accent}
-        onValueChange={onValueChange}
-        style={styles.inputField}
-      />
+        <StyledText big style={styles.text}>{label} </StyledText>
+      <View style={styles.rightContent}>
+        <Switch
+          value={value}
+          trackColor={{false: '#333', true: "#ffb900" }}
+          thumbColor={colors.accent}
+          onValueChange={onValueChange}
+          style={styles.inputField}
+        />
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     alignItems: 'center',
     borderRadius: 15,
     fontSize: 16,
     height: 60,
-    marginVertical: 3,
-    marginBottom: 20,
+    marginTop: 10,
   },
   text: {
-    textAlign: "center",
     paddingHorizontal: 10,
     paddingTop: 2,
+    paddingBottom: 30,
   },
   leftIcon: {
+    flex: 1,
     marginRight: 10,
+  },
+  rightContent: {
+    flex: 1,
+    alignItems: 'flex-end', // Add this line
   },
   inputField: {
     borderRadius: 15,
+    marginBottom: 25,
     backgroundColor: colors.secondary,
   },
   multilineInputField: {
