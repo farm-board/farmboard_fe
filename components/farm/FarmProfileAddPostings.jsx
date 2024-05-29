@@ -10,6 +10,7 @@ import StyledText from '../Texts/StyledText';
 import StyledSwitch from '../Inputs/StyledSwitch';
 import SkillsSelect from '../skills/SkillSelect';
 import StyledSelectDropdown from '../Inputs/StyledSelectDropdown';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 
 export default function FarmProfileAddPostings() {
@@ -90,6 +91,7 @@ export default function FarmProfileAddPostings() {
             placeholder="Job Title"
             icon="account-outline"
             label="Job Title:"
+            labelStyle={{fontSize: 18, color: 'white'}}
             onChangeText={(text) => setData({ ...data, attributes: { ...data.attributes, title: text } })}
           />
         </Animated.View>
@@ -99,6 +101,7 @@ export default function FarmProfileAddPostings() {
               placeholder="Salary"
               icon="city-variant-outline"
               label="Payment Amount:"
+              labelStyle={{fontSize: 18, color: 'white'}}
               keyboardType="numeric"
               onChangeText={(text) => setData({ ...data, attributes: { ...data.attributes, salary: text } })}
             />
@@ -108,6 +111,7 @@ export default function FarmProfileAddPostings() {
               listData={paymentTypeList}
               fieldPlaceholder="Payment Type"
               label="Payment Type:"
+              labelStyle={{fontSize: 18, color: 'white'}}
               onSelect={(selectedItem) => {
                 setData({ ...data, attributes: { ...data.attributes, payment_type: selectedItem } });
               }}
@@ -124,17 +128,19 @@ export default function FarmProfileAddPostings() {
             }}
           />
         </Animated.View>
-        <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.inputContainer}>
-           <StyledTextInput
-            placeholder="Age Requirement"
-            icon="longitude"
-            label="Age Requirement:"
-            onChangeText={(text) => setData({ ...data, attributes: { ...data.attributes, age_requirement: text } })}
-          />
-        </Animated.View>
         <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} >
-        <Text style={{ alignSelf: 'flex-start', color: 'white', marginBottom: 5 }}>Relevant Skills:</Text>
+        <Text style={{ alignSelf: 'flex-start', color: 'white', marginBottom: 10, fontSize: 18 }}>Relevant Skills:</Text>
             <SkillsSelect selectedItems={selectedItems} onSelectedItemsChange={onSelectedItemsChange} />
+        </Animated.View>
+        <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputContainer}>
+        <StyledTextInput
+          placeholder="Description"
+          icon="pencil-outline"
+          multiline={true}
+          label="Description:"
+          labelStyle={{fontSize: 18, color: 'white'}}
+          onChangeText={(text) => setData({ ...data, attributes: { ...data.attributes, description: text } })}
+        />
         </Animated.View>
         { accommodationData.housing || accommodationData.meals || accommodationData.transportation ?
           <Animated.View entering={FadeInDown.delay(1000).duration(1000).springify()}style={styles.inputContainer}>
@@ -178,19 +184,13 @@ export default function FarmProfileAddPostings() {
             }
           </Animated.View>
         : null}
-        <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputContainer}>
-        <StyledTextInput
-          placeholder="Description"
-          icon="pencil-outline"
-          multiline={true}
-          label="Description:"
-          onChangeText={(text) => setData({ ...data, attributes: { ...data.attributes, description: text } })}
-        />
-        </Animated.View>
         {/* Submit button */}
-        <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.submitButtonContainer}>
+        <Animated.View entering={FadeInDown.delay(1400).duration(1000).springify()} style={styles.submitButtonContainer}>
           <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
             <Text style={styles.submitButtonText}>Create Posting</Text>
+            <View style={styles.submitArrow}>
+              <MaterialCommunityIcons name="arrow-right" size={24} color="white" />
+            </View>
           </TouchableOpacity>
         </Animated.View>
       </View>
@@ -208,6 +208,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    maxWidth: '100%',
   },
   titleTextBox: {
     padding: 10,
@@ -228,20 +229,59 @@ const styles = StyleSheet.create({
     shadowColor: 'black',
     shadowOpacity: 0.4,
   },
+  inputContainerAccommodations: {
+    width: '100%',
+    shadowRadius: 20,
+    shadowColor: 'black',
+    shadowOpacity: 0.4,
+  },
+  deleteButtonContainer: {
+    width: '100%',
+    marginTop: 30,
+  },
+  deleteButton: {
+    backgroundColor: '#FF3F3F',
+    borderRadius: 50,
+    paddingVertical: 30,
+    paddingHorizontal: 100,
+  },
+  deleteButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#333',
+  },
+  deleteIcon: {
+    backgroundColor: "#333",
+    borderRadius: 30,
+    padding: 15,
+    position: "absolute",
+    right: 15,
+    top: 13,
+  },
   submitButtonContainer: {
     width: '100%',
-    marginBottom: 3,
+    marginTop: 15,
   },
   submitButton: {
-    backgroundColor: '#ECE3CE',
-    padding: 10,
-    borderRadius: 8,
+    backgroundColor: '#ffb900',
+    borderRadius: 50,
+    paddingVertical: 30,
+    paddingHorizontal: 100,
   },
   submitButtonText: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: 'bold',
-    color: '#3A4D39',
     textAlign: 'center',
+    color: '#333',
+  },
+  submitArrow: {
+    backgroundColor: "#333",
+    borderRadius: 30,
+    padding: 15,
+    position: "absolute",
+    right: 15,
+    top: 13,
   },
   paymentInfo: {
     flexDirection: 'row',
@@ -258,7 +298,7 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     paddingHorizontal: 25,
     paddingVertical: 10,
-    marginBottom: 25,
+    marginBottom: 30,
     backgroundColor: '#4F6F52',
     minWidth: '100%',
     shadowRadius: 20,

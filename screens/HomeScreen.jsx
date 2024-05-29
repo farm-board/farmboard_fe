@@ -9,10 +9,6 @@ import FarmHome from '../components/Farm/FarmHome';
 
 export default function HomeScreen({ navigation }) {
 
-  const handleLogout = () => {
-    logout(navigation);
-  };
-
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
@@ -21,15 +17,6 @@ export default function HomeScreen({ navigation }) {
             <FarmHome />
           </KeyboardAvoidingContainer>
       </View>
-      <Animated.View entering={FadeInDown.delay(1400).duration(1000).springify()} style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.redButton}
-          onPress={handleLogout}>
-          <Text style={styles.buttonText}>
-            Log Out
-          </Text>
-        </TouchableOpacity>
-      </Animated.View>
     </View>
   );
 }
@@ -40,7 +27,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#4F6F52',
   },
   content: {
-    minHeight: '110%',
+    minHeight: '100%',
     alignItems: 'center',
     justifyContent: 'center',
   },

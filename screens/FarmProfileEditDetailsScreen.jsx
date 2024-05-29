@@ -25,7 +25,7 @@ export default function FarmProfileEditDetailsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#4F6F52',
+    backgroundColor: '#3A4D39',
   },
   backgroundImage: {
     position: 'absolute',

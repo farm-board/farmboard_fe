@@ -29,7 +29,7 @@ const UploadModal = ({
 
         {!isLoading && (
           <View style={[styles.modalView, { backgroundColor: colors.modalBackground }]}>
-            <StyledText big style={{ marginBottom: 10, color: '#ECE3CE' }}>
+            <StyledText big style={{ marginBottom: 10, color: 'white' }}>
               Profile Photo
             </StyledText>
 
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
     paddingTop: 15,
   },
   optionBtn: {
-    backgroundColor: "#ECE3CE",
+    backgroundColor: "white",
     borderRadius: 15,
     padding: 10,
     paddingHorizontal: 15,

@@ -248,14 +248,6 @@ export default function FarmHome() {
                 </View>
                 <View style={styles.itemRow}>
                   <StyledText bold style={styles.postingItem}>
-                    Age Requirement:
-                  </StyledText>
-                  <StyledText style={styles.postingItem}>
-                    {posting.attributes.age_requirement}
-                  </StyledText>
-                </View>
-                <View style={styles.itemRow}>
-                  <StyledText bold style={styles.postingItem}>
                     Offers Accommodations:
                   </StyledText>
                   <StyledText style={styles.postingItem}>

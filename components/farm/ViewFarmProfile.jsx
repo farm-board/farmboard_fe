@@ -152,14 +152,6 @@ export default function ViewFarmProfile() {
                 </View>
                 <View style={styles.itemRow}>
                   <StyledText bold style={styles.postingItem}>
-                    Age Requirement:
-                  </StyledText>
-                  <StyledText style={styles.postingItem}>
-                    {posting.age_requirement}
-                  </StyledText>
-                </View>
-                <View style={styles.itemRow}>
-                  <StyledText bold style={styles.postingItem}>
                     Offers Accommodations:
                   </StyledText>
                   <StyledText style={styles.postingItem}>

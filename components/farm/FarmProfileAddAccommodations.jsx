@@ -7,6 +7,7 @@ import axios from 'axios';
 import KeyboardAvoidingContainer from "../Containers/KeyboardAvoidingContainer";
 import StyledText from '../Texts/StyledText';
 import StyledSwitch from '../Inputs/StyledSwitch';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 
 export default function FarmProfileAddAccommodations() {
@@ -65,6 +66,9 @@ export default function FarmProfileAddAccommodations() {
         <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.submitButtonContainer}>
           <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
             <Text style={styles.submitButtonText}>Save Changes</Text>
+            <View style={styles.submitArrow}>
+              <MaterialCommunityIcons name="arrow-right" size={24} color="white" />
+            </View>
           </TouchableOpacity>
         </Animated.View>
       </View>
@@ -74,48 +78,38 @@ export default function FarmProfileAddAccommodations() {
 
 const styles = StyleSheet.create({
   container: {
-    paddingBottom: 25,
-    paddingHorizontal: 25,
   },
   content: {
     marginTop: 25,
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    minWidth: '100%',
-  },
-  titleTextBox: {
-    padding: 10,
-  },
-  text: {
-    textAlign: 'center',
+    minWidth: '90%',
   },
   mb3: {
     marginTop: 25,
-  },
-  avatarEdit: {
-    // Styles for AvatarEdit component
-  },
-  inputContainer: {
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   submitButtonContainer: {
     width: '100%',
     marginBottom: 3,
   },
   submitButton: {
-    backgroundColor: '#ECE3CE',
-    padding: 10,
-    borderRadius: 8,
-    marginTop: 20,
+    backgroundColor: '#ffb900',
+    borderRadius: 50,
+    paddingVertical: 30,
+    paddingHorizontal: 100,
   },
   submitButtonText: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: 'bold',
-    color: '#3A4D39',
     textAlign: 'center',
+    color: '#333',
+  },
+  submitArrow: {
+    backgroundColor: "#333",
+    borderRadius: 30,
+    padding: 15,
+    position: "absolute",
+    right: 15,
+    top: 13,
   },
 });
 
