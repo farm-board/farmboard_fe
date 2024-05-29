@@ -122,53 +122,65 @@ export default function EmployeeProfile() {
   const renderContent = () => {
     if (selectedTab === 'Experience') {
       return (
-        <View style={styles.subContentContainer}>
+        <View style={styles.subContentContainerFour}>
           <View style={styles.experienceWrapper}>
-            {experiences
-              .sort((a, b) => new Date(b.attributes.ended_at) - new Date(a.attributes.ended_at))
-              .slice(0, 3) 
-              .map((experience, index) => (
-                <View key={index} style={[styles.experienceContainer, styles.experienceBox]}>
-                  <View style={styles.labelContainer}>
-                    <Text style={styles.experienceLabel}>{experience.attributes.company_name}</Text>
+            {experiences.length === 0 ? (
+              <Text style={styles.noContentText}>
+                You have not added any work experience. To add work experience, click the edit pencil in the top right hand corner.
+              </Text>
+            ) : (
+              experiences
+                .sort((a, b) => new Date(b.attributes.ended_at) - new Date(a.attributes.ended_at))
+                .slice(0, 3)
+                .map((experience, index) => (
+                  <View key={index} style={[styles.experienceContainer, styles.experienceBox]}>
+                    <View style={styles.labelContainer}>
+                      <Text style={styles.experienceLabel}>{experience.attributes.company_name}</Text>
+                    </View>
+                    <Text style={styles.label}>Employment:</Text>
+                    <Text style={styles.experienceCompany}>
+                      <Text>{`${experience.attributes.started_at} to ${experience.attributes.ended_at}`}</Text>
+                    </Text>
+                    <Text style={styles.label}>Description:</Text>
+                    <Text style={styles.experienceCompany}>
+                      <Text>{experience.attributes.description}</Text>
+                    </Text>
                   </View>
-                  <Text style={styles.label}>Employment:</Text>
-                  <Text style={styles.experienceCompany}>
-                    <Text>{`${experience.attributes.started_at} to ${experience.attributes.ended_at}`}</Text>
-                  </Text>
-                  <Text style={styles.label}>Description:</Text>
-                  <Text style={styles.experienceCompany}>
-                    <Text>{experience.attributes.description}</Text>
-                  </Text>
-                </View>
-              ))}
+                ))
+            )}
           </View>
         </View>
       );
     } else if (selectedTab === 'References') {
       return (
-        <View style={styles.subContentContainer}>
+        <View style={styles.subContentContainerFour}>
           <View style={styles.experienceWrapper}>
-            {references
-              .slice(0, 3)
-              .map((reference, index) => (
-                <View key={index} style={[styles.referenceContainer, styles.experienceBox]}>
-                  <View style={styles.referenceHeader}>
-                    <Text style={styles.referenceName}>{`${reference.attributes.first_name} ${reference.attributes.last_name}`}</Text>
+            {references.length === 0 ? (
+              <Text style={styles.noContentText}>
+                You have not added any references. To add references, click the edit pencil in the top right hand corner.
+              </Text>
+            ) : (
+              references
+                .slice(0, 3)
+                .map((reference, index) => (
+                  <View key={index} style={[styles.referenceContainer, styles.experienceBox]}>
+                    <View style={styles.labelContainer}>
+                      <Text style={styles.experienceLabel}>{`${reference.attributes.first_name} ${reference.attributes.last_name}`}</Text>
+                    </View>
+                    <View style={styles.referenceContent}>
+                      <Text style={styles.label}>Contact:</Text>
+                      {reference.attributes.phone && (
+                        <Text style={styles.referenceDetail}>Phone: {reference.attributes.phone}</Text>
+                      )}
+                      {reference.attributes.email && (
+                        <Text style={styles.referenceDetail}>Email: {reference.attributes.email}</Text>
+                      )}
+                      <Text style={styles.label}>Relationship:</Text>
+                      <Text style={styles.referenceDetail}>{reference.attributes.relationship}</Text>
+                    </View>
                   </View>
-                  <View style={styles.referenceContent}>
-                    <Text style={styles.referenceLabel}>Contact:</Text>
-                    {reference.attributes.phone && (
-                      <Text style={styles.referenceDetail}>Phone: {reference.attributes.phone}</Text>
-                    )}
-                    {reference.attributes.email && (
-                      <Text style={styles.referenceDetail}>Email: {reference.attributes.email}</Text>
-                    )}
-                    <Text style={styles.referenceLabel}>Relationship:</Text>
-                    <Text style={styles.referenceDetail}>{reference.attributes.relationship}</Text>
-                  </View>
-                </View>
-              ))}
+                ))
+            )}
           </View>
         </View>
       );
@@ -182,7 +194,7 @@ export default function EmployeeProfile() {
           <MaterialCommunityIcons
             name="pencil-outline"
             size={25}
-            color={colors.highlight}
+            color="white"
           />
         </TouchableOpacity>
         <View style={styles.leftContent}>
@@ -222,19 +234,21 @@ export default function EmployeeProfile() {
         <StyledText big tanColor style={styles.sectionTitle}>About</StyledText>
         <StyledText small tanColor style={styles.sectionText}>{employee.bio}</StyledText>
       </View>
-      <View style={styles.toggleContainer}>
-        <TouchableOpacity
-          style={[styles.toggleButton, selectedTab === 'Experience' && styles.toggleButtonSelected]}
-          onPress={() => setSelectedTab('Experience')}
-        >
-          <Text style={[styles.toggleButtonText, selectedTab === 'Experience' && styles.toggleButtonTextSelected]}>Experience</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.toggleButton, selectedTab === 'References' && styles.toggleButtonSelected]}
-          onPress={() => setSelectedTab('References')}
-        >
-          <Text style={[styles.toggleButtonText, selectedTab === 'References' && styles.toggleButtonTextSelected]}>References</Text>
-        </TouchableOpacity>
+      <View style={styles.subContentContainerThree}>
+        <View style={styles.toggleContainer}>
+          <TouchableOpacity
+            style={[styles.toggleButton, selectedTab === 'Experience' && styles.toggleButtonSelected]}
+            onPress={() => setSelectedTab('Experience')}
+          >
+            <Text style={[styles.toggleButtonText, selectedTab === 'Experience' && styles.toggleButtonTextSelected]}>Experience</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.toggleButton, selectedTab === 'References' && styles.toggleButtonSelected]}
+            onPress={() => setSelectedTab('References')}
+          >
+            <Text style={[styles.toggleButtonText, selectedTab === 'References' && styles.toggleButtonTextSelected]}>References</Text>
+          </TouchableOpacity>
+        </View>
       </View>
       {renderContent()}
     </View>
@@ -256,6 +270,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     paddingHorizontal: 20,
     paddingVertical: 5,
+    marginBottom: 10,
   },
   rightContent: {
     flex: 3,
@@ -266,13 +281,14 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     marginBottom: 5,
     alignItems: 'center',
-    marginLeft: -30,
+    marginLeft: -15,
   },
   name: {
-    fontSize: 25,
+    textAlign: 'right',
+    letterSpacing: 1,
+    paddingBottom: 5,
+    fontSize: 20,
     fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 10,
     color: 'white',
   },
   contentContainer: {
@@ -280,45 +296,67 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   subContentContainer: {
-    alignItems: 'flex-start',
+    letterSpacing: 1,
+    paddingHorizontal: 25,
     backgroundColor: '#3A4D39',
+    shadowRadius: 20,
+    shadowColor: 'black',
+    shadowOpacity: 0.3,
     minWidth: '100%',
-    paddingLeft: 10,
-    paddingRight: 10,
-    paddingBottom: 10,
-    marginBottom: 5, // Add margin to the bottom of each section
+    paddingBottom: 15,
+    marginBottom: 10,
   },
   subContentContainerTwo: {
-    alignItems: 'flex-start',
+    letterSpacing: 1,
+    paddingHorizontal: 25,
+    backgroundColor: '#3A4D39',
+    shadowRadius: 20,
+    shadowColor: 'black',
+    shadowOpacity: 0.3,
+    minWidth: '100%',
+    paddingBottom: 15,
+    marginBottom: 10,
+  },
+  subContentContainerThree: {
+    letterSpacing: 1,
+    paddingHorizontal: 25,
     backgroundColor: '#3A4D39',
     minWidth: '100%',
-    paddingLeft: 10,
-    paddingRight: 10,
-    paddingBottom: 10,
-    marginBottom: 5, 
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: 'white',
+    shadowRadius: 20,
+    shadowColor: 'black',
+    shadowOpacity: 0.3,
+    paddingTop: 10,
+  },
+  subContentContainerFour: {
+    letterSpacing: 1,
+    paddingHorizontal: 25,
+    backgroundColor: '#3A4D39',
+    minWidth: '100%',
+    paddingBottom: 15,
+    marginBottom: 10,
   },
   skillContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
   },
   location: {
-    textAlign: 'center',
-    color: 'white',
+    textAlign: 'right',
+    letterSpacing: 1,
+    paddingBottom: 5,
     fontSize: 16,
+    color: 'white',
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 5,
-    paddingTop: 10,
+    paddingTop: 5,
     color: 'white',
   },
   sectionText: {
     fontSize: 16,
     color: 'white',
+    letterSpacing: 1,
   },
   addButton: {
     backgroundColor: '#007AFF',
@@ -366,6 +404,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ECE3CE',
     marginTop: 5,
+    padding: 10,
+    marginBottom: 10,
+    shadowRadius: 20,
+    shadowColor: 'black',
+    shadowOpacity: 0.3,
   },
   experienceBox: {
     padding: 10,
@@ -406,16 +449,6 @@ const styles = StyleSheet.create({
     marginTop: 5,
     marginBottom: 5,
   },
-  feedButton: {
-    backgroundColor: colors.highlight,
-    padding: 10,
-    borderRadius: 5,
-    marginTop: 20,
-  },
-  feedButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
   referenceContainer: {
     minWidth: '100%',
     backgroundColor: '#4F6F52', 
@@ -423,6 +456,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ECE3CE',
     marginTop: 5,
+    padding: 10,
+    marginBottom: 10,
+    shadowRadius: 20,
+    shadowColor: 'black',
+    shadowOpacity: 0.3,
   },
   referenceHeader: {
     borderBottomWidth: 1,
@@ -434,38 +472,53 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'white',
     fontSize: 20,
+    paddingBottom: 2,
+    paddingTop: 2,
     textAlign: 'center',
   },
   referenceContent: {
-    padding: 5,
   },
   referenceLabel: {
     fontWeight: 'bold',
     color: 'white',
     fontSize: 18,
-    marginTop: 5,
+    paddingBottom: 2,
+    paddingTop: 2,
   },
   referenceDetail: {
     color: 'white',
     fontSize: 16,
+    marginTop: 5,
+    marginBottom: 5,
+  },
+  feedButton: {
+    backgroundColor: colors.highlight,
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 20,
+  },
+  feedButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
   toggleContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginBottom: 10,
     borderRadius: 5,
-    marginHorizontal: 10,
     backgroundColor: '#333',
+    marginBottom: 10,
+    marginVertical: 5,
+    
   },
   toggleButton: {
     flex: 1,
     alignItems: 'center',
     paddingVertical: 10,
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
+    borderWidth: 2,
+    borderColor: '#333',
   },
   toggleButtonSelected: {
-    backgroundColor: '#4F6F52',
+    backgroundColor: '#FFB900',
   },
   toggleButtonText: {
     fontSize: 18,
@@ -473,9 +526,12 @@ const styles = StyleSheet.create({
   },
   toggleButtonTextSelected: {
     fontWeight: 'bold',
+    color: '#333',
+  },
+  noContentText: {
     color: 'white',
+    textAlign: 'center',
+    fontSize: 16,
+    padding: 20,
   },
 });
-
-
-
