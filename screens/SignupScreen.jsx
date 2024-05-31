@@ -6,6 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import { UserContext } from '../contexts/UserContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export default function SignupScreen() {
     const [data, setData] = useState({
@@ -15,6 +16,8 @@ export default function SignupScreen() {
     })
     
     const navigation = useNavigation();
+
+    const [showPassword, setShowPassword] = useState(false);
 
     const { currentUser, setCurrentUser } = useContext(UserContext);
 
@@ -54,6 +57,11 @@ export default function SignupScreen() {
             console.log(error.message);
         })
     }
+
+    const togglePasswordVisibility = () => {
+      setShowPassword(!showPassword);
+    };
+
 return (
     <View style={styles.container}>
         <StatusBar style="light" />
@@ -81,18 +89,24 @@ return (
                 style={styles.input}
                 placeholder='Password'
                 placeholderTextColor='gray'
-                secureTextEntry
+                secureTextEntry={!showPassword}
                 onChangeText={text => setData({ ...data, password: text })}
             />
+             <TouchableOpacity onPress={togglePasswordVisibility}>
+                    <Icon name={showPassword ? "eye-off" : "eye"} size={24} color="gray" />
+              </TouchableOpacity>
             </Animated.View>
             <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.inputContainer}>
             <TextInput
                 style={styles.input}
                 placeholder='Password Confirmation'
                 placeholderTextColor='gray'
-                secureTextEntry
+                secureTextEntry={!showPassword}
                 onChangeText={text => setData({ ...data, password_confirmation: text })}
             />
+              <TouchableOpacity onPress={togglePasswordVisibility}>
+                    <Icon name={showPassword ? "eye-off" : "eye"} size={24} color="gray" />
+              </TouchableOpacity>
             </Animated.View>
             <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()}>
             <TouchableOpacity
@@ -156,9 +170,12 @@ const styles = StyleSheet.create({
       width: '100%',
       marginBottom: 10,
       marginTop: 10,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
     },
     input: {
       color: 'black',
+      flex: 1,
     },
     button: {
       backgroundColor: '#4F6F52',

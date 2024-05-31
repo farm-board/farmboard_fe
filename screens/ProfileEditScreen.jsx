@@ -36,6 +36,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#4F6F52',
+    marginBottom: -35,
   },
   backgroundImage: {
     position: 'absolute',
