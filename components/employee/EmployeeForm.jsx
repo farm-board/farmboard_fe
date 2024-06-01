@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
-import { Text, View, TouchableOpacity, StyleSheet } from 'react-native';
+import { Text, View, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { UserContext } from '../../contexts/UserContext';
 import axios from 'axios';
@@ -53,15 +53,33 @@ export default function EmployeeForm() {
   const navigation = useNavigation();
   const { currentUser, setSetupComplete } = useContext(UserContext);
 
+  const validateForm = () => {
+    const missingFields = [];
+    if (!data.first_name) missingFields.push('First Name');
+    if (!data.last_name) missingFields.push('Last Name');
+    if (!data.city) missingFields.push('City');
+    if (!data.state) missingFields.push('State');
+    if (!data.zip_code) missingFields.push('Zip Code');
+    if (!data.phone && !data.email) missingFields.push('Phone or Email');
+
+    if (missingFields.length > 0) {
+      Alert.alert('Missing Fields', `Please fill out the following fields: ${missingFields.join(', ')} to create a profile`);
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = () => {
-    axios.put(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`, { employee: { ...data, setup_complete: true } })
-      .then(response => {
-        console.log(response.data);
-        setSetupComplete(true);
-      })
-      .catch(error => {
-        console.log('Unable to register user', error);
-      });
+    if (validateForm()) {
+      axios.put(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`, { employee: { ...data, setup_complete: true } })
+        .then(response => {
+          console.log(response.data);
+          setSetupComplete(true);
+        })
+        .catch(error => {
+          console.log('Unable to register user', error);
+        });
+    }
   };
 
   const pickImage = async (mode) => {
@@ -188,34 +206,34 @@ export default function EmployeeForm() {
             onChangeText={(text) => setData({ ...data, zip_code: text })}
           />
         </Animated.View>
-          <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputContainer}>
-            <StyledTextInput
-              placeholder="Phone"
-              icon="phone"
-              label="Phone number that potential employers can contact you at:"
-              labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
-              keyboardType="numeric"
-              onChangeText={(text) => setData({ ...data, phone: text })}
-            />
-            <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputContainer}>
-              <StyledTextInput
-                placeholder="Email"
-                icon="email"
-                label="Email that potential employers can contact you at:"
-                labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
-                onChangeText={(text) => setData({ ...data, email: text })}
-              />
-              <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputContainer}>
-                <StyledTextInput
-                  placeholder="Bio"
-                  icon="pencil-outline"
-                  multiline={true}
-                  label="Bio:"
-                  labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
-                  onChangeText={(text) => setData({ ...data, bio: text })}
-                />
-            </Animated.View>
-          </Animated.View>
+        <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputContainer}>
+          <StyledTextInput
+            placeholder="Phone"
+            icon="phone"
+            label="Phone number that potential employers can contact you at:"
+            labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
+            keyboardType="numeric"
+            onChangeText={(text) => setData({ ...data, phone: text })}
+          />
+        </Animated.View>
+        <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputContainer}>
+          <StyledTextInput
+            placeholder="Email"
+            icon="email"
+            label="Email that potential employers can contact you at:"
+            labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
+            onChangeText={(text) => setData({ ...data, email: text })}
+          />
+        </Animated.View>
+        <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputContainer}>
+          <StyledTextInput
+            placeholder="Bio"
+            icon="pencil-outline"
+            multiline={true}
+            label="Bio:"
+            labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
+            onChangeText={(text) => setData({ ...data, bio: text })}
+          />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()}>
           <Text style={{ alignSelf: 'flex-start', color: 'white', marginBottom: 5, fontSize: 18 }}>Relevant Skills:</Text>

@@ -1,4 +1,4 @@
-import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet } from 'react-native'
+import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native'
 import React, { useState, useContext } from 'react'
 import { StatusBar } from 'expo-status-bar';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
@@ -6,6 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import { UserContext } from '../contexts/UserContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export default function LoginScreen() {
     const [data, setData] = useState({
@@ -14,6 +15,8 @@ export default function LoginScreen() {
     })
     
     const navigation = useNavigation();
+
+    const [showPassword, setShowPassword] = useState(false);
     
     const { setCurrentUser } = useContext(UserContext);
 
@@ -33,8 +36,18 @@ export default function LoginScreen() {
         .catch(error => {
           console.log(error);
           console.log(error.message);
+          Alert.alert(
+            "Login Error",
+            "The email or password you entered is incorrect.",
+            [{ text: "OK" }]
+          );
         })
     }
+
+    const togglePasswordVisibility = () => {
+      setShowPassword(!showPassword);
+    };
+
     return (
         <View style={styles.container}>
           <StatusBar style="light" />
@@ -62,9 +75,12 @@ export default function LoginScreen() {
                   style={styles.input}
                   placeholder='Password'
                   placeholderTextColor='gray'
-                  secureTextEntry
+                  secureTextEntry={!showPassword}
                   onChangeText={text => setData({ ...data, password: text })}
                 />
+                <TouchableOpacity onPress={togglePasswordVisibility}>
+                    <Icon name={showPassword ? "eye-off" : "eye"} size={24} color="gray" />
+                </TouchableOpacity>
               </Animated.View>
               <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()}>
                 <TouchableOpacity
@@ -133,9 +149,12 @@ export default function LoginScreen() {
         width: '100%',
         marginBottom: 10,
         marginTop: 10,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
       },
       input: {
         color: 'black',
+        flex: 1,
       },
       button: {
         backgroundColor: '#4F6F52',

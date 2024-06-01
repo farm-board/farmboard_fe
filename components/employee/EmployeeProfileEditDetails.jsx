@@ -1,6 +1,6 @@
-import React, { useState, useContext, useEffect } from 'react'
+import React, { useState, useContext, useEffect } from 'react';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
-import { Text, View, TextInput, TouchableOpacity, StyleSheet } from 'react-native'
+import { Text, View, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { UserContext } from '../../contexts/UserContext';
 import axios from 'axios';
@@ -11,12 +11,8 @@ import AvatarEdit from "../Profile/AvatarEdit";
 import UploadModal from '../Profile/UploadModal';
 import StyledText from '../Texts/StyledText';
 import SkillSelect from '../../components/skills/SkillSelect';
-import ExperienceForm from '../Experience/ExperienceForm';
-import ReferenceForm from '../Reference/ReferenceForm';
-import SectionHeader from '../Texts/SectionHeader';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import StyledSelectDropdown from '../Inputs/StyledSelectDropdown';
-
 
 export default function EmployeeProfileEditDetails() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -29,8 +25,10 @@ export default function EmployeeProfileEditDetails() {
     skills: [],
     bio: '',
     age: '',
-    image: null
-  })
+    phone: '',
+    email: '',
+    image: null,
+  });
 
   const states = [
     "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
@@ -43,40 +41,27 @@ export default function EmployeeProfileEditDetails() {
     "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota",
     "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington",
     "West Virginia", "Wisconsin", "Wyoming"
-]
-
-  const [showExperienceForm, setShowExperienceForm] = useState(false);
-  const [experiences, setExperiences] = useState([]);
-  const [showReferencesForm, setShowReferencesForm] = useState(false);
-  const [references, setReferences] = useState([]);
+  ];
 
   const [selectedItems, setSelectedItems] = useState([]);
 
   const onSelectedItemsChange = (selectedItems, selectedSkills) => {
     setSelectedItems(selectedItems);
-    setData({...data, skills: selectedSkills});
-  }
+    setData({ ...data, skills: selectedSkills });
+  };
 
   const navigation = useNavigation();
   const { currentUser } = useContext(UserContext);
 
   const handleSubmit = () => {
-    axios.put(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`, { employee: data})
-    .then(response => {
-      console.log(response.data);
-      navigation.navigate('Profile');
-    })
-    .catch(error => {
-      console.log('Unable to register user', error);
-    })
-  }
-
-  const toggleExperienceForm = () => {
-    setShowExperienceForm(!showExperienceForm);
-  };
-
-  const toggleReferenceForm = () => {
-    setShowReferencesForm(!showReferencesForm);
+    axios.put(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`, { employee: data })
+      .then(response => {
+        console.log(response.data);
+        navigation.navigate('Profile');
+      })
+      .catch(error => {
+        console.log('Unable to register user', error);
+      });
   };
 
   const pickImage = async (mode) => {
@@ -101,7 +86,7 @@ export default function EmployeeProfileEditDetails() {
       }
 
       if (!result.canceled) {
-        setData({ ...data, image: result.assets[0].uri});
+        setData({ ...data, image: result.assets[0].uri });
         uploadImage(result.assets[0].uri);
         setModalVisible(false);
       }
@@ -120,8 +105,7 @@ export default function EmployeeProfileEditDetails() {
         name: `profile_${currentUser.id}.jpg`,
       });
 
-      // Upload image to Amazon S3
-      let response = await axios.post(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/upload_image`, formData, {
+      await axios.post(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/upload_image`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -132,13 +116,18 @@ export default function EmployeeProfileEditDetails() {
   };
 
   const fetchProfileData = async () => {
-    Promise.all([
-      axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`),
-      axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/image`)
-    ])
-    .then(([employeeResponse, imageResponse]) => {
+    try {
+      const [employeeResponse, imageResponse] = await Promise.all([
+        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`),
+        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/image`).catch(error => {
+          if (error.response && error.response.status === 404) {
+            return { data: { image_url: null } };
+          }
+          throw error;
+        })
+      ]);
+
       setData({
-        ...data,
         first_name: employeeResponse.data.data.attributes.first_name,
         last_name: employeeResponse.data.data.attributes.last_name,
         city: employeeResponse.data.data.attributes.city,
@@ -149,50 +138,49 @@ export default function EmployeeProfileEditDetails() {
         age: employeeResponse.data.data.attributes.age,
         phone: employeeResponse.data.data.attributes.phone,
         email: employeeResponse.data.data.attributes.email,
-        image: imageResponse.data.image_url
-      })
-    })
-    .catch(error => {
+        image: imageResponse.data.image_url || null,
+      });
+    } catch (error) {
       console.error('There was an error fetching the employee:', error);
-    });
+    }
   };
 
   useEffect(() => {
-    fetchProfileData()
+    fetchProfileData();
   }, []);
 
   return (
     <KeyboardAvoidingContainer style={styles.container} behavior="padding">
       <View style={styles.content}>
-        <Animated.View entering={FadeInDown.duration(1000).springify()}style={styles.inputContainer}>
-            <StyledTextInput
-              placeholder="First Name"
-              icon="account-outline"
-              label="First Name:"
-              value={data.first_name}
-              labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
-              onChangeText={(text) => setData({...data, first_name: text})}
-            />
+        <Animated.View entering={FadeInDown.duration(1000).springify()} style={styles.inputContainer}>
+          <StyledTextInput
+            placeholder="First Name"
+            icon="account-outline"
+            label="First Name:"
+            value={data.first_name}
+            labelStyle={{ fontSize: 18, color: 'white' }}
+            onChangeText={(text) => setData({ ...data, first_name: text })}
+          />
         </Animated.View>
         <Animated.View entering={FadeInDown.duration(1000).springify()} style={styles.inputContainer}>
-            <StyledTextInput
-              placeholder="Last Name"
-              icon="account-outline"
-              label="Last Name:"
-              value={data.last_name}
-              labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
-              onChangeText={(text) => setData({...data, last_name: text})}
-            />
+          <StyledTextInput
+            placeholder="Last Name"
+            icon="account-outline"
+            label="Last Name:"
+            value={data.last_name}
+            labelStyle={{ fontSize: 18, color: 'white' }}
+            onChangeText={(text) => setData({ ...data, last_name: text })}
+          />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(200).duration(1000).springify()} style={styles.inputContainer}>
-            <StyledTextInput
-              placeholder="City"
-              icon="city-variant-outline"
-              label="City:"
-              value={data.city}
-              labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
-              onChangeText={(text) => setData({...data, city: text})}
-            />
+          <StyledTextInput
+            placeholder="City"
+            icon="city-variant-outline"
+            label="City:"
+            value={data.city}
+            labelStyle={{ fontSize: 18, color: 'white' }}
+            onChangeText={(text) => setData({ ...data, city: text })}
+          />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.inputContainer}>
           <StyledSelectDropdown
@@ -200,42 +188,42 @@ export default function EmployeeProfileEditDetails() {
             fieldPlaceholder="State"
             label="State:"
             value={data.state}
-            labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
+            labelStyle={{ fontSize: 18, color: 'white' }}
             onSelect={(selectedItem) => {
-              setData({...data, state: selectedItem})
+              setData({ ...data, state: selectedItem });
             }}
           />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.inputContainer}>
-             <StyledTextInput
-              placeholder="Zip Code"
-              icon="longitude"
-              label="Zip Code:"
-              keyboardType="numeric"
-              value={data.zip_code}
-              labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
-              onChangeText={(text) => setData({...data, zip_code: text})}
-            />
+          <StyledTextInput
+            placeholder="Zip Code"
+            icon="longitude"
+            label="Zip Code:"
+            keyboardType="numeric"
+            value={data.zip_code}
+            labelStyle={{ fontSize: 18, color: 'white' }}
+            onChangeText={(text) => setData({ ...data, zip_code: text })}
+          />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.inputContainer}>
-             <StyledTextInput
-              placeholder="Phone"
-              icon="phone"
-              label="Phone:"
-              value={data.phone}
-              labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
-              onChangeText={(text) => setData({...data, phone: text})}
-            />
+          <StyledTextInput
+            placeholder="Phone"
+            icon="phone"
+            label="Phone:"
+            value={data.phone}
+            labelStyle={{ fontSize: 18, color: 'white' }}
+            onChangeText={(text) => setData({ ...data, phone: text })}
+          />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.inputContainer}>
-             <StyledTextInput
-              placeholder="Email"
-              icon="email"
-              label="Email:"
-              value={data.email}
-              labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
-              onChangeText={(text) => setData({...data, email: text})}
-            />
+          <StyledTextInput
+            placeholder="Email"
+            icon="email"
+            label="Email:"
+            value={data.email}
+            labelStyle={{ fontSize: 18, color: 'white' }}
+            onChangeText={(text) => setData({ ...data, email: text })}
+          />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputContainer}>
           <StyledTextInput
@@ -243,28 +231,26 @@ export default function EmployeeProfileEditDetails() {
             icon="pencil-outline"
             multiline={true}
             label="Bio:"
-            labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
+            labelStyle={{ fontSize: 18, color: 'white' }}
             value={data.bio}
-            onChangeText={(text) => setData({...data, bio: text})}
+            onChangeText={(text) => setData({ ...data, bio: text })}
           />
         </Animated.View>
-        <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} >
-        <Text style={{ alignSelf: 'flex-start', color: 'white', marginBottom: 5, fontSize: 18, }}>Relevant Skills:</Text>
-            <SkillSelect selectedItems={selectedItems} onSelectedItemsChange={onSelectedItemsChange} />
+        <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()}>
+          <Text style={{ alignSelf: 'flex-start', color: 'white', marginBottom: 5, fontSize: 18 }}>Relevant Skills:</Text>
+          <SkillSelect selectedItems={selectedItems} onSelectedItemsChange={onSelectedItemsChange} />
         </Animated.View>
-        {/* Submit button */}
         <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.submitButtonContainer}>
-            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-              <Text style={styles.submitButtonText}>
-                Save Changes
-              </Text>
-              <View style={styles.submitArrow}>
-                <MaterialCommunityIcons name="arrow-right" size={24} color="white" />
-              </View>
-            </TouchableOpacity>
+          <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+            <Text style={styles.submitButtonText}>
+              Save Changes
+            </Text>
+            <View style={styles.submitArrow}>
+              <MaterialCommunityIcons name="arrow-right" size={24} color="white" />
+            </View>
+          </TouchableOpacity>
         </Animated.View>
       </View>
-      {/* UploadModal component */}
       <UploadModal
         modalVisible={modalVisible}
         onBackPress={() => {
@@ -273,9 +259,9 @@ export default function EmployeeProfileEditDetails() {
         onCameraPress={() => pickImage()}
         onGalleryPress={() => pickImage("gallery")}
         onRemovePress={() => removeImage()}
-    />
+      />
     </KeyboardAvoidingContainer>
-  )
+  );
 };
 
 const styles = StyleSheet.create({

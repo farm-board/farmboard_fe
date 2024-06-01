@@ -40,7 +40,7 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: -10,
+    marginBottom: -35,
     flex: 1,
     backgroundColor: '#4F6F52',
   },
