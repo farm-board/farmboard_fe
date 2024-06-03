@@ -40,7 +40,7 @@ export default function EmployeeProfileEdit() {
   }
 
   const navigation = useNavigation();
-  const { currentUser } = useContext(UserContext);
+  const { currentUser, setUserAvatar } = useContext(UserContext);
 
   useEffect(() => {
     fetchProfileData();
@@ -67,6 +67,7 @@ export default function EmployeeProfileEdit() {
 
       setExperiences(experiencesResponse.data.data);
       setReferences(referencesResponse.data.data);
+      setUserAvatar(imageResponse.data.image_url);
       setData(prevData => ({
         ...prevData,
         first_name: employeeResponse.data.data.attributes.first_name,
@@ -124,7 +125,6 @@ export default function EmployeeProfileEdit() {
         type: 'image/jpeg',
         name: `profile_${currentUser.id}.jpg`,
       });
-
       await axios.post(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/upload_image`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',

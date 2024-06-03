@@ -51,9 +51,27 @@ export default function EmployeeProfileEditDetails() {
   };
 
   const navigation = useNavigation();
-  const { currentUser } = useContext(UserContext);
+  const { currentUser, setUserFirstName, setUserLastName } = useContext(UserContext);
 
   const handleSubmit = () => {
+    axios.put(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`, { employee: data})
+    .then(response => {
+      console.log(response.data);
+      setUserFirstName(data.first_name);
+      setUserLastName(data.last_name);
+      navigation.navigate('Profile');
+    })
+    .catch(error => {
+      console.log('Unable to register user', error);
+    })
+  }
+
+  const toggleExperienceForm = () => {
+    setShowExperienceForm(!showExperienceForm);
+  };
+
+  const toggleReferenceForm = () => {
+    setShowReferencesForm(!showReferencesForm);
     axios.put(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`, { employee: data })
       .then(response => {
         console.log(response.data);

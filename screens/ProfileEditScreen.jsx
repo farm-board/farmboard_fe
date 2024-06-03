@@ -34,6 +34,7 @@ export default function ProfileEditScreen() {
 
 const styles = StyleSheet.create({
   container: {
+    marginBottom: -35,
     flex: 1,
     backgroundColor: '#4F6F52',
     marginBottom: -35,

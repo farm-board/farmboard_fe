@@ -245,7 +245,7 @@ export default function FarmProfileEditPostings() {
             </View>
           </TouchableOpacity>
         </Animated.View>
-        <Animated.View entering={FadeInDown.delay(1400).duration(1000).springify()} style={styles.deleteButtonContainer}>
+        <Animated.View entering={FadeInDown.delay(1600).duration(1000).springify()} style={styles.deleteButtonContainer}>
           <TouchableOpacity style={styles.deleteButton} onPress={handleDeletePosting}>
             <Text style={styles.deleteButtonText}>Remove Posting</Text>
             <View style={styles.deleteIcon}>

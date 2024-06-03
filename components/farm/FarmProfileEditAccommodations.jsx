@@ -43,6 +43,17 @@ export default function FarmProfileEditAccommodations() {
     });
   };
 
+  const handleAccommodationsDelete = () => {
+    axios.delete(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/accommodation`)
+    .then(response => {
+      console.log(response.data);
+      navigation.push('Edit Profile');
+    })
+    .catch(error => {
+      console.log('Unable to register user', error);
+    })
+  };
+
   useEffect(() => {
     fetchAccommodationData()
   }, []);
@@ -78,11 +89,19 @@ export default function FarmProfileEditAccommodations() {
           />
         </Animated.View>
         {/* Submit button */}
-        <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.submitButtonContainer}>
+        <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.submitButtonContainer}>
           <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
             <Text style={styles.submitButtonText}>Save Changes</Text>
             <View style={styles.submitArrow}>
               <MaterialCommunityIcons name="arrow-right" size={24} color="white" />
+            </View>
+          </TouchableOpacity>
+        </Animated.View>
+        <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.deleteButtonContainer}>
+          <TouchableOpacity style={styles.deleteButton} onPress={handleAccommodationsDelete}>
+            <Text style={styles.deleteButtonText}>Remove Accommodations</Text>
+            <View style={styles.deleteIcon}>
+              <MaterialCommunityIcons name="trash-can-outline" size={24} color="white" />
             </View>
           </TouchableOpacity>
         </Animated.View>
@@ -119,6 +138,30 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   submitArrow: {
+    backgroundColor: "#333",
+    borderRadius: 30,
+    padding: 15,
+    position: "absolute",
+    right: 15,
+    top: 13,
+  },
+  deleteButtonContainer: {
+    width: '100%',
+    marginTop: 20,
+  },
+  deleteButton: {
+    backgroundColor: '#FF3F3F',
+    borderRadius: 50,
+    paddingVertical: 30,
+    paddingHorizontal: 60,
+  },
+  deleteButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#333',
+  },
+  deleteIcon: {
     backgroundColor: "#333",
     borderRadius: 30,
     padding: 15,
