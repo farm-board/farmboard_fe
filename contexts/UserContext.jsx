@@ -7,6 +7,10 @@ export const UserContext = React.createContext();
 export const UserProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [setupComplete, setSetupComplete] = useState(false);
+  const [userName, setUserName] = useState('');
+  const [userAvatar, setUserAvatar] = useState('');
+  const [userFirstName, setUserFirstName] = useState('');
+  const [userLastName, setUserLastName] = useState('');
   const [loading, setLoading] = useState(false);
 
   // Load any saved user data when the component mounts
@@ -29,6 +33,7 @@ export const UserProvider = ({ children }) => {
           // Update the setupComplete state
           console.log("setup Complete:", response.data.data.attributes.setup_complete);
           setSetupComplete(response.data.data.attributes.setup_complete);
+          setUserName(response.data.data.attributes.name);
           setLoading(false);
         })
         .catch(error => {
@@ -80,7 +85,7 @@ export const UserProvider = ({ children }) => {
   };
 
   return (
-    <UserContext.Provider value={{ currentUser, setCurrentUser, logout, loading, setupComplete, setSetupComplete }}>
+    <UserContext.Provider value={{ currentUser, setCurrentUser, logout, loading, setupComplete, setSetupComplete, userName, setUserName, userAvatar, setUserAvatar, userFirstName, setUserFirstName, userLastName, setUserLastName }}>
       {children}
     </UserContext.Provider>
   );

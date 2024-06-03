@@ -26,6 +26,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#3A4D39',
+    marginBottom: -35,
   },
   backgroundImage: {
     position: 'absolute',

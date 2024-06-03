@@ -11,7 +11,7 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native'
 import Gallery from '../Profile/Gallery';
 
 export default function FarmProfile() {
-  const {currentUser} = useContext(UserContext);
+  const {currentUser, setUserAvatar} = useContext(UserContext);
   const [farm, setFarm] = useState({});
   const [accommodations, setAccommodations] = useState(null);
   const [expandedMap, setExpandedMap] = useState({});
@@ -92,6 +92,7 @@ export default function FarmProfile() {
         try {
           const imageResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/image`);
           setProfilePhoto(imageResponse.data.image_url);
+          setUserAvatar(imageResponse.data.image_url);
         } catch (imageError) {
           console.error('Error fetching profile photo:', imageError);
           setProfilePhoto(null); // Handle the absence of profile photo appropriately
@@ -295,6 +296,22 @@ export default function FarmProfile() {
           </Text>
         </View>
       </View>
+      { accommodations === null && Object.keys(galleryImages).length === 0 ?
+      <View style={styles.infoMessage}>
+        <StyledText bold style={styles.infoMessageTitle}>Complete Your Profile for Better Visibility!</StyledText>
+        <StyledText style={styles.infoMessageText}>Add your farm's accommodations and gallery images to attract more applicants and showcase what makes your farm unique. Tap on the pencil icon above your farm's name to get started.</StyledText>
+      </View>
+      : accommodations === null ? 
+      <View style={styles.infoMessage}>
+        <StyledText bold style={styles.infoMessageTitle}>Add Accommodations to Your Profile!</StyledText>
+        <StyledText style={styles.infoMessageText}>Add your farm's accommodations to provide them within your job postings. Tap on the pencil icon above your farm's name to get started.</StyledText>
+      </View>
+      : Object.keys(galleryImages).length === 0 ?
+      <View style={styles.infoMessage}>
+        <StyledText bold style={styles.infoMessageTitle}>Add Gallery Images to Your Profile!</StyledText>
+        <StyledText style={styles.infoMessageText}>Add gallery images to attract more applicants and showcase what makes your farm unique. Tap on the pencil icon above your farm's name to get started.</StyledText>
+      </View>
+      : null }
       {Object.keys(galleryImages).length !== 0 ?
         <View style={styles.galleryContainer}>
           <Gallery
@@ -307,9 +324,13 @@ export default function FarmProfile() {
         <StyledText bold style={styles.farmBioTitle}>
           About
         </StyledText>
-        <StyledText style={styles.farmBioText}>
-          {`${farm.bio}`}
-        </StyledText>
+        {farm.bio && farm.bio.length !== 0 ? 
+          <StyledText style={styles.farmBioText}>
+            {`${farm.bio}`}
+          </StyledText>
+          :
+          <StyledText style={styles.farmBioText}>No bio available. Visit The Edit Profile Screen by tapping the pencil in the top right corner to add one!</StyledText> 
+        }
       </View>
       {accommodations !== null ?
       <View style={styles.accommodationsContainer}>
@@ -456,13 +477,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
-    marginBottom: 10,
   },
   topSectionContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: 5,
+    marginBottom: 10,
     backgroundColor: '#3A4D39',
     maxWidth: '100%',
     shadowRadius: 20,
@@ -511,7 +532,8 @@ const styles = StyleSheet.create({
   accommodationsContainer: {
     letterSpacing: 1,
     paddingHorizontal: 25,
-    paddingVertical: 10,
+    paddingBottom: 10,
+    marginBottom: 10,
     backgroundColor: '#3A4D39',
     minWidth: '100%',
     shadowRadius: 20,
@@ -553,9 +575,8 @@ const styles = StyleSheet.create({
   postingsContainer: {
     letterSpacing: 1,
     paddingHorizontal: 25,
-    paddingVertical: 10,
+    paddingBottom: 30,
     backgroundColor: '#3A4D39',
-    marginVertical: 10,
     shadowRadius: 20,
     shadowColor: 'black',
     shadowOpacity: 0.1,
@@ -568,13 +589,15 @@ const styles = StyleSheet.create({
   },
   postingsNotFoundText: {
     textAlign: 'center',
+    paddingTop: 20,
+    fontSize: 18,
   },
   addPostingButton: {
     backgroundColor: 'white',
     alignSelf: 'center',
     padding: 10,
     borderRadius: 8,
-    marginTop: 10,
+    marginTop: 30,
     marginBottom: 20,
     minWidth: '100%',
   },
@@ -747,6 +770,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#3A4D39',
     textAlign: 'center',
+  },
+  infoMessage: {
+    backgroundColor: '#333',
+    padding: 10,
+    width: '100%',
   },
 });
 

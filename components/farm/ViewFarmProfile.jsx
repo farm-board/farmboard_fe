@@ -88,9 +88,13 @@ export default function ViewFarmProfile() {
         <StyledText big style={styles.farmBioTitle}>
           About
         </StyledText>
-        <StyledText small style={styles.farmBioText}>
-          {`${farm.bio}`}
-        </StyledText>
+        {farm.bio && farm.bio.length !== 0 ? 
+          <StyledText style={styles.farmBioText}>
+            {`${farm.bio}`}
+          </StyledText>
+          :
+          <StyledText style={styles.farmBioText}>No bio available for this farm.</StyledText> 
+        }
       </View>
       {accommodations !== null ?
       <View style={styles.accommodationsContainer}>
@@ -265,6 +269,7 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     paddingHorizontal: 25,
     paddingVertical: 10,
+    marginBottom: 10,
     backgroundColor: '#3A4D39',
     minWidth: '100%',
     shadowRadius: 20,
@@ -308,7 +313,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 25,
     paddingVertical: 10,
     backgroundColor: '#3A4D39',
-    marginVertical: 10,
     shadowRadius: 20,
     shadowColor: 'black',
     shadowOpacity: 0.1,

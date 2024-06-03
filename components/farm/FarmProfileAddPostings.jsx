@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react'
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
-import { Text, View, TouchableOpacity, StyleSheet } from 'react-native'
+import { Text, View, TouchableOpacity, StyleSheet, Alert } from 'react-native'
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { UserContext } from '../../contexts/UserContext';
 import axios from 'axios';
@@ -59,6 +59,30 @@ export default function FarmProfileAddPostings() {
   };
 
   const handleSubmit = () => {
+    if (!data.attributes.title) {
+      Alert.alert('Posting Incomplete', 'A Job Title is required for this Posting.');
+      return;
+    }
+    if (!data.attributes.salary) {
+      Alert.alert('Posting Incomplete', 'A Payment Amount is required for this Posting.');
+      return;
+    }
+    if (!data.attributes.payment_type) {
+      Alert.alert('Posting Incomplete', 'A Payment Type is required for this Posting.');
+      return;
+    }
+    if (!data.attributes.duration) {
+      Alert.alert('Posting Incomplete', 'A Duration is required for this Posting.');
+      return;
+    }
+    if (!data.attributes.skill_requirements || data.attributes.skill_requirements.length === 0) {
+      Alert.alert('Posting Incomplete', 'Skill Requirements are required for this Posting.');
+      return;
+    }
+    if (!data.attributes.description) {
+      Alert.alert('Posting Incomplete', 'A Description is required for this Posting.');
+      return;
+    }
     const postData = {
       posting: {
         attributes: { ...data.attributes }
@@ -98,7 +122,7 @@ export default function FarmProfileAddPostings() {
         <View style={styles.paymentInfo}>
           <Animated.View entering={FadeInDown.delay(200).duration(1000).springify()} style={styles.inputContainerPayment}>
             <StyledTextInput
-              placeholder="Salary"
+              placeholder="Amount"
               icon="city-variant-outline"
               label="Payment Amount:"
               labelStyle={{fontSize: 18, color: 'white'}}

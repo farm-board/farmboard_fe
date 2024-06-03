@@ -42,7 +42,7 @@ export default function EmployeeProfileEdit() {
   }
 
   const navigation = useNavigation();
-  const { currentUser } = useContext(UserContext);
+  const { currentUser, setUserAvatar } = useContext(UserContext);
 
   useEffect(() => {
     fetchExperiences();
@@ -129,7 +129,6 @@ export default function EmployeeProfileEdit() {
         type: 'image/jpeg',
         name: `profile_${currentUser.id}.jpg`,
       });
-
       // Upload image to Amazon S3
       let response = await axios.post(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/upload_image`, formData, {
         headers: {
@@ -142,17 +141,27 @@ export default function EmployeeProfileEdit() {
   };
 
   const fetchProfileData = async () => {
-    Promise.all([
-      axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`),
-      axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/experiences`),
-      axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/references`),
-      axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/image`),
-    ])
-    .then(([employeeResponse, experiencesResponse, referencesResponse, imageResponse]) => {
-      setExperiences(experiencesResponse.data.data); 
+    try {
+      const [employeeResponse, experiencesResponse, referencesResponse] = await Promise.all([
+        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`),
+        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/experiences`),
+        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/references`)
+      ]);
+      let imageResponse;
+      try {
+        imageResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/image`);
+      } catch (error) {
+        if (error.response && error.response.status === 404) {
+          imageResponse = { data: { image_url: null } }; // Default value if image is not found
+        } else {
+          throw error; // Rethrow if it's a different error
+        }
+      }
+      setExperiences(experiencesResponse.data.data);
       setReferences(referencesResponse.data.data);
-      setData({
-        ...data,
+      setUserAvatar(imageResponse.data.image_url);
+      setData(prevData => ({
+        ...prevData,
         first_name: employeeResponse.data.data.attributes.first_name,
         last_name: employeeResponse.data.data.attributes.last_name,
         city: employeeResponse.data.data.attributes.city,
@@ -161,12 +170,11 @@ export default function EmployeeProfileEdit() {
         skills: employeeResponse.data.data.attributes.skills,
         bio: employeeResponse.data.data.attributes.bio,
         age: employeeResponse.data.data.attributes.age,
-        image: imageResponse.data.image_url
-      })
-    })
-    .catch(error => {
+        image: imageResponse.data.image_url || prevData.image,  // Maintain previous image if not updated
+      }));
+    } catch (error) {
       console.error('There was an error fetching the employee:', error);
-    });
+    }
   };
 
   useEffect(() => {

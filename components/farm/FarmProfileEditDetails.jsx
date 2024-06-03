@@ -37,13 +37,14 @@ export default function FarmProfileEditDetails() {
 ]
 
   const navigation = useNavigation();
-  const { currentUser } = useContext(UserContext);
+  const { currentUser, setUserName } = useContext(UserContext);
 
   const handleSubmit = () => {
     axios.put(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`, { farm: data})
     .then(response => {
       console.log(response.data);
       navigation.push('Edit Profile');
+      setUserName(data.name);
     })
     .catch(error => {
       console.log('Unable to register user', error);
@@ -108,14 +109,19 @@ export default function FarmProfileEditDetails() {
           />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.inputContainer}>
-           <StyledTextInput
+          <StyledTextInput
             placeholder="Zip Code"
             icon="longitude"
             label="Zip Code:"
             labelStyle={{fontSize: 18, color: 'white'}}
             keyboardType="numeric"
+            maxLength={5}
             value={data.zip_code}
-            onChangeText={(text) => setData({...data, zip_code: text})}
+            onChangeText={(text) => {
+              // Ensure that only numbers are entered
+              const numericText = text.replace(/[^0-9]/g, '');
+              setData({...data, zip_code: numericText})
+            }}
           />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputContainer}>
@@ -181,6 +187,7 @@ const styles = StyleSheet.create({
   submitButtonContainer: {
     width: '100%',
     marginTop: 15,
+    marginBottom: 3,
   },
   submitButton: {
     backgroundColor: '#ffb900',

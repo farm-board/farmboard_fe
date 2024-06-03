@@ -32,7 +32,7 @@ export default function FarmProfileEdit() {
   const width = Dimensions.get('window').width;
 
   const navigation = useNavigation();
-  const { currentUser } = useContext(UserContext);
+  const { currentUser, setUserAvatar } = useContext(UserContext);
 
   const pickImage = async (mode) => {
     try {
@@ -91,11 +91,6 @@ export default function FarmProfileEdit() {
     axios.delete(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/delete_image`);
     setModalVisible(false);
   };
-  
-  const handleAccommodationsDelete = () => {
-    setAccommodations({});
-    axios.delete(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/accommodation`);
-  };
 
   const handleGalleryImageUpload = async () => {
     if (galleryImages.length >= 6) {
@@ -149,24 +144,39 @@ export default function FarmProfileEdit() {
   };
 
   const fetchProfileData = async () => {
-    Promise.all([
-      axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`),
-      axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/image`),
-    ])
-    .then(([farmResponse, imageResponse]) => {
-      setData({
-        ...data,
+    try {
+      // Fetch user data
+      const farmResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`);
+  
+      // Update state with user data
+      setData(prevData => ({
+        ...prevData,
         name: farmResponse.data.data.attributes.name,
         state: farmResponse.data.data.attributes.state,
         city: farmResponse.data.data.attributes.city,
         zip_code: farmResponse.data.data.attributes.zip_code,
         bio: farmResponse.data.data.attributes.bio,
-        image: imageResponse.data.image_url
-      });
-    })
-    .catch(error => {
-      console.error('There was an error fetching the farm:', error);
-    });
+      }));
+  
+      try {
+        // Fetch user avatar image
+        const imageResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/image`);
+        // Update state with image URL
+        setData(prevData => ({
+          ...prevData,
+          image: imageResponse.data.image_url,
+        }));
+        setUserAvatar(imageResponse.data.image_url);
+      } catch (imageError) {
+        setData(prevData => ({
+          ...prevData,
+          image: null, // or set a default image URL here if you have one
+        }));
+      }
+  
+    } catch (farmError) {
+      console.error('There was an error fetching the farm:', farmError);
+    }
   };
 
   const fetchAccommodationData = async () => {
@@ -232,90 +242,87 @@ export default function FarmProfileEdit() {
           <Text style={styles.addImageText}>Upload Image To Gallery</Text>
         </TouchableOpacity>
         </View>
-        <View style={styles.inputContainer}>
-          <SectionHeader
-            option="Edit"
-            onPress={() =>
-              navigation.navigate("Farm Profile Edit Details")
-            }
-            >
-            Display Info
-          </SectionHeader>
-          <Animated.View entering={FadeInDown.duration(1000).springify()}style={styles.inputItem}>
-          <ProfileInfo label="Name" icon="account-outline">
-            <StyledText style={styles.existingData}>
-              {data.name.length > 15 ? `${data.name.substring(0, 15)}...` : data.name}
-            </StyledText>
-          </ProfileInfo>
-          </Animated.View>
-          <Animated.View entering={FadeInDown.delay(200).duration(1000).springify()} style={styles.inputItem}>
-          <ProfileInfo label="City" icon="city-variant-outline">
-            <StyledText style={styles.existingData}>{data.city}</StyledText>
-          </ProfileInfo>
-          </Animated.View>
-          <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.inputItem}>
-          <ProfileInfo label="State" icon="star-box-outline">
-            <StyledText style={styles.existingData}>{data.state}</StyledText>
-          </ProfileInfo>
-          </Animated.View>
-          <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.inputItem}>
-          <ProfileInfo label="Zip Code" icon="longitude">
-            <StyledText style={styles.existingData}>{data.zip_code}</StyledText>
-          </ProfileInfo>
-          </Animated.View>
-          <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputItem}>
-          <ProfileInfo label="About" icon="pencil-outline">
-            <StyledText style={styles.existingData}>
-            {data.bio.length > 15 ? `${data.bio.substring(0, 15)}...` : data.bio}
-            </StyledText>
-          </ProfileInfo>
-          </Animated.View>
-          {/* Submit button */}
-        </View>
-        <View style={styles.inputContainer}>
-          { Object.keys(accommodations).length === 0 ?
-            <View>
-              <StyledText bold >
-                No accommodations found. Click on the button below to add accommodations to your profile.
+        <View style={styles.infoContainer}>
+          <View style={styles.inputContainer}>
+            <SectionHeader
+              option="Edit"
+              onPress={() =>
+                navigation.navigate("Farm Profile Edit Details")
+              }
+              >
+              Display Info
+            </SectionHeader>
+            <Animated.View entering={FadeInDown.duration(1000).springify()}style={styles.inputItem}>
+            <ProfileInfo label="Name" icon="account-outline">
+              <StyledText style={styles.existingData}>
+                {data.name.length > 15 ? `${data.name.substring(0, 15)}...` : data.name}
               </StyledText>
-              <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.submitButtonContainer}>
-                <TouchableOpacity style={styles.submitButton} onPress={handleAddAccommodation}>
-                  <Text style={styles.submitButtonText}>Add Accommodations</Text>
-                </TouchableOpacity>
-              </Animated.View>
-            </View>
-            :
-            <View>
-              <SectionHeader
-                option="Edit"
-                onPress={() =>
-                  navigation.navigate("Farm Profile Edit Accommodations")
-                }
-                >
-                Accommodation Info
-              </SectionHeader>
-              <Animated.View entering={FadeInDown.delay(1000).duration(1000).springify()} style={styles.inputItem}>
-                <ProfileInfo label="Offers Housing" icon="home-outline">
-                  <StyledText style={styles.existingData}>{accommodations.housing === true ? "Yes" : "No"}</StyledText>
-                </ProfileInfo>
-              </Animated.View>
-              <Animated.View entering={FadeInDown.delay(1200).duration(1000).springify()} style={styles.inputItem}>
-                <ProfileInfo label="Offers Meals" icon="food-apple-outline">
-                  <StyledText style={styles.existingData}>{accommodations.meals === true ? "Yes" : "No"}</StyledText>
-                </ProfileInfo>
-              </Animated.View>
-              <Animated.View entering={FadeInDown.delay(1400).duration(1000).springify()} style={styles.inputItem}>
-                <ProfileInfo label="Offers Transportation" icon="car-outline">
-                  <StyledText style={styles.existingData}>{accommodations.transportation === true ? "Yes" : "No"}</StyledText>
-                </ProfileInfo>
-              </Animated.View>
-              <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.submitButtonContainer}>
-                <TouchableOpacity style={styles.submitButton} onPress={handleAccommodationsDelete}>
-                  <Text style={styles.submitButtonText}>Remove Accommodations</Text>
-                </TouchableOpacity>
-              </Animated.View>
-            </View>
-          }
+            </ProfileInfo>
+            </Animated.View>
+            <Animated.View entering={FadeInDown.delay(200).duration(1000).springify()} style={styles.inputItem}>
+            <ProfileInfo label="City" icon="city-variant-outline">
+              <StyledText style={styles.existingData}>{data.city}</StyledText>
+            </ProfileInfo>
+            </Animated.View>
+            <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.inputItem}>
+            <ProfileInfo label="State" icon="star-box-outline">
+              <StyledText style={styles.existingData}>{data.state}</StyledText>
+            </ProfileInfo>
+            </Animated.View>
+            <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.inputItem}>
+            <ProfileInfo label="Zip Code" icon="longitude">
+              <StyledText style={styles.existingData}>{data.zip_code}</StyledText>
+            </ProfileInfo>
+            </Animated.View>
+            <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputItem}>
+            <ProfileInfo label="About" icon="pencil-outline">
+              <StyledText style={styles.existingData}>
+              {data.bio.length > 15 ? `${data.bio.substring(0, 15)}...` : data.bio}
+              </StyledText>
+            </ProfileInfo>
+            </Animated.View>
+            {/* Submit button */}
+          </View>
+          <View style={styles.inputContainer}>
+            { Object.keys(accommodations).length === 0 ?
+              <View>
+                <StyledText bold >
+                  No accommodations found. Click on the button below to add accommodations to your profile.
+                </StyledText>
+                <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.submitButtonContainer}>
+                  <TouchableOpacity style={styles.submitButton} onPress={handleAddAccommodation}>
+                    <Text style={styles.submitButtonText}>Add Accommodations</Text>
+                  </TouchableOpacity>
+                </Animated.View>
+              </View>
+              :
+              <View>
+                <SectionHeader
+                  option="Edit"
+                  onPress={() =>
+                    navigation.navigate("Farm Profile Edit Accommodations")
+                  }
+                  >
+                  Accommodation Info
+                </SectionHeader>
+                <Animated.View entering={FadeInDown.delay(1000).duration(1000).springify()} style={styles.inputItem}>
+                  <ProfileInfo label="Offers Housing" icon="home-outline">
+                    <StyledText style={styles.existingData}>{accommodations.housing === true ? "Yes" : "No"}</StyledText>
+                  </ProfileInfo>
+                </Animated.View>
+                <Animated.View entering={FadeInDown.delay(1200).duration(1000).springify()} style={styles.inputItem}>
+                  <ProfileInfo label="Offers Meals" icon="food-apple-outline">
+                    <StyledText style={styles.existingData}>{accommodations.meals === true ? "Yes" : "No"}</StyledText>
+                  </ProfileInfo>
+                </Animated.View>
+                <Animated.View entering={FadeInDown.delay(1400).duration(1000).springify()} style={styles.inputItem}>
+                  <ProfileInfo label="Offers Transportation" icon="car-outline">
+                    <StyledText style={styles.existingData}>{accommodations.transportation === true ? "Yes" : "No"}</StyledText>
+                  </ProfileInfo>
+                </Animated.View>
+              </View>
+            }
+          </View>
         </View>
         {/* UploadModal component */}
         <UploadModal
@@ -340,6 +347,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     minWidth: '100%',
+  },
+  infoContainer: {
+    backgroundColor: '#3A4D39',
+    paddingBottom: 30,
   },
   text: {
     textAlign: 'center',
@@ -408,6 +419,7 @@ const styles = StyleSheet.create({
   addImageContainer: {
     width: '100%',
     backgroundColor: '#3A4D39',
+    paddingBottom: 20,
   },
   addImageButton: {
     backgroundColor: 'white',

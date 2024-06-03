@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react'
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
-import { Text, View, TouchableOpacity, StyleSheet } from 'react-native'
+import { Text, View, TouchableOpacity, StyleSheet, Alert } from 'react-native'
 import { useNavigation } from '@react-navigation/native';
 import { UserContext } from '../../contexts/UserContext';
 import axios from 'axios';
@@ -42,6 +42,26 @@ export default function FarmForm() {
   const { currentUser, setSetupComplete } = useContext(UserContext);
 
   const handleSubmit = () => {
+    if (!data.name) {
+      // Show an error message
+      Alert.alert('Setup Incomplete', 'A name for the farm is required.');
+      return;
+    }
+    if (!data.city) {
+      // Show an error message
+      Alert.alert('Setup Incomplete', 'A City for the farm is required.');
+      return;
+    }
+    if (!data.state) {
+      // Show an error message
+      Alert.alert('Setup Incomplete', 'A state for the farm is required.');
+      return;
+    }
+    if (!data.zip_code) {
+      // Show an error message
+      Alert.alert('Setup Incomplete', 'A Zip Code for the farm is required.');
+      return;
+    }
     axios.put(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`, { farm: {...data, setup_complete: true}}) 
     .then(response => {
       console.log(response.data);
@@ -165,12 +185,18 @@ export default function FarmForm() {
           />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.inputContainer}>
-           <StyledTextInput
+          <StyledTextInput
             placeholder="Zip Code"
             icon="longitude"
             label="Zip Code:"
             labelStyle={{fontSize: 18, color: 'white'}}
-            onChangeText={(text) => setData({...data, zip_code: text})}
+            keyboardType="numeric"
+            maxLength={5} 
+            onChangeText={(text) => {
+              // Ensure that only numbers are entered
+              const numericText = text.replace(/[^0-9]/g, '');
+              setData({...data, zip_code: numericText})
+            }}
           />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputContainer}>

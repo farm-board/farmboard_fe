@@ -22,6 +22,9 @@ const FeedScreen = () => {
   const [selectedPosting, setSelectedPosting] = useState(null);
   const [activeTab, setActiveTab] = useState('Description');
   const [expanded, setExpanded] = useState(false);
+  const [postHousing, setPostHousing] = useState(false);
+  const [postTransportation, setPostTransportation] = useState(false);
+  const [postMeals, setPostMeals] = useState(false);
   const { currentUser } = useContext(UserContext);
   const navigation = useNavigation();
   const durationTypes = ['Part-Time', 'Full-Time', 'Seasonal', 'Contract'];
@@ -102,6 +105,7 @@ const FeedScreen = () => {
     setSearchTerm('');
     setFilteredPostings(postings);
     setSearchResults(postings);
+    setModalFilterVisible(false);
   };
 
   const calculateDaysAgo = (createdAt) => {
@@ -148,8 +152,12 @@ const FeedScreen = () => {
     console.log('Fetching posting profile photo for farm:', farmId);
     axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/${farmId}/profile_info`)
       .then((response) => {
+        console.log('Posting profile Accommodation Housing:', response.data.accommodations.housing);
         console.log('Posting profile photo:', response.data.attributes.image_url);
         setPostingProfilePhoto(response.data.attributes.image_url);
+        setPostHousing(response.data.accommodations.housing);
+        setPostMeals(response.data.accommodations.meals);
+        setPostTransportation(response.data.accommodations.transportation);
       })
       .catch(error => {
         console.error('There was an error fetching the posting profile photo:', error);
@@ -182,7 +190,7 @@ const FeedScreen = () => {
         <TouchableOpacity 
           style={styles.detailsButton} 
           onPress={() => { 
-            setSelectedPosting(item); 
+            setSelectedPosting(item);
             setModalPostingVisible(true); 
             fetchPostingProfileImage(item.attributes.farm_id);
           }}>
@@ -224,6 +232,27 @@ const FeedScreen = () => {
           <View style={styles.tag}>
             <Text style={styles.tagText}>{selectedPosting?.attributes.duration}</Text>
           </View>
+          { selectedPosting?.attributes.offers_lodging ?
+            <>
+              { postHousing ?
+                <View style={styles.tag}>
+                  <Text style={styles.tagText}>Offers Housing</Text>
+                </View>
+              : null }
+
+              { postMeals ?
+                <View style={styles.tag}>
+                  <Text style={styles.tagText}>Offers Meals</Text>
+                </View>
+              : null }
+
+              { postTransportation ?
+                <View style={styles.tag}>
+                  <Text style={styles.tagText}>Offers Transportation</Text>
+                </View>
+              : null }
+            </>
+          : null }
         </View>
   
         <View style={styles.infoContainer}>
@@ -384,6 +413,7 @@ const FeedScreen = () => {
         data={searchResults} // Use searchResults instead of filteredPostings
         renderItem={renderPostingItem}
         keyExtractor={(item) => item.id.toString()}
+        showsVerticalScrollIndicator={false}
       />
       {renderPostingModal()}
     </View>
@@ -597,6 +627,7 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   container: {
+    flex: 1,
     backgroundColor: '#3A4D39',
     padding: 20,
     paddingTop: 20,

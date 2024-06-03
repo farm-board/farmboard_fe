@@ -24,7 +24,8 @@ export default function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#4F6F52',
+    backgroundColor: '#3A4D39',
+    marginBottom: -35,
   },
   content: {
     minHeight: '100%',

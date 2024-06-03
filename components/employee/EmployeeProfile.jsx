@@ -10,7 +10,7 @@ import StyledText from '../Texts/StyledText';
 
 export default function EmployeeProfile() {
   const navigation = useNavigation();
-  const { currentUser } = useContext(UserContext);
+  const { currentUser, setUserAvatar } = useContext(UserContext);
   const [employee, setEmployee] = useState({});
   const [experiences, setExperiences] = useState([]);
   const [references, setReferences] = useState([]); 
@@ -51,6 +51,7 @@ export default function EmployeeProfile() {
         // Fetch profile photo
         const imageResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/image`);
         setProfilePhoto(imageResponse.data.image_url);
+        setUserAvatar(imageResponse.data.image_url);
       } catch (imageError) {
         console.error('Error fetching profile photo:', imageError);
         setProfilePhoto(null); // Handle the absence of profile photo appropriately
@@ -95,6 +96,7 @@ export default function EmployeeProfile() {
           // Fetch profile photo
           const imageResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/image`);
           setProfilePhoto(imageResponse.data.image_url);
+          setUserAvatar(imageResponse.data.image_url);
         } catch (imageError) {
           console.error('Error fetching profile photo:', imageError);
           setProfilePhoto(null); // Handle the absence of profile photo appropriately
