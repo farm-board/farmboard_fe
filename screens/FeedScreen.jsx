@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput, Button, Modal, ScrollView, Touchable, Pressable } from 'react-native';
-import { useNavigation } from '@react-navigation/native'
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput, Button, Modal, ScrollView, Pressable } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
-import { MaterialCommunityIcons, MaterialIcons, FontAwesome } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { UserContext } from '../contexts/UserContext';
 import StyledSelectDropdown from '../components/Inputs/StyledSelectDropdown';
 import Avatar from '../components/Profile/Avatar';
@@ -18,13 +18,13 @@ const FeedScreen = () => {
   const [selectedCompensationTypes, setSelectedCompensationTypes] = useState([]);
   const [selectedStateTypes, setSelectedStateTypes] = useState([]);
   const [selectedDurationTypes, setSelectedDurationTypes] = useState([]);
-  const compensationTypes = ['Hourly', 'Salary'];
   const [selectedPosting, setSelectedPosting] = useState(null);
   const [activeTab, setActiveTab] = useState('Description');
   const [expanded, setExpanded] = useState(false);
   const [postHousing, setPostHousing] = useState(false);
   const [postTransportation, setPostTransportation] = useState(false);
   const [postMeals, setPostMeals] = useState(false);
+  const [appliedPostings, setAppliedPostings] = useState(new Set());
   const { currentUser } = useContext(UserContext);
   const navigation = useNavigation();
   const durationTypes = ['Part-Time', 'Full-Time', 'Seasonal', 'Contract'];
@@ -38,6 +38,7 @@ const FeedScreen = () => {
     "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota",
     "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington",
     "West Virginia", "Wisconsin", "Wyoming"];
+  const compensationTypes = ['Hourly', 'Salary'];
 
   useEffect(() => {
     fetchPostings();
@@ -49,6 +50,7 @@ const FeedScreen = () => {
         setPostings(response.data.data);
         setFilteredPostings(response.data.data);
         setSearchResults(response.data.data); // Initialize search results with all postings
+        // Fetch applied postings for the current user
       })
       .catch(error => {
         console.error('There was an error fetching the postings:', error);
@@ -118,28 +120,20 @@ const FeedScreen = () => {
 
   const applyToPosting = async () => {
     try {
-      // Check if the user has already applied to this posting
-      if (selectedPosting && selectedPosting.applied) {
-        alert("You have already applied to this posting.");
-        return;
-      }
-
       const response = await axios.post(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/postings/${selectedPosting.id}/apply`);
       if (response.status === 200) {
-        // Application submitted successfully
         alert("Application submitted successfully!");
-
-        // Update the selectedPosting to mark it as applied
-        setSelectedPosting(prevPosting => ({ ...prevPosting, applied: true }));
+        setAppliedPostings(prev => new Set(prev).add(selectedPosting.id));
       } else {
-        // Error handling for other response statuses
-        console.error("Error submitting application:", response.data.error);
-        alert("There was an issue submitting the application.");
+        alert(response.data.error || "There was an issue submitting the application.");
       }
     } catch (error) {
-      // Error handling for network errors
-      console.error("Network error:", error);
-      alert("Network error occurred. Please try again later.");
+      if (error.response && error.response.status === 422) {
+        alert("You have already applied to this posting.");
+      } else {
+        console.error("Network error:", error);
+        alert("Network error occurred. Please try again later.");
+      }
     }
   };
 
@@ -210,7 +204,7 @@ const FeedScreen = () => {
         setPostingProfilePhoto(null);
       }}
     >
-      <ScrollView contentContainerStyle={styles.modalContainer}>
+      <ScrollView contentContainerStyle={styles.modalContainer} showsVerticalScrollIndicator={false}>
         <TouchableOpacity
           style={styles.closeButton}
           onPress={() => setModalPostingVisible(false)}
@@ -409,12 +403,16 @@ const FeedScreen = () => {
           </View>
         </View>
       </Modal>
-      <FlatList
-        data={searchResults} // Use searchResults instead of filteredPostings
-        renderItem={renderPostingItem}
-        keyExtractor={(item) => item.id.toString()}
-        showsVerticalScrollIndicator={false}
-      />
+      {searchResults.length === 0 ? (
+        <Text style={styles.noResultsText}>No positions match search parameters</Text>
+      ) : (
+        <FlatList
+          data={searchResults} // Use searchResults instead of filteredPostings
+          renderItem={renderPostingItem}
+          keyExtractor={(item) => item.id.toString()}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
       {renderPostingModal()}
     </View>
   );
@@ -631,6 +629,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#3A4D39',
     padding: 20,
     paddingTop: 20,
+    marginBottom: -35,
   },
   heading: {
     fontSize: 24,
@@ -841,6 +840,12 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 15,
     top: 13,
+  },
+  noResultsText: {
+    fontSize: 18,
+    color: 'white',
+    textAlign: 'center',
+    marginTop: 20,
   },
 });
 

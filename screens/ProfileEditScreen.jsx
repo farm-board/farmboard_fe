@@ -37,6 +37,7 @@ const styles = StyleSheet.create({
     marginBottom: -35,
     flex: 1,
     backgroundColor: '#4F6F52',
+    marginBottom: -35,
   },
   backgroundImage: {
     position: 'absolute',

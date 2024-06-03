@@ -1,19 +1,17 @@
-import React, { useState, useContext, useEffect } from 'react'
+import React, { useState, useContext, useEffect } from 'react';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
-import { Text, View, TextInput, TouchableOpacity, StyleSheet } from 'react-native'
+import { Text, View, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { UserContext } from '../../contexts/UserContext';
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import KeyboardAvoidingContainer from "../Containers/KeyboardAvoidingContainer";
-import StyledTextInput from "../Inputs/StyledTextInput";
 import AvatarEdit from "../Profile/AvatarEdit";
 import UploadModal from '../Profile/UploadModal';
 import StyledText from '../Texts/StyledText';
 import SectionHeader from '../Texts/SectionHeader';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import ProfileInfo from '../Profile/ProfileInfo';
-
 
 export default function EmployeeProfileEdit() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -27,7 +25,7 @@ export default function EmployeeProfileEdit() {
     bio: '',
     age: '',
     image: null
-  })
+  });
   const [experiences, setExperiences] = useState([]);
   const [references, setReferences] = useState([]);
 
@@ -38,54 +36,52 @@ export default function EmployeeProfileEdit() {
 
   const onSelectedItemsChange = (selectedItems, selectedSkills) => {
     setSelectedItems(selectedItems);
-    setData({...data, skills: selectedSkills});
+    setData({ ...data, skills: selectedSkills });
   }
 
   const navigation = useNavigation();
   const { currentUser, setUserAvatar } = useContext(UserContext);
 
   useEffect(() => {
-    fetchExperiences();
+    fetchProfileData();
   }, []);
 
-  const fetchExperiences = async () => {
+  const fetchProfileData = async () => {
     try {
-      const response = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/experiences`);
-      const sortedExperiences = response.data.data.sort((a, b) => new Date(b.attributes.ended_at) - new Date(a.attributes.ended_at));
-      setExperiences(sortedExperiences.slice(0, 3));
-    } catch (error) {
-      console.error('Error fetching experiences:', error);
-    }
-  };
+      const [employeeResponse, experiencesResponse, referencesResponse] = await Promise.all([
+        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`),
+        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/experiences`),
+        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/references`)
+      ]);
 
-  const deleteExperience = async (experienceId) => {
-    try {
-      await axios.delete(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/experiences/${experienceId}`);
-      fetchExperiences();
-    } catch (error) {
-      console.error('Error deleting experience:', error);
-    }
-  };
+      let imageResponse;
+      try {
+        imageResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/image`);
+      } catch (error) {
+        if (error.response && error.response.status === 404) {
+          imageResponse = { data: { image_url: null } }; // Default value if image is not found
+        } else {
+          throw error; // Rethrow if it's a different error
+        }
+      }
 
-  useEffect(() => {
-    fetchReferences();
-  }, []);
-
-  const fetchReferences = async () => {
-    try {
-      const response = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/references`);
-      setReferences(response.data.data);
+      setExperiences(experiencesResponse.data.data);
+      setReferences(referencesResponse.data.data);
+      setUserAvatar(imageResponse.data.image_url);
+      setData(prevData => ({
+        ...prevData,
+        first_name: employeeResponse.data.data.attributes.first_name,
+        last_name: employeeResponse.data.data.attributes.last_name,
+        city: employeeResponse.data.data.attributes.city,
+        state: employeeResponse.data.data.attributes.state,
+        zip_code: employeeResponse.data.data.attributes.zip_code,
+        skills: employeeResponse.data.data.attributes.skills,
+        bio: employeeResponse.data.data.attributes.bio,
+        age: employeeResponse.data.data.attributes.age,
+        image: imageResponse.data.image_url || prevData.image,  // Maintain previous image if not updated
+      }));
     } catch (error) {
-      console.error('Error fetching references:', error);
-    }
-  };
-
-  const deleteReference = async (referenceId) => {
-    try {
-      await axios.delete(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/references/${referenceId}`);
-      fetchReferences();
-    } catch (error) {
-      console.error('Error deleting references:', error);
+      console.error('There was an error fetching the employee:', error);
     }
   };
 
@@ -111,7 +107,7 @@ export default function EmployeeProfileEdit() {
       }
 
       if (!result.canceled) {
-        setData({ ...data, image: result.assets[0].uri});
+        setData({ ...data, image: result.assets[0].uri });
         uploadImage(result.assets[0].uri);
         setModalVisible(false);
       }
@@ -129,8 +125,7 @@ export default function EmployeeProfileEdit() {
         type: 'image/jpeg',
         name: `profile_${currentUser.id}.jpg`,
       });
-      // Upload image to Amazon S3
-      let response = await axios.post(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/upload_image`, formData, {
+      await axios.post(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/upload_image`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -140,169 +135,143 @@ export default function EmployeeProfileEdit() {
     }
   };
 
-  const fetchProfileData = async () => {
+  const deleteExperience = async (experienceId) => {
     try {
-      const [employeeResponse, experiencesResponse, referencesResponse] = await Promise.all([
-        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`),
-        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/experiences`),
-        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/references`)
-      ]);
-      let imageResponse;
-      try {
-        imageResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/image`);
-      } catch (error) {
-        if (error.response && error.response.status === 404) {
-          imageResponse = { data: { image_url: null } }; // Default value if image is not found
-        } else {
-          throw error; // Rethrow if it's a different error
-        }
-      }
-      setExperiences(experiencesResponse.data.data);
-      setReferences(referencesResponse.data.data);
-      setUserAvatar(imageResponse.data.image_url);
-      setData(prevData => ({
-        ...prevData,
-        first_name: employeeResponse.data.data.attributes.first_name,
-        last_name: employeeResponse.data.data.attributes.last_name,
-        city: employeeResponse.data.data.attributes.city,
-        state: employeeResponse.data.data.attributes.state,
-        zip_code: employeeResponse.data.data.attributes.zip_code,
-        skills: employeeResponse.data.data.attributes.skills,
-        bio: employeeResponse.data.data.attributes.bio,
-        age: employeeResponse.data.data.attributes.age,
-        image: imageResponse.data.image_url || prevData.image,  // Maintain previous image if not updated
-      }));
+      await axios.delete(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/experiences/${experienceId}`);
+      fetchExperiences();
     } catch (error) {
-      console.error('There was an error fetching the employee:', error);
+      console.error('Error deleting experience:', error);
     }
   };
 
-  useEffect(() => {
-    fetchProfileData()
-  }, []);
+  const deleteReference = async (referenceId) => {
+    try {
+      await axios.delete(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/references/${referenceId}`);
+      fetchReferences();
+    } catch (error) {
+      console.error('Error deleting references:', error);
+    }
+  };
 
   return (
     <KeyboardAvoidingContainer style={styles.container} behavior="padding">
       <View style={styles.content}>
-        <View style={styles.header}>
-          </View>
+        <View style={styles.header} />
         <Animated.View entering={FadeInDown.delay(1000).duration(1000).springify()} style={styles.mb3}>
-            <AvatarEdit uri={data.image} onButtonPress={() => setModalVisible(true)} style={styles.avatarEdit}/>
+          <AvatarEdit uri={data.image} onButtonPress={() => setModalVisible(true)} style={styles.avatarEdit} />
         </Animated.View>
         <View style={styles.inputContainer}>
           <SectionHeader
             option="Edit"
-            onPress={() =>
-              navigation.navigate("Employee Profile Edit Details")
-            }
-            >
+            onPress={() => navigation.navigate("Employee Profile Edit Details")}
+          >
             Display Info
           </SectionHeader>
-          <Animated.View entering={FadeInDown.duration(1000).springify()}style={styles.inputItem}>
-          <ProfileInfo label="First Name" icon="account-outline">
-            <StyledText style={styles.existingData}>
-              {data.first_name.length > 15 ? `${data.first_name.substring(0, 15)}...` : data.first_name}
-            </StyledText>
-          </ProfileInfo>
+          <Animated.View entering={FadeInDown.duration(1000).springify()} style={styles.inputItem}>
+            <ProfileInfo label="First Name" icon="account-outline">
+              <StyledText style={styles.existingData}>
+                {data.first_name.length > 15 ? `${data.first_name.substring(0, 15)}...` : data.first_name}
+              </StyledText>
+            </ProfileInfo>
           </Animated.View>
           <Animated.View entering={FadeInDown.delay(200).duration(1000).springify()} style={styles.inputItem}>
-          <ProfileInfo label="Last Name" icon="account-outline">
-            <StyledText style={styles.existingData}>{data.last_name}</StyledText>
-          </ProfileInfo>
+            <ProfileInfo label="Last Name" icon="account-outline">
+              <StyledText style={styles.existingData}>{data.last_name}</StyledText>
+            </ProfileInfo>
           </Animated.View>
           <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.inputItem}>
-          <ProfileInfo label="City" icon="city-variant-outline">
-            <StyledText style={styles.existingData}>{data.city}</StyledText>
-          </ProfileInfo>
+            <ProfileInfo label="City" icon="city-variant-outline">
+              <StyledText style={styles.existingData}>{data.city}</StyledText>
+            </ProfileInfo>
           </Animated.View>
           <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.inputItem}>
-          <ProfileInfo label="State" icon="star-box-outline">
-            <StyledText style={styles.existingData}>{data.state}</StyledText>
-          </ProfileInfo>
+            <ProfileInfo label="State" icon="star-box-outline">
+              <StyledText style={styles.existingData}>{data.state}</StyledText>
+            </ProfileInfo>
           </Animated.View>
           <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.inputItem}>
-          <ProfileInfo label="Zip Code" icon="longitude">
-            <StyledText style={styles.existingData}>{data.zip_code}</StyledText>
-          </ProfileInfo>
+            <ProfileInfo label="Zip Code" icon="longitude">
+              <StyledText style={styles.existingData}>{data.zip_code}</StyledText>
+            </ProfileInfo>
           </Animated.View>
           <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputItem}>
-          <ProfileInfo label="About" icon="pencil-outline">
-            <StyledText style={styles.existingData}>
-            {data.bio.length > 15 ? `${data.bio.substring(0, 15)}...` : data.bio}
-            </StyledText>
-          </ProfileInfo>
+            <ProfileInfo label="About" icon="pencil-outline">
+              <StyledText style={styles.existingData}>
+                {data.bio.length > 15 ? `${data.bio.substring(0, 15)}...` : data.bio}
+              </StyledText>
+            </ProfileInfo>
           </Animated.View>
         </View>
         <View style={styles.inputContainer}>
-            <SectionHeader
-              option={experienceEditMode ? 'Done' : 'Edit'}
-              onPress={() => setExperienceEditMode(!experienceEditMode)}
+          <SectionHeader
+            option={experienceEditMode ? 'Done' : 'Edit'}
+            onPress={() => setExperienceEditMode(!experienceEditMode)}
+          >
+            Experience Info
+          </SectionHeader>
+          {experiences.map((experience, index) => (
+            <Animated.View key={index} entering={FadeInDown.duration(1000).springify()} style={styles.inputItemTwo}>
+              <ProfileInfo label="Company Name" icon="briefcase-outline">
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <StyledText style={styles.existingData}>
+                    {experience.attributes.company_name}
+                  </StyledText>
+                  {experienceEditMode && (
+                    <TouchableOpacity onPress={() => deleteExperience(experience.id)}>
+                      <MaterialCommunityIcons name="delete" size={24} color="red" />
+                    </TouchableOpacity>
+                  )}
+                </View>
+              </ProfileInfo>
+            </Animated.View>
+          ))}
+          {experienceEditMode && experiences.length < 3 && (
+            <TouchableOpacity
+              style={[styles.addButton, styles.bottomButton]}
+              onPress={() => navigation.navigate("Employee Profile Add Experiences")}
             >
-              Experience Info
-            </SectionHeader>
-            {experiences.map((experience, index) => (
-              <Animated.View key={index} entering={FadeInDown.duration(1000).springify()} style={styles.inputItemTwo}>
-                <ProfileInfo label="Company Name" icon="briefcase-outline">
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <StyledText style={styles.existingData}>
-                      {experience.attributes.company_name}
-                    </StyledText>
-                    {experienceEditMode && (
-                      <TouchableOpacity onPress={() => deleteExperience(experience.id)}>
-                        <MaterialCommunityIcons name="delete" size={24} color="red" />
-                      </TouchableOpacity>
-                    )}
-                  </View>
-                </ProfileInfo>
-              </Animated.View>
-            ))}
-            {experienceEditMode && experiences.length < 3 && (
-              <TouchableOpacity
-                style={[styles.addButton, styles.bottomButton]}
-                onPress={() => navigation.navigate("Employee Profile Add Experiences")}
-              >
-                <Text style={styles.addButtonText}>Add Experience</Text>
-                <View style={styles.submitArrow}>
+              <Text style={styles.addButtonText}>Add Experience</Text>
+              <View style={styles.submitArrow}>
                 <MaterialCommunityIcons name="arrow-right" size={24} color="white" />
-            </View>
-              </TouchableOpacity>
-            )}
-          </View>
-          <View style={styles.inputContainer}>
-            <SectionHeader
-              option={referenceEditMode ? 'Done' : 'Edit'}
-              onPress={() => setReferenceEditMode(!referenceEditMode)}
+              </View>
+            </TouchableOpacity>
+          )}
+        </View>
+        <View style={styles.inputContainer}>
+          <SectionHeader
+            option={referenceEditMode ? 'Done' : 'Edit'}
+            onPress={() => setReferenceEditMode(!referenceEditMode)}
+          >
+            Reference Info
+          </SectionHeader>
+          {references.map((reference, index) => (
+            <Animated.View key={index} entering={FadeInDown.duration(1000).springify()} style={styles.inputItemTwo}>
+              <ProfileInfo label="Reference Name" icon="account-outline">
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <StyledText style={styles.existingData}>
+                    {reference.attributes.first_name}
+                  </StyledText>
+                  {referenceEditMode && (
+                    <TouchableOpacity onPress={() => deleteReference(reference.id)}>
+                      <MaterialCommunityIcons name="delete" size={24} color="red" />
+                    </TouchableOpacity>
+                  )}
+                </View>
+              </ProfileInfo>
+            </Animated.View>
+          ))}
+          {referenceEditMode && references.length < 3 && (
+            <TouchableOpacity
+              style={[styles.addButton, styles.bottomButton]}
+              onPress={() => navigation.navigate("Employee Profile Add References")}
             >
-              Reference Info
-            </SectionHeader>
-            {references.map((reference, index) => (
-              <Animated.View key={index} entering={FadeInDown.duration(1000).springify()} style={styles.inputItemTwo}>
-                <ProfileInfo label="Reference Name" icon="account-outline">
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <StyledText style={styles.existingData}>
-                      {reference.attributes.first_name}
-                    </StyledText>
-                    {referenceEditMode && (
-                      <TouchableOpacity onPress={() => deleteReference(reference.id)}>
-                        <MaterialCommunityIcons name="delete" size={24} color="red" />
-                      </TouchableOpacity>
-                    )}
-                  </View>
-                </ProfileInfo>
-              </Animated.View>
-            ))}
-            {referenceEditMode && references.length < 3 && (
-              <TouchableOpacity
-                style={[styles.addButton, styles.bottomButton]}
-                onPress={() => navigation.navigate("Employee Profile Add References")}
-              >
-                <Text style={styles.addButtonText}>Add Reference</Text>
-                <View style={styles.submitArrow}>
+              <Text style={styles.addButtonText}>Add Reference</Text>
+              <View style={styles.submitArrow}>
                 <MaterialCommunityIcons name="arrow-right" size={24} color="white" />
-            </View>
-              </TouchableOpacity>
-            )}
-          </View>
+              </View>
+            </TouchableOpacity>
+          )}
+        </View>
         {/* UploadModal component */}
         <UploadModal
           modalVisible={modalVisible}
@@ -315,8 +284,8 @@ export default function EmployeeProfileEdit() {
         />
       </View>
     </KeyboardAvoidingContainer>
-  )
-};
+  );
+}
 
 const styles = StyleSheet.create({
   container: {
