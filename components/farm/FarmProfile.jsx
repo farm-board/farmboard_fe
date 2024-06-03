@@ -56,7 +56,8 @@ export default function FarmProfile() {
   const fetchPostings = async () => {
     try {
       const postingsResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/postings`);
-      return postingsResponse;
+      const sortedPostings = postingsResponse.data.data.sort((a, b) => new Date(b.attributes.created_at) - new Date(a.attributes.created_at));
+      return { ...postingsResponse, data: { ...postingsResponse.data, data: sortedPostings } };
     } catch (error) {
       console.error("There was an error fetching the farm's postings:", error);
     }
@@ -499,7 +500,9 @@ const styles = StyleSheet.create({
   },
   farmName: {
     textAlign: 'right',
+    marginTop: 20,
     marginEnd: 20,
+    marginStart: 20,
     letterSpacing: 1,
     paddingBottom: 5,
   },
@@ -570,7 +573,10 @@ const styles = StyleSheet.create({
   galleryContainer: {
     flex: 1,
     justifyContent: 'space-between',
-    maxWidth: '100%'
+    maxWidth: '100%',
+    shadowRadius: 20,
+    shadowColor: 'black',
+    shadowOpacity: 0.4,
   },
   postingsContainer: {
     letterSpacing: 1,

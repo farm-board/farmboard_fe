@@ -11,12 +11,12 @@ const Gallery = ({
   return (
     <View>
       <Carousel
-        loop
+        loop={false}
         width={width}
         height={width / 2}
         data={galleryImages}
         scrollAnimationDuration={1000}
-        mode="parallax"
+        mode={galleryImages.length > 1 ? "parallax" : null} // Set mode to null if there's only one image
         modeConfig={{
           parallaxScrollingScale: 0.9,
           parallaxScrollingOffset: 50,
@@ -35,7 +35,7 @@ const Gallery = ({
 
 const styles = StyleSheet.create({
   gallery: {
-    marginTop: 10,
+    
   },
 });
 

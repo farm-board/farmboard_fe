@@ -115,6 +115,7 @@ export default function FarmProfileAddPostings() {
             placeholder="Job Title"
             icon="account-outline"
             label="Job Title:"
+            maxLength={45}
             labelStyle={{fontSize: 18, color: 'white'}}
             onChangeText={(text) => setData({ ...data, attributes: { ...data.attributes, title: text } })}
           />
@@ -161,6 +162,7 @@ export default function FarmProfileAddPostings() {
           placeholder="Description"
           icon="pencil-outline"
           multiline={true}
+          maxLength={255}
           label="Description:"
           labelStyle={{fontSize: 18, color: 'white'}}
           onChangeText={(text) => setData({ ...data, attributes: { ...data.attributes, description: text } })}

@@ -15,10 +15,11 @@ const GalleryEdit = ({
     <View>
       <Carousel
         width={width}
+        loop={false}
         height={width / 2}
         data={galleryImages}
         style={styles.gallery}
-        mode="parallax"
+        mode={galleryImages.length > 1 ? "parallax" : null}
         modeConfig={{
           parallaxScrollingScale: 0.9,
           parallaxScrollingOffset: 50,
@@ -42,7 +43,11 @@ const GalleryEdit = ({
 
 const styles = StyleSheet.create({
   gallery: {
-    marginVertical: 10,
+    marginVertical: 20,
+    marginTop: 20,
+    shadowRadius: 20,
+    shadowColor: 'black',
+    shadowOpacity: 0.4,
   },
   closeButton: {
     position: 'absolute',

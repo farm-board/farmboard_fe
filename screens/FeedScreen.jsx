@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput, Button, Modal, ScrollView, Pressable } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import axios from 'axios';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { UserContext } from '../contexts/UserContext';
@@ -43,13 +43,22 @@ const FeedScreen = () => {
   useEffect(() => {
     fetchPostings();
   }, []);
-
+  
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchPostings();
+      // Return a cleanup function to be called when the screen is unfocused
+      return () => {};
+    }, [])
+  );
+  
   const fetchPostings = () => {
     axios.get(`http://localhost:4000/api/v1/feed`)
       .then((response) => {
-        setPostings(response.data.data);
-        setFilteredPostings(response.data.data);
-        setSearchResults(response.data.data); // Initialize search results with all postings
+        const sortedPostings = response.data.data.sort((a, b) => new Date(b.attributes.created_at) - new Date(a.attributes.created_at));
+        setPostings(sortedPostings);
+        setFilteredPostings(sortedPostings);
+        setSearchResults(sortedPostings); // Initialize search results with all postings
         // Fetch applied postings for the current user
       })
       .catch(error => {
@@ -406,12 +415,14 @@ const FeedScreen = () => {
       {searchResults.length === 0 ? (
         <Text style={styles.noResultsText}>No positions match search parameters</Text>
       ) : (
-        <FlatList
-          data={searchResults} // Use searchResults instead of filteredPostings
-          renderItem={renderPostingItem}
-          keyExtractor={(item) => item.id.toString()}
-          showsVerticalScrollIndicator={false}
-        />
+        <View style={styles.postingsContainer}>
+          <FlatList
+            data={searchResults} // Use searchResults instead of filteredPostings
+            renderItem={renderPostingItem}
+            keyExtractor={(item) => item.id.toString()}
+            showsVerticalScrollIndicator={false}
+          />
+        </View>
       )}
       {renderPostingModal()}
     </View>
@@ -629,7 +640,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#3A4D39',
     padding: 20,
     paddingTop: 20,
-    marginBottom: -35,
   },
   heading: {
     fontSize: 24,
@@ -693,6 +703,7 @@ const styles = StyleSheet.create({
   },
   postingTitle: {
     fontSize: 18,
+    marginRight: 10,
     fontWeight: 'bold',
     color: '#333',
     flex: 1,
@@ -846,6 +857,9 @@ const styles = StyleSheet.create({
     color: 'white',
     textAlign: 'center',
     marginTop: 20,
+  },
+  postingsContainer: {
+    paddingBottom: 100,
   },
 });
 

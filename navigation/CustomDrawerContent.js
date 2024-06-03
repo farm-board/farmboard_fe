@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import { View, StyleSheet, Text, Alert } from 'react-native';
 import { DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
 import { Avatar, Title } from 'react-native-paper';
 import { TouchableOpacity } from 'react-native-gesture-handler';
@@ -55,7 +55,22 @@ function CustomDrawerContent(props) {
       : [];
 
   const handleLogout = () => {
-    logout(navigation);
+    Alert.alert(
+      'Log Out', "Are you sure you want to Log out?",
+      [
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel'
+        },
+        {
+          text: 'Log Out',
+          onPress: () => {
+          logout(navigation);
+        }
+      }
+    ],
+    );
   };
 
   const fetchUserData = async () => {
@@ -123,8 +138,8 @@ function CustomDrawerContent(props) {
               <View style={{flexDirection: 'row', marginTop: 15}}>
               <Avatar.Image
                   source={userAvatar ? { uri: userAvatar } : require('../assets/images/FarmProfilePlaceholder.png')}
-                  size={50}
-                  style={{ marginTop: 5 }}
+                  size={60}
+                  style={{ justifyContent: 'center', alignSelf: 'center'}}
                 />
                 <View style={{ marginLeft: 10, flexDirection: 'column' }}>
                   <Title style={styles.title}>{getUserDisplayName()}</Title>
@@ -172,6 +187,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     marginTop: 3,
+    marginRight: 45,
     fontWeight: 'bold',
     color: "white",
   },
