@@ -18,6 +18,7 @@ export default function SignupScreen() {
     const navigation = useNavigation();
 
     const [showPassword, setShowPassword] = useState(false);
+    const [showPasswordTwo, setShowPasswordTwo] = useState(false);
 
     const { currentUser, setCurrentUser } = useContext(UserContext);
 
@@ -62,6 +63,10 @@ export default function SignupScreen() {
       setShowPassword(!showPassword);
     };
 
+    const togglePasswordVisibilityTwo = () => {
+      setShowPasswordTwo(!showPasswordTwo);
+    };
+
 return (
     <View style={styles.container}>
         <StatusBar style="light" />
@@ -101,11 +106,11 @@ return (
                 style={styles.input}
                 placeholder='Password Confirmation'
                 placeholderTextColor='gray'
-                secureTextEntry={!showPassword}
+                secureTextEntry={!showPasswordTwo}
                 onChangeText={text => setData({ ...data, password_confirmation: text })}
             />
-              <TouchableOpacity onPress={togglePasswordVisibility}>
-                    <Icon name={showPassword ? "eye-off" : "eye"} size={24} color="gray" />
+              <TouchableOpacity onPress={togglePasswordVisibilityTwo}>
+                    <Icon name={showPasswordTwo ? "eye-off" : "eye"} size={24} color="gray" />
               </TouchableOpacity>
             </Animated.View>
             <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()}>

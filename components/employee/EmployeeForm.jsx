@@ -163,6 +163,7 @@ export default function EmployeeForm() {
             placeholder="First Name"
             icon="account-outline"
             label="First Name:"
+            maxLength={25}
             labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
             onChangeText={(text) => setData({ ...data, first_name: text })}
           />
@@ -172,6 +173,7 @@ export default function EmployeeForm() {
             placeholder="Last Name"
             icon="account-outline"
             label="Last Name:"
+            maxLength={25}
             labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
             onChangeText={(text) => setData({ ...data, last_name: text })}
           />
@@ -203,7 +205,12 @@ export default function EmployeeForm() {
             label="Zip Code:"
             labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
             keyboardType="numeric"
-            onChangeText={(text) => setData({ ...data, zip_code: text })}
+            maxLength={5}
+            onChangeText={(text) => {
+              // Ensure that only numbers are entered
+              const numericText = text.replace(/[^0-9]/g, '');
+              setData({...data, zip_code: numericText})
+            }}
           />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputContainer}>
@@ -230,6 +237,7 @@ export default function EmployeeForm() {
             placeholder="Bio"
             icon="pencil-outline"
             multiline={true}
+            maxLength={255}
             label="Bio:"
             labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
             onChangeText={(text) => setData({ ...data, bio: text })}

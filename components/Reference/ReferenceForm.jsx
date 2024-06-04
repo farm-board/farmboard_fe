@@ -64,6 +64,7 @@ export default function ReferenceForm( { setReferences }) {
               placeholder="First Name"
               icon="account-outline"
               label="First Name:"
+              maxLength={25}
               labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
               onChangeText={(text) => setData({...data, first_name: text})}
             />
@@ -73,6 +74,7 @@ export default function ReferenceForm( { setReferences }) {
               placeholder="Last Name"
               icon="account-outline"
               label="Last Name:"
+              maxLength={25}
               labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
               onChangeText={(text) => setData({...data, last_name: text})}
             />
@@ -82,6 +84,7 @@ export default function ReferenceForm( { setReferences }) {
               placeholder="Phone Number"
               icon="city-variant-outline"
               label="Phone Number:"
+              keyboardType="numeric"
               labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
               onChangeText={(text) => setData({...data, phone: text})}
             />

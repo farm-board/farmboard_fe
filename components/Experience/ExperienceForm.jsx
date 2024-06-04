@@ -47,6 +47,7 @@ export default function ExperienceForm({ setExperiences }) {
             placeholder="Company Name"
             icon="account-outline"
             label="Company Name:"
+            maxLength={35}
             labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
             onChangeText={(text) => setData({...data, company_name: text})}
           />
@@ -75,6 +76,7 @@ export default function ExperienceForm({ setExperiences }) {
             icon="star-box-outline"
             multiline={true}
             label="Description:"
+            maxLength={255}
             labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
             onChangeText={(text) => setData({...data, description: text})}
           />
