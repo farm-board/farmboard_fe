@@ -175,6 +175,7 @@ export default function EmployeeProfileEditDetails() {
             placeholder="First Name"
             icon="account-outline"
             label="First Name:"
+            maxLength={25}
             value={data.first_name}
             labelStyle={{ fontSize: 18, color: 'white' }}
             onChangeText={(text) => setData({ ...data, first_name: text })}
@@ -185,6 +186,7 @@ export default function EmployeeProfileEditDetails() {
             placeholder="Last Name"
             icon="account-outline"
             label="Last Name:"
+            maxLength={25}
             value={data.last_name}
             labelStyle={{ fontSize: 18, color: 'white' }}
             onChangeText={(text) => setData({ ...data, last_name: text })}
@@ -220,7 +222,11 @@ export default function EmployeeProfileEditDetails() {
             keyboardType="numeric"
             value={data.zip_code}
             labelStyle={{ fontSize: 18, color: 'white' }}
-            onChangeText={(text) => setData({ ...data, zip_code: text })}
+            onChangeText={(text) => {
+              // Ensure that only numbers are entered
+              const numericText = text.replace(/[^0-9]/g, '');
+              setData({...data, zip_code: numericText})
+            }}
           />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.inputContainer}>
@@ -228,6 +234,7 @@ export default function EmployeeProfileEditDetails() {
             placeholder="Phone"
             icon="phone"
             label="Phone:"
+            keyboardType="numeric"
             value={data.phone}
             labelStyle={{ fontSize: 18, color: 'white' }}
             onChangeText={(text) => setData({ ...data, phone: text })}
@@ -249,6 +256,7 @@ export default function EmployeeProfileEditDetails() {
             icon="pencil-outline"
             multiline={true}
             label="Bio:"
+            maxLength={255}
             labelStyle={{ fontSize: 18, color: 'white' }}
             value={data.bio}
             onChangeText={(text) => setData({ ...data, bio: text })}
