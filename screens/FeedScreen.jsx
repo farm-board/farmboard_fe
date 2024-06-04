@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput, Button, Modal, ScrollView, Pressable } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput, Button, Modal, ScrollView, Pressable, ActivityIndicator } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import axios from 'axios';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -9,7 +9,9 @@ import Avatar from '../components/Profile/Avatar';
 
 const FeedScreen = () => {
   const [postings, setPostings] = useState([]);
+  const [page, setPage] = useState(1);
   const [filteredPostings, setFilteredPostings] = useState([]);
+  const [allPagesFetched, setAllPagesFetched] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [postingProfilePhoto, setPostingProfilePhoto] = useState(null);
@@ -25,6 +27,7 @@ const FeedScreen = () => {
   const [postTransportation, setPostTransportation] = useState(false);
   const [postMeals, setPostMeals] = useState(false);
   const [appliedPostings, setAppliedPostings] = useState(new Set());
+  const [loadingNextPage, setLoadingNextPage] = useState(false); 
   const { currentUser } = useContext(UserContext);
   const navigation = useNavigation();
   const durationTypes = ['Part-Time', 'Full-Time', 'Seasonal', 'Contract'];
@@ -40,30 +43,66 @@ const FeedScreen = () => {
     "West Virginia", "Wisconsin", "Wyoming"];
   const compensationTypes = ['Hourly', 'Salary'];
 
-  useEffect(() => {
-    fetchPostings();
-  }, []);
-  
   useFocusEffect(
     React.useCallback(() => {
-      fetchPostings();
-      // Return a cleanup function to be called when the screen is unfocused
-      return () => {};
+      setAllPagesFetched(false);
+      setPage(1);
+      setPostings([]);
+      setFilteredPostings([]);
+      setSearchResults([]);
+      fetchPostings(1);
     }, [])
   );
+
+  const fetchPostings = (page) => {
+    if (allPagesFetched) return;
   
-  const fetchPostings = () => {
-    axios.get(`http://localhost:4000/api/v1/feed`)
+    setLoadingNextPage(true);
+    axios.get(`http://localhost:4000/api/v1/feed?page=${page}`)
       .then((response) => {
+        if (response.data.data.length === 0) {
+          setLoadingNextPage(false);
+          setAllPagesFetched(true);
+          return;
+        }
+  
         const sortedPostings = response.data.data.sort((a, b) => new Date(b.attributes.created_at) - new Date(a.attributes.created_at));
-        setPostings(sortedPostings);
-        setFilteredPostings(sortedPostings);
-        setSearchResults(sortedPostings); // Initialize search results with all postings
-        // Fetch applied postings for the current user
+        setPostings(prevPostings => {
+          const newPostings = [...prevPostings, ...sortedPostings];
+          return newPostings.sort((a, b) => new Date(b.attributes.created_at) - new Date(a.attributes.created_at)); // Sort the postings again
+        });
+        setFilteredPostings(prevPostings => {
+          const newPostings = [...prevPostings, ...sortedPostings];
+          return newPostings.sort((a, b) => new Date(b.attributes.created_at) - new Date(a.attributes.created_at)); // Sort the filtered postings again
+        });
+        setSearchResults(prevPostings => {
+          const newPostings = [...prevPostings, ...sortedPostings];
+          return newPostings.sort((a, b) => new Date(b.attributes.created_at) - new Date(a.attributes.created_at)); // Sort the search results again
+        });
+        setLoadingNextPage(false);
       })
       .catch(error => {
         console.error('There was an error fetching the postings:', error);
+        setLoadingNextPage(false);
       });
+  };
+  
+  const fetchNextPage = () => {
+    if (!loadingNextPage && !allPagesFetched) { // Add the allPagesFetched check here
+      const nextPage = page + 1;
+      setPage(nextPage);
+      fetchPostings(nextPage);
+    }
+  };
+
+  const ListEndLoader = () => {
+    if (loadingNextPage) {
+      // If the next page is being loaded, render an ActivityIndicator
+      return <ActivityIndicator size="large" />;
+    } else {
+      // Otherwise, render nothing
+      return null;
+    }
   };
 
   const handleSearch = (term = searchTerm) => {
@@ -417,10 +456,13 @@ const FeedScreen = () => {
       ) : (
         <View style={styles.postingsContainer}>
           <FlatList
-            data={searchResults} // Use searchResults instead of filteredPostings
+            data={searchResults}
             renderItem={renderPostingItem}
             keyExtractor={(item) => item.id.toString()}
             showsVerticalScrollIndicator={false}
+            onEndReached={fetchNextPage}
+            onEndReachedThreshold={0.8}
+            ListFooterComponent={ListEndLoader}
           />
         </View>
       )}
