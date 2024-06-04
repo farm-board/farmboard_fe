@@ -30,17 +30,19 @@ export default function ViewFarmProfile() {
 
   useEffect(() => {
     setLoading(true); 
-      axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/${farmId}/profile_info`)
+    axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/${farmId}/profile_info`)
     .then((farmResponse) => {
+      console.log('farm response:', farmResponse.data.postings);
       setFarm(farmResponse.data.attributes);
       setAccommodations(farmResponse.data.accommodations); 
-      setPostings(farmResponse.data.postings); 
+      const sortedPostings = farmResponse.data.postings.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      setPostings(sortedPostings); 
       setGalleryImages(farmResponse.data.gallery_photos);
       setLoading(false); 
     })
     .catch(error => {
       console.error('There was an error fetching the farm:', error);
-      setLoading(false); // Set loading state to false in case of error
+      setLoading(false);
     });
   }, [currentUser.id]);
   
@@ -220,6 +222,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: 5,
+    marginBottom: 10,
     backgroundColor: '#3A4D39',
     maxWidth: '100%',
     shadowRadius: 20,
@@ -235,6 +238,7 @@ const styles = StyleSheet.create({
   },
   farmName: {
     textAlign: 'right',
+    marginStart: 20,
     marginEnd: 20,
     letterSpacing: 1,
     paddingBottom: 5,
@@ -259,7 +263,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 25,
     paddingVertical: 10,
     backgroundColor: '#3A4D39',
-    marginVertical: 10,
+    marginBottom: 10,
     shadowRadius: 20,
     shadowColor: 'black',
     shadowOpacity: 0.3,
@@ -306,7 +310,8 @@ const styles = StyleSheet.create({
   galleryContainer: {
     flex: 1,
     justifyContent: 'space-between',
-    maxWidth: '100%'
+    maxWidth: '100%',
+    marginBottom: 10,
   },
   postingsContainer: {
     letterSpacing: 1,

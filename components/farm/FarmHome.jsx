@@ -315,7 +315,6 @@ export default function FarmHome() {
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    marginBottom: 40,
   },
   backButton: {
     position: 'absolute',

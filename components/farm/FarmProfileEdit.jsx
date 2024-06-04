@@ -138,9 +138,24 @@ export default function FarmProfileEdit() {
   };
 
   const handleDeleteGalleryImage = (photoId) => {
-    axios.delete(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/delete_gallery_photo/${photoId}`);
-    console.log('Deleted photo:', photoId);
-    setGalleryImages(galleryImages.filter(galleryPhoto => galleryPhoto.id !== photoId));
+    Alert.alert(
+      'Delete Gallery Image', "Are you sure you want to delete this Gallery Image?",
+      [
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel'
+        },
+        {
+          text: 'Delete',
+          onPress: () => {
+            axios.delete(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/delete_gallery_photo/${photoId}`);
+            console.log('Deleted photo:', photoId);
+            setGalleryImages(galleryImages.filter(galleryPhoto => galleryPhoto.id !== photoId));
+          }
+        }
+      ],
+    );
   };
 
   const fetchProfileData = async () => {

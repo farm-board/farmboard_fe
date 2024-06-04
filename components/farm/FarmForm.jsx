@@ -160,6 +160,7 @@ export default function FarmForm() {
             placeholder="Name"
             icon="account-outline"
             label="Name:"
+            maxLength={35}
             labelStyle={{fontSize: 18, color: 'white'}}
             onChangeText={(text) => setData({ ...data, name: text })}
           />
@@ -204,6 +205,7 @@ export default function FarmForm() {
           placeholder="Bio"
           icon="pencil-outline"
           multiline={true}
+          maxLength={255}
           label="Bio:"
           labelStyle={{fontSize: 18, color: 'white'}}
           onChangeText={(text) => setData({...data, bio: text})}
