@@ -16,7 +16,7 @@ export default function ForgotPasswordScreen() {
 
     const handleSubmit = () => {
         // Call your API to request password reset
-        axios.post(`http://localhost:4000/password`, { user: { email: email } })
+        axios.post(`https://farmboard-be-a01a77990d21.herokuapp.com/password`, { user: { email: email } })
           .then(response => {
             // Handle success
             console.log('Password reset link sent');

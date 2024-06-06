@@ -30,7 +30,7 @@ export default function ViewFarmProfile() {
 
   useEffect(() => {
     setLoading(true); 
-    axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/${farmId}/profile_info`)
+    axios.get(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/farms/${farmId}/profile_info`)
     .then((farmResponse) => {
       console.log('farm response:', farmResponse.data.postings);
       setFarm(farmResponse.data.attributes);

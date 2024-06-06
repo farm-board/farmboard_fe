@@ -62,7 +62,7 @@ export default function FarmForm() {
       Alert.alert('Setup Incomplete', 'A Zip Code for the farm is required.');
       return;
     }
-    axios.put(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`, { farm: {...data, setup_complete: true}}) 
+    axios.put(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/farms`, { farm: {...data, setup_complete: true}}) 
     .then(response => {
       console.log(response.data);
       setSetupComplete(true);
@@ -114,7 +114,7 @@ export default function FarmForm() {
       });
 
       // Upload image to Amazon S3
-      let response = await axios.post(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/upload_image`, formData, {
+      let response = await axios.post(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/farms/upload_image`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -126,14 +126,14 @@ export default function FarmForm() {
 
   const removeImage = () => {
     setData({ ...data, image: null});
-    axios.delete(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/delete_image`);
+    axios.delete(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/farms/delete_image`);
     setModalVisible(false);
   };
 
 
   const fetchProfileImage = async () => {
     try {
-      let response = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/image`);
+      let response = await axios.get(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/farms/image`);
       setData({ ...data, image: response.data.image_url });
     } catch (error) {
       console.log('Unable to fetch profile image', error);

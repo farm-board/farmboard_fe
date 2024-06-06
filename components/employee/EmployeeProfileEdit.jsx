@@ -49,14 +49,14 @@ export default function EmployeeProfileEdit() {
   const fetchProfileData = async () => {
     try {
       const [employeeResponse, experiencesResponse, referencesResponse] = await Promise.all([
-        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`),
-        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/experiences`),
-        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/references`)
+        axios.get(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/employees`),
+        axios.get(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/employees/experiences`),
+        axios.get(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/employees/references`)
       ]);
 
       let imageResponse;
       try {
-        imageResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/image`);
+        imageResponse = await axios.get(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/employees/image`);
       } catch (error) {
         if (error.response && error.response.status === 404) {
           imageResponse = { data: { image_url: null } }; // Default value if image is not found
@@ -125,7 +125,7 @@ export default function EmployeeProfileEdit() {
         type: 'image/jpeg',
         name: `profile_${currentUser.id}.jpg`,
       });
-      await axios.post(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/upload_image`, formData, {
+      await axios.post(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/employees/upload_image`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -137,7 +137,7 @@ export default function EmployeeProfileEdit() {
 
   const deleteExperience = async (experienceId) => {
     try {
-      await axios.delete(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/experiences/${experienceId}`);
+      await axios.delete(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/employees/experiences/${experienceId}`);
       fetchExperiences();
     } catch (error) {
       console.error('Error deleting experience:', error);
@@ -146,7 +146,7 @@ export default function EmployeeProfileEdit() {
 
   const deleteReference = async (referenceId) => {
     try {
-      await axios.delete(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/references/${referenceId}`);
+      await axios.delete(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/employees/references/${referenceId}`);
       fetchReferences();
     } catch (error) {
       console.error('Error deleting references:', error);

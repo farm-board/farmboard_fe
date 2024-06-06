@@ -23,7 +23,7 @@ export default function SetupScreen() {
     // Get the token from AsyncStorage
     const token = await AsyncStorage.getItem('token');
 
-    axios.patch('http://localhost:4000/current_user/update', {
+    axios.patch('https://farmboard-be-a01a77990d21.herokuapp.com/current_user/update', {
       user: {
           role_type: role
       }

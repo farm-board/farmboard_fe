@@ -49,7 +49,7 @@ export default function FarmProfileEditPostings() {
 
   const fetchPosting = () => {
     console.log('Posting ID:', postingId );
-    axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/postings/${postingId}`)
+    axios.get(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/farms/postings/${postingId}`)
     .then((postingsResponse) => {
       console.log('Posting:', postingsResponse.data.data);
       setData(postingsResponse.data.data);
@@ -72,7 +72,7 @@ export default function FarmProfileEditPostings() {
         {
           text: 'Delete',
           onPress: () => {
-            axios.delete(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/postings/${postingId}`)
+            axios.delete(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/farms/postings/${postingId}`)
             .then(response => {
               console.log('Posting deleted:', postingId);
               Alert.alert('Posting deleted');
@@ -92,7 +92,7 @@ export default function FarmProfileEditPostings() {
   }
 
   const fetchAccommodationData = () => {
-    axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/accommodation`)
+    axios.get(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/farms/accommodation`)
       .then((accommodationResponse) => {
         if (accommodationResponse.data && accommodationResponse.data.data && accommodationResponse.data.data.attributes) {
           setAccommodationData(accommodationResponse.data.data.attributes);
@@ -112,7 +112,7 @@ export default function FarmProfileEditPostings() {
         attributes: { ...data.attributes }
       }
     };
-    axios.put(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/postings/${postingId}`, postData)
+    axios.put(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/farms/postings/${postingId}`, postData)
       .then(response => {
         console.log(response.data);
         // Check the sourceStack parameter and navigate accordingly

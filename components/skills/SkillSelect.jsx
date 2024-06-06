@@ -53,11 +53,44 @@ const skills = [
           { name: 'Load Securing', id: 501 },
           { name: 'Navigation Skills', id: 502 },
           { name: 'Communication and Coordination', id: 503 },
-          { name: 'Tractor Trailer - CDL', id: 504 },
-          { name: 'Tractor Trailer - NO CDL', id: 505 },
-          { name: 'Livestock Transportation', id: 506 },
+          { name: 'Tractor Trailer - CDL(Class A)', id: 504 },
+          { name: 'Tractor Trailer - CDL(Class B)', id: 505 },
+          { name: 'Tractor Trailer - CDL(Class C)', id: 506 },
+          { name: 'Tractor Trailer - NO CDL', id: 507 },
+          { name: 'Livestock Transportation', id: 508 },
         ]
     },
+    { name: 'General Farm Work', id: 6,
+      skills: [
+          { name: 'Fencing', id: 600 },
+          { name: 'Landscaping', id: 601 },
+          { name: 'Grounds Maintenance', id: 602 },
+          { name: 'Building Maintenance', id: 603 },
+          { name: 'General Labor', id: 604 },
+          { name: 'Cleaning', id: 605 },
+          { name: 'Painting', id: 606 },
+          { name: 'Carpentry', id: 607 },
+          { name: 'Plumbing', id: 608 },
+          { name: 'Electrical', id: 609 },
+          { name: 'Masonry', id: 610 },
+          { name: 'Roofing', id: 611 },
+          { name: 'Welding', id: 612 },
+          { name: 'Mechanical', id: 613 },
+        ]
+      },
+      { name: 'Language', id: 7,
+        skills: [
+            { name: 'Language - English', id: 700 },
+            { name: 'Language - Spanish', id: 701 },
+            { name: 'Language - French', id: 702 },
+            { name: 'Language - German', id: 703 },
+            { name: 'Language - Italian', id: 704 },
+            { name: 'Language - Portuguese', id: 705 },
+            { name: 'Language - Russian', id: 706 },
+            { name: 'Language - Chinese', id: 707 },
+            { name: 'Other', id: 708 },
+          ]
+      },
 ];
 
 export default function SkillsSelect({ selectedItems, onSelectedItemsChange }) {

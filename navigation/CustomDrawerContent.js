@@ -76,13 +76,13 @@ function CustomDrawerContent(props) {
   const fetchUserData = async () => {
     try {
       if (currentUser.role_type === 'farm') {
-        const farmResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`);
+        const farmResponse = await axios.get(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/farms`);
         console.log('drawer farm data:', farmResponse.data);
         setUserData(farmResponse.data.data.attributes);
         setUserName(farmResponse.data.data.attributes.name);
 
         try {
-          const imageResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/image`);
+          const imageResponse = await axios.get(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/farms/image`);
           console.log('drawer image data:', imageResponse.data);
           setAvatarImage(imageResponse.data.image_url);
           setUserAvatar(imageResponse.data.image_url);
@@ -90,14 +90,14 @@ function CustomDrawerContent(props) {
           console.log('Unable to fetch farm image', imageError);
         }
       } else if (currentUser.role_type === 'employee') {
-        const employeeResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`);
+        const employeeResponse = await axios.get(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/employees`);
         console.log('drawer employee data:', employeeResponse.data);
         setUserData(employeeResponse.data.data.attributes);
         setUserFirstName(employeeResponse.data.data.attributes.first_name);
         setUserLastName(employeeResponse.data.data.attributes.last_name);
 
         try {
-          const imageResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/image`);
+          const imageResponse = await axios.get(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/employees/image`);
           console.log('drawer image data:', imageResponse.data);
           setAvatarImage(imageResponse.data.image_url);
           setUserAvatar(imageResponse.data.image_url);

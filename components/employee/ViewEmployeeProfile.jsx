@@ -28,7 +28,7 @@ export default function ViewEmployeeProfile() {
 
   useEffect(() => {
     setLoading(true);
-    axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/${employeeId}/profile_info`)
+    axios.get(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/employees/${employeeId}/profile_info`)
       .then((employeeResponse) => {
         setEmployee(employeeResponse.data.attributes);
         setExperiences(employeeResponse.data.experiences);

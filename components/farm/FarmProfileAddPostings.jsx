@@ -45,7 +45,7 @@ export default function FarmProfileAddPostings() {
   }
 
   const fetchAccommodationData = () => {
-    axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/accommodation`)
+    axios.get(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/farms/accommodation`)
       .then((accommodationResponse) => {
         if (accommodationResponse.data && accommodationResponse.data.data && accommodationResponse.data.data.attributes) {
           setAccommodationData(accommodationResponse.data.data.attributes);
@@ -88,7 +88,7 @@ export default function FarmProfileAddPostings() {
         attributes: { ...data.attributes }
       }
     };
-    axios.post(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/postings`, postData)
+    axios.post(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/farms/postings`, postData)
     .then(response => {
       console.log(response.data);
       if (route.params.sourceStack === 'Profile') {

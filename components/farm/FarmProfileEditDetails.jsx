@@ -40,7 +40,7 @@ export default function FarmProfileEditDetails() {
   const { currentUser, setUserName } = useContext(UserContext);
 
   const handleSubmit = () => {
-    axios.put(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`, { farm: data})
+    axios.put(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/farms`, { farm: data})
     .then(response => {
       console.log(response.data);
       navigation.push('Edit Profile');
@@ -53,7 +53,7 @@ export default function FarmProfileEditDetails() {
 
   const fetchProfileData = async () => {
     Promise.all([
-      axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`),
+      axios.get(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/farms`),
     ])
     .then(([farmResponse, imageResponse]) => {
       setData({

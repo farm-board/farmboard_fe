@@ -23,7 +23,7 @@ export default function FarmHome() {
 
   const fetchPostings = async () => {
     try {
-      const postingsResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/postings`);
+      const postingsResponse = await axios.get(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/farms/postings`);
       return postingsResponse;
     } catch (error) {
       console.error("There was an error fetching the farm's postings:", error);
@@ -32,7 +32,7 @@ export default function FarmHome() {
   
   const fetchApplicantsCount = async (postingId) => {
     try {
-      const applicantsResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/postings/${postingId}/applicants`);
+      const applicantsResponse = await axios.get(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/farms/postings/${postingId}/applicants`);
       console.log('Applicants:', applicantsResponse.data);
   
       // Set applicants only for the current posting being viewed
@@ -51,7 +51,7 @@ export default function FarmHome() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const farmResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`);
+        const farmResponse = await axios.get(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/farms`);
         console.log('current farm:', farmResponse.data.data.attributes);
         setFarm(farmResponse.data.data.attributes);
   
@@ -79,7 +79,7 @@ export default function FarmHome() {
     React.useCallback(() => {
       const fetchData = async () => {
         try {
-          const farmResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`);
+          const farmResponse = await axios.get(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/farms`);
           console.log('current farm:', farmResponse.data.data.attributes);
           setFarm(farmResponse.data.data.attributes);
     

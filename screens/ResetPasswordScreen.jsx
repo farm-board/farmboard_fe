@@ -25,7 +25,7 @@ export default function ResetPasswordScreen() {
     
     const handleSubmit = () => {
       // Call your API to request password reset
-      axios.patch('http://localhost:4000/password', {
+      axios.patch('https://farmboard-be-a01a77990d21.herokuapp.com/password', {
         user: {
           reset_password_token: passwordResetToken,
           password: password,

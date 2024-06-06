@@ -25,7 +25,7 @@ export default function EmployeeProfile() {
   
       try {
         // Fetch employee data
-        const employeeResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`);
+        const employeeResponse = await axios.get(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/employees`);
         setEmployee(employeeResponse.data.data.attributes);
       } catch (employeeError) {
         console.error('Error fetching employee data:', employeeError);
@@ -33,7 +33,7 @@ export default function EmployeeProfile() {
   
       try {
         // Fetch experiences data
-        const experiencesResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/experiences`);
+        const experiencesResponse = await axios.get(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/employees/experiences`);
         setExperiences(experiencesResponse.data.data);
       } catch (experiencesError) {
         console.error('Error fetching experiences data:', experiencesError);
@@ -41,7 +41,7 @@ export default function EmployeeProfile() {
   
       try {
         // Fetch references data
-        const referenceResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/references`);
+        const referenceResponse = await axios.get(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/employees/references`);
         setReferences(referenceResponse.data.data);
       } catch (referenceError) {
         console.error('Error fetching references data:', referenceError);
@@ -49,7 +49,7 @@ export default function EmployeeProfile() {
   
       try {
         // Fetch profile photo
-        const imageResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/image`);
+        const imageResponse = await axios.get(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/employees/image`);
         setProfilePhoto(imageResponse.data.image_url);
         setUserAvatar(imageResponse.data.image_url);
       } catch (imageError) {
@@ -70,7 +70,7 @@ export default function EmployeeProfile() {
     
         try {
           // Fetch employee data
-          const employeeResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`);
+          const employeeResponse = await axios.get(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/employees`);
           setEmployee(employeeResponse.data.data.attributes);
         } catch (employeeError) {
           console.error('Error fetching employee data:', employeeError);
@@ -78,7 +78,7 @@ export default function EmployeeProfile() {
     
         try {
           // Fetch experiences data
-          const experiencesResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/experiences`);
+          const experiencesResponse = await axios.get(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/employees/experiences`);
           setExperiences(experiencesResponse.data.data);
         } catch (experiencesError) {
           console.error('Error fetching experiences data:', experiencesError);
@@ -86,7 +86,7 @@ export default function EmployeeProfile() {
     
         try {
           // Fetch references data
-          const referenceResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/references`);
+          const referenceResponse = await axios.get(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/employees/references`);
           setReferences(referenceResponse.data.data);
         } catch (referenceError) {
           console.error('Error fetching references data:', referenceError);
@@ -94,7 +94,7 @@ export default function EmployeeProfile() {
     
         try {
           // Fetch profile photo
-          const imageResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/image`);
+          const imageResponse = await axios.get(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/employees/image`);
           setProfilePhoto(imageResponse.data.image_url);
           setUserAvatar(imageResponse.data.image_url);
         } catch (imageError) {

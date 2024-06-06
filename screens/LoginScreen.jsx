@@ -28,7 +28,7 @@ export default function LoginScreen() {
             }
           };
 
-        axios.post('http://localhost:4000/login', user)
+        axios.post('https://farmboard-be-a01a77990d21.herokuapp.com/login', user)
         .then(response => {
           setCurrentUser(response.data.data);
           AsyncStorage.setItem('token', response.headers.authorization);

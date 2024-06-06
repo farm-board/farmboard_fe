@@ -54,7 +54,7 @@ export default function EmployeeProfileEditDetails() {
   const { currentUser, setUserFirstName, setUserLastName } = useContext(UserContext);
 
   const handleSubmit = () => {
-    axios.put(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`, { employee: data})
+    axios.put(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/employees`, { employee: data})
     .then(response => {
       console.log(response.data);
       setUserFirstName(data.first_name);
@@ -72,7 +72,7 @@ export default function EmployeeProfileEditDetails() {
 
   const toggleReferenceForm = () => {
     setShowReferencesForm(!showReferencesForm);
-    axios.put(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`, { employee: data })
+    axios.put(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/employees`, { employee: data })
       .then(response => {
         console.log(response.data);
         navigation.navigate('Profile');
@@ -123,7 +123,7 @@ export default function EmployeeProfileEditDetails() {
         name: `profile_${currentUser.id}.jpg`,
       });
 
-      await axios.post(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/upload_image`, formData, {
+      await axios.post(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/employees/upload_image`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -136,8 +136,8 @@ export default function EmployeeProfileEditDetails() {
   const fetchProfileData = async () => {
     try {
       const [employeeResponse, imageResponse] = await Promise.all([
-        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`),
-        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/image`).catch(error => {
+        axios.get(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/employees`),
+        axios.get(`https://farmboard-be-a01a77990d21.herokuapp.com/api/v1/users/${currentUser.id}/employees/image`).catch(error => {
           if (error.response && error.response.status === 404) {
             return { data: { image_url: null } };
           }
