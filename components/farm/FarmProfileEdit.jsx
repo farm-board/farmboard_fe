@@ -76,7 +76,7 @@ export default function FarmProfileEdit() {
       });
 
       // Upload image to Amazon S3
-      let response = await axios.post(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/upload_image`, formData, {
+      let response = await axios.post(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/upload_image`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -88,7 +88,7 @@ export default function FarmProfileEdit() {
 
   const removeImage = () => {
     setData({ ...data, image: null});
-    axios.delete(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/delete_image`);
+    axios.delete(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/delete_image`);
     setModalVisible(false);
   };
 
@@ -126,7 +126,7 @@ export default function FarmProfileEdit() {
       });
 
       // Upload image to Amazon S3
-      let response = await axios.post(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/upload_gallery_photo`, formData, {
+      let response = await axios.post(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/upload_gallery_photo`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -149,7 +149,7 @@ export default function FarmProfileEdit() {
         {
           text: 'Delete',
           onPress: () => {
-            axios.delete(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/delete_gallery_photo/${photoId}`);
+            axios.delete(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/delete_gallery_photo/${photoId}`);
             console.log('Deleted photo:', photoId);
             setGalleryImages(galleryImages.filter(galleryPhoto => galleryPhoto.id !== photoId));
           }
@@ -161,7 +161,7 @@ export default function FarmProfileEdit() {
   const fetchProfileData = async () => {
     try {
       // Fetch user data
-      const farmResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`);
+      const farmResponse = await axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms`);
   
       // Update state with user data
       setData(prevData => ({
@@ -175,7 +175,7 @@ export default function FarmProfileEdit() {
   
       try {
         // Fetch user avatar image
-        const imageResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/image`);
+        const imageResponse = await axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/image`);
         // Update state with image URL
         setData(prevData => ({
           ...prevData,
@@ -195,7 +195,7 @@ export default function FarmProfileEdit() {
   };
 
   const fetchAccommodationData = async () => {
-    axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/accommodation`)
+    axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/accommodation`)
       .then((accommodationResponse) => {
         if (accommodationResponse.data && accommodationResponse.data.data && accommodationResponse.data.data.attributes) {
           setAccommodations(accommodationResponse.data.data.attributes);
@@ -210,7 +210,7 @@ export default function FarmProfileEdit() {
 
 
   const fetchGalleryImages = () => {
-    axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/gallery_photos`)
+    axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/gallery_photos`)
     .then((galleryResponse) => {
       console.log('gallery images:', galleryResponse.data.gallery_photos);
       setGalleryImages(galleryResponse.data.gallery_photos);

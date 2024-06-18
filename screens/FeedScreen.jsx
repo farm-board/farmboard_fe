@@ -58,7 +58,7 @@ const FeedScreen = () => {
     if (allPagesFetched) return;
   
     setLoadingNextPage(true);
-    axios.get(`http://localhost:4000/api/v1/feed?page=${page}`)
+    axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/feed?page=${page}`)
       .then((response) => {
         if (response.data.data.length === 0) {
           setLoadingNextPage(false);
@@ -168,7 +168,7 @@ const FeedScreen = () => {
 
   const applyToPosting = async () => {
     try {
-      const response = await axios.post(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/postings/${selectedPosting.id}/apply`);
+      const response = await axios.post(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/postings/${selectedPosting.id}/apply`);
       if (response.status === 200) {
         alert("Application submitted successfully!");
         setAppliedPostings(prev => new Set(prev).add(selectedPosting.id));
@@ -192,7 +192,7 @@ const FeedScreen = () => {
 
   const fetchPostingProfileImage = (farmId) => {
     console.log('Fetching posting profile photo for farm:', farmId);
-    axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/${farmId}/profile_info`)
+    axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/${farmId}/profile_info`)
       .then((response) => {
         console.log('Posting profile Accommodation Housing:', response.data.accommodations.housing);
         console.log('Posting profile photo:', response.data.attributes.image_url);

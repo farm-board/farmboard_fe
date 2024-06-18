@@ -71,7 +71,7 @@ export default function EmployeeForm() {
 
   const handleSubmit = () => {
     if (validateForm()) {
-      axios.put(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`, { employee: { ...data, setup_complete: true } })
+      axios.put(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/employees`, { employee: { ...data, setup_complete: true } })
         .then(response => {
           console.log(response.data);
           setSetupComplete(true);
@@ -124,7 +124,7 @@ export default function EmployeeForm() {
       });
 
       // Upload image to Amazon S3
-      let response = await axios.post(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/upload_image`, formData, {
+      let response = await axios.post(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/employees/upload_image`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -136,7 +136,7 @@ export default function EmployeeForm() {
 
   const fetchProfileImage = async () => {
     try {
-      let response = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/image`);
+      let response = await axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/employees/image`);
       setData({ ...data, image: response.data.image_url });
     } catch (error) {
       console.log('Unable to fetch profile image', error);

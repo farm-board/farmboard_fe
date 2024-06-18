@@ -30,7 +30,7 @@ export default function ViewFarmProfile() {
 
   useEffect(() => {
     setLoading(true); 
-    axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/${farmId}/profile_info`)
+    axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/${farmId}/profile_info`)
     .then((farmResponse) => {
       console.log('farm response:', farmResponse.data.postings);
       setFarm(farmResponse.data.attributes);

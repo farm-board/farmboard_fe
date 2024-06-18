@@ -27,7 +27,7 @@ export default function FarmProfile() {
   const navigation = useNavigation();
   
   const fetchAccommodations = () => {
-    axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/accommodation`)
+    axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/accommodation`)
       .then((accommodationResponse) => {
         if (accommodationResponse.data && accommodationResponse.data.data && accommodationResponse.data.data.attributes) {
           console.log("accommodations:", accommodationResponse.data.data.attributes)
@@ -43,7 +43,7 @@ export default function FarmProfile() {
   };
 
   const fetchGalleryImages = () => {
-    axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/gallery_photos`)
+    axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/gallery_photos`)
     .then((galleryResponse) => {
       console.log('gallery images:', galleryResponse.data.gallery_photos);
       setGalleryImages(galleryResponse.data.gallery_photos);
@@ -55,7 +55,7 @@ export default function FarmProfile() {
 
   const fetchPostings = async () => {
     try {
-      const postingsResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/postings`);
+      const postingsResponse = await axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/postings`);
       const sortedPostings = postingsResponse.data.data.sort((a, b) => new Date(b.attributes.created_at) - new Date(a.attributes.created_at));
       return { ...postingsResponse, data: { ...postingsResponse.data, data: sortedPostings } };
     } catch (error) {
@@ -65,7 +65,7 @@ export default function FarmProfile() {
   
   const fetchApplicantsCount = async (postingId) => {
     try {
-      const applicantsResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/postings/${postingId}/applicants`);
+      const applicantsResponse = await axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/postings/${postingId}/applicants`);
       console.log('Applicants:', applicantsResponse.data);
   
       // Set applicants only for the current posting being viewed
@@ -85,13 +85,13 @@ export default function FarmProfile() {
     const fetchData = async () => {
       try {
         // Fetch farm data
-        const farmResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`);
+        const farmResponse = await axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms`);
         console.log('current farm:', farmResponse.data.data.attributes);
         setFarm(farmResponse.data.data.attributes);
   
         // Fetch profile photo separately
         try {
-          const imageResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/image`);
+          const imageResponse = await axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/image`);
           setProfilePhoto(imageResponse.data.image_url);
           setUserAvatar(imageResponse.data.image_url);
         } catch (imageError) {
@@ -126,13 +126,13 @@ export default function FarmProfile() {
       const fetchData = async () => {
         try {
         // Fetch farm data
-          const farmResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`);
+          const farmResponse = await axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms`);
           console.log('current farm:', farmResponse.data.data.attributes);
           setFarm(farmResponse.data.data.attributes);
 
           // Fetch profile photo separately
           try {
-            const imageResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/image`);
+            const imageResponse = await axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/image`);
             setProfilePhoto(imageResponse.data.image_url);
           } catch (imageError) {
             console.error('Error fetching profile photo:', imageError);
