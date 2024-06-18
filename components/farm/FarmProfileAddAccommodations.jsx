@@ -21,7 +21,7 @@ export default function FarmProfileAddAccommodations() {
   const { currentUser } = useContext(UserContext);
 
   const handleSubmit = () => {
-    axios.post(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/accommodation`, data )
+    axios.post(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/accommodation`, data )
     .then(response => {
       console.log(response.data);
       navigation.push('Edit Profile');

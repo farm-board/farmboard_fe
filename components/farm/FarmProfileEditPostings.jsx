@@ -1,19 +1,16 @@
-import React, { useState, useContext, useEffect } from 'react'
+import React, { useState, useContext, useEffect } from 'react';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
-import { Text, View, TouchableOpacity, StyleSheet, Alert } from 'react-native'
+import { Text, View, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { UserContext } from '../../contexts/UserContext';
 import axios from 'axios';
-import KeyboardAvoidingContainer from "../Containers/KeyboardAvoidingContainer";
-import StyledTextInput from "../Inputs/StyledTextInput";
+import KeyboardAvoidingContainer from '../Containers/KeyboardAvoidingContainer';
+import StyledTextInput from '../Inputs/StyledTextInput';
 import StyledText from '../Texts/StyledText';
 import StyledSwitch from '../Inputs/StyledSwitch';
 import SkillsSelect from '../skills/SkillSelect';
-import SelectDropdown from 'react-native-select-dropdown';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; 
 import StyledSelectDropdown from '../Inputs/StyledSelectDropdown';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-
 
 export default function FarmProfileEditPostings() {
   const [data, setData] = useState({
@@ -31,9 +28,8 @@ export default function FarmProfileEditPostings() {
 
   const [accommodationData, setAccommodationData] = useState({});
 
-  const durationList = [ "Full-Time", "Part-Time", "Seasonal", "Contract"];
-
-  const paymentTypeList = [ "Hourly", "Salary"];
+  const durationList = ["Full-Time", "Part-Time", "Seasonal", "Contract"];
+  const paymentTypeList = ["Hourly", "Salary"];
 
   const navigation = useNavigation();
   const { currentUser } = useContext(UserContext);
@@ -45,19 +41,19 @@ export default function FarmProfileEditPostings() {
   const onSelectedItemsChange = (selectedItems, selectedSkills) => {
     setSelectedItems(selectedItems);
     setData({...data, attributes: { ...data.attributes, skill_requirements: selectedSkills}});
-  }
+  };
 
   const fetchPosting = () => {
-    console.log('Posting ID:', postingId );
-    axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/postings/${postingId}`)
-    .then((postingsResponse) => {
-      console.log('Posting:', postingsResponse.data.data);
-      setData(postingsResponse.data.data);
-      setSelectedItems(postingsResponse.data.data.attributes.skill_requirements);
-    })
-    .catch(error => {
-      console.error("There was an error fetching the farm's postings:", error);
-    });
+    console.log('Posting ID:', postingId);
+    axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/postings/${postingId}`)
+      .then((postingsResponse) => {
+        console.log('Posting:', postingsResponse.data.data);
+        setData(postingsResponse.data.data);
+        setSelectedItems(postingsResponse.data.data.attributes.skill_requirements);
+      })
+      .catch(error => {
+        console.error("There was an error fetching the farm's postings:", error);
+      });
   };
 
   const handleDeletePosting = () => {
@@ -72,27 +68,27 @@ export default function FarmProfileEditPostings() {
         {
           text: 'Delete',
           onPress: () => {
-            axios.delete(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/postings/${postingId}`)
-            .then(response => {
-              console.log('Posting deleted:', postingId);
-              Alert.alert('Posting deleted');
-              if (route.params.sourceStack === 'Profile') {
-                navigation.navigate('Profile');
-              } else if (route.params.sourceStack === 'Home') {
-                navigation.navigate('Home');
-              }
-            })
-            .catch(error => {
-              console.log('Unable to delete posting', error);
-            });
+            axios.delete(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/postings/${postingId}`)
+              .then(response => {
+                console.log('Posting deleted:', postingId);
+                Alert.alert('Posting deleted');
+                if (route.params.sourceStack === 'Profile') {
+                  navigation.navigate('Profile');
+                } else if (route.params.sourceStack === 'Home') {
+                  navigation.navigate('Home');
+                }
+              })
+              .catch(error => {
+                console.log('Unable to delete posting', error);
+              });
           }
         }
       ]
     );
-  }
+  };
 
   const fetchAccommodationData = () => {
-    axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/accommodation`)
+    axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/accommodation`)
       .then((accommodationResponse) => {
         if (accommodationResponse.data && accommodationResponse.data.data && accommodationResponse.data.data.attributes) {
           setAccommodationData(accommodationResponse.data.data.attributes);
@@ -105,17 +101,21 @@ export default function FarmProfileEditPostings() {
       });
   };
 
-
   const handleSubmit = () => {
     const postData = {
-      posting: {
-        attributes: { ...data.attributes }
-      }
+      title: data.attributes.title,
+      salary: data.attributes.salary,
+      payment_type: data.attributes.payment_type,
+      duration: data.attributes.duration,
+      age_requirement: data.attributes.age_requirement,
+      offers_lodging: data.attributes.offers_lodging,
+      skill_requirements: data.attributes.skill_requirements,
+      description: data.attributes.description,
     };
-    axios.put(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/postings/${postingId}`, postData)
+
+    axios.put(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/postings/${postingId}`, { posting: postData })
       .then(response => {
         console.log(response.data);
-        // Check the sourceStack parameter and navigate accordingly
         if (route.params.sourceStack === 'Profile') {
           navigation.navigate('Profile');
         } else if (route.params.sourceStack === 'Home') {
@@ -124,8 +124,10 @@ export default function FarmProfileEditPostings() {
       })
       .catch(error => {
         console.log('Unable to edit posting', error);
+        Alert.alert('Error', 'Unable to edit posting. Please try again.');
       });
-  }
+  };
+
   useEffect(() => {
     if (postingId) fetchPosting();
     fetchAccommodationData();
@@ -134,8 +136,8 @@ export default function FarmProfileEditPostings() {
   return (
     <KeyboardAvoidingContainer style={styles.container} behavior="padding">
       <View style={styles.content}>
-        <Animated.View entering={FadeInDown.duration(1000).springify()}style={styles.inputContainer}>
-        <StyledTextInput
+        <Animated.View entering={FadeInDown.duration(1000).springify()} style={styles.inputContainer}>
+          <StyledTextInput
             placeholder="Job Title"
             icon="account-outline"
             label="Job Title:"
@@ -180,9 +182,9 @@ export default function FarmProfileEditPostings() {
             }}
           />
         </Animated.View>
-        <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} >
-        <Text style={{ alignSelf: 'flex-start', color: 'white', marginBottom: 10, fontSize: 18 }}>Relevant Skills:</Text>
-            <SkillsSelect selectedItems={selectedItems} onSelectedItemsChange={onSelectedItemsChange}/>
+        <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()}>
+          <Text style={{ alignSelf: 'flex-start', color: 'white', marginBottom: 10, fontSize: 18 }}>Relevant Skills:</Text>
+          <SkillsSelect selectedItems={selectedItems} onSelectedItemsChange={onSelectedItemsChange}/>
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(1200).duration(1000).springify()} style={styles.inputContainer}>
           <StyledTextInput
@@ -197,7 +199,7 @@ export default function FarmProfileEditPostings() {
           />
         </Animated.View>
         { accommodationData.housing || accommodationData.meals || accommodationData.transportation ?
-          <Animated.View entering={FadeInDown.delay(1000).duration(1000).springify()}style={styles.inputContainerAccommodations}>
+          <Animated.View entering={FadeInDown.delay(1000).duration(1000).springify()} style={styles.inputContainerAccommodations}>
             <StyledSwitch
               placeholder="Offers Accommodations"
               icon="home-outline"

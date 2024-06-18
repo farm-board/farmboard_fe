@@ -16,7 +16,7 @@ export default function ForgotPasswordScreen() {
 
     const handleSubmit = () => {
         // Call your API to request password reset
-        axios.post(`http://localhost:4000/password`, { user: { email: email } })
+        axios.post(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/password`, { user: { email: email } })
           .then(response => {
             // Handle success
             console.log('Password reset link sent');

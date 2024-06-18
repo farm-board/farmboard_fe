@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { UserContext } from '../../contexts/UserContext';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import axios from 'axios';
@@ -17,109 +17,44 @@ export default function EmployeeProfile() {
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [loading, setLoading] = useState(true); 
   const [expanded, setExpanded] = useState(false); 
-  const [selectedTab, setSelectedTab] = useState('Experience'); // New state for toggle
+  const [selectedTab, setSelectedTab] = useState('Experience'); 
 
-  useEffect(() => {
-    const fetchEmployeeData = async () => {
-      setLoading(true);
-  
-      try {
-        // Fetch employee data
-        const employeeResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`);
-        setEmployee(employeeResponse.data.data.attributes);
-      } catch (employeeError) {
-        console.error('Error fetching employee data:', employeeError);
-      }
-  
-      try {
-        // Fetch experiences data
-        const experiencesResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/experiences`);
-        setExperiences(experiencesResponse.data.data);
-      } catch (experiencesError) {
-        console.error('Error fetching experiences data:', experiencesError);
-      }
-  
-      try {
-        // Fetch references data
-        const referenceResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/references`);
-        setReferences(referenceResponse.data.data);
-      } catch (referenceError) {
-        console.error('Error fetching references data:', referenceError);
-      }
-  
-      try {
-        // Fetch profile photo
-        const imageResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/image`);
-        setProfilePhoto(imageResponse.data.image_url);
-        setUserAvatar(imageResponse.data.image_url);
-      } catch (imageError) {
-        console.error('Error fetching profile photo:', imageError);
-        setProfilePhoto(null); // Handle the absence of profile photo appropriately
-      }
-  
-      setLoading(false);
-    };
-  
-    fetchEmployeeData();
-  }, [currentUser.id]);
+  const fetchEmployeeData = async () => {
+    setLoading(true);
+
+    try {
+      const [employeeResponse, experiencesResponse, referenceResponse, imageResponse] = await Promise.all([
+        axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/employees`),
+        axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/employees/experiences`),
+        axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/employees/references`),
+        axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/employees/image`),
+      ]);
+
+      setEmployee(employeeResponse.data.data.attributes);
+      setExperiences(experiencesResponse.data.data);
+      setReferences(referenceResponse.data.data);
+      setProfilePhoto(imageResponse.data.image_url);
+      setUserAvatar(imageResponse.data.image_url);
+    } catch (error) {
+      console.error('Error fetching employee data:', error);
+    }
+
+    setLoading(false);
+  };
 
   useFocusEffect(
     React.useCallback(() => {
-      const fetchEmployeeData = async () => {
-        setLoading(true);
-    
-        try {
-          // Fetch employee data
-          const employeeResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`);
-          setEmployee(employeeResponse.data.data.attributes);
-        } catch (employeeError) {
-          console.error('Error fetching employee data:', employeeError);
-        }
-    
-        try {
-          // Fetch experiences data
-          const experiencesResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/experiences`);
-          setExperiences(experiencesResponse.data.data);
-        } catch (experiencesError) {
-          console.error('Error fetching experiences data:', experiencesError);
-        }
-    
-        try {
-          // Fetch references data
-          const referenceResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/references`);
-          setReferences(referenceResponse.data.data);
-        } catch (referenceError) {
-          console.error('Error fetching references data:', referenceError);
-        }
-    
-        try {
-          // Fetch profile photo
-          const imageResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/image`);
-          setProfilePhoto(imageResponse.data.image_url);
-          setUserAvatar(imageResponse.data.image_url);
-        } catch (imageError) {
-          console.error('Error fetching profile photo:', imageError);
-          setProfilePhoto(null); // Handle the absence of profile photo appropriately
-        }
-    
-        setLoading(false);
-      };
-    
       fetchEmployeeData();
-    }, [currentUser.id]) // Only trigger on currentUser.id changes
+    }, [currentUser.id])
   );
 
   if (loading) {
-    return <Text>Loading...</Text>; // Render loading indicator
+    return <ActivityIndicator size="large" color={colors.primary} />;
   }
 
   const onEditButtonPress = () => {
     navigation.navigate("Edit Profile");
-  }
-
-  const goToFeedScreen = () => {
-    navigation.navigate('Feed'); // Navigate to the Feed screen
-  }
+  };
 
   const renderContent = () => {
     if (selectedTab === 'Experience') {
@@ -193,11 +128,7 @@ export default function EmployeeProfile() {
     <View style={styles.container}>
       <View style={styles.topSectionContainer}>
         <TouchableOpacity style={styles.editButton} onPress={onEditButtonPress}>
-          <MaterialCommunityIcons
-            name="pencil-outline"
-            size={25}
-            color="white"
-          />
+          <MaterialCommunityIcons name="pencil-outline" size={25} color="white" />
         </TouchableOpacity>
         <View style={styles.leftContent}>
           <View style={[styles.avatarContainer, styles.marginBottom3]}>
@@ -205,16 +136,8 @@ export default function EmployeeProfile() {
           </View>
         </View>
         <View style={styles.rightContent}>
-          <Text style={styles.name}>
-            <StyledText big tanColor style={styles.name}>
-              {`${employee.first_name} ${employee.last_name}`}
-            </StyledText>
-          </Text>
-          <Text style={styles.location}>
-            <StyledText tanColor style={styles.location}>
-              {`${employee.city}, ${employee.state}`}
-            </StyledText>
-          </Text>
+          <StyledText big tanColor style={styles.name}>{`${employee.first_name} ${employee.last_name}`}</StyledText>
+          <StyledText tanColor style={styles.location}>{`${employee.city}, ${employee.state}`}</StyledText>
         </View>
       </View>
       <View style={styles.subContentContainerTwo}>

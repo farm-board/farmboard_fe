@@ -28,7 +28,7 @@ export const UserProvider = ({ children }) => {
     if (currentUser) {
       if (currentUser.role_type === "farm") {
         setLoading(true);
-        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`)
+        axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms`)
         .then(response => {
           // Update the setupComplete state
           console.log("setup Complete:", response.data.data.attributes.setup_complete);
@@ -43,7 +43,7 @@ export const UserProvider = ({ children }) => {
   
       if (currentUser.role_type === "employee") {
         setLoading(true);
-        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`)
+        axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/employees`)
         .then(response => {
           // Update the setupComplete state
           console.log("setup complete:", response.data);
@@ -73,7 +73,7 @@ export const UserProvider = ({ children }) => {
       await AsyncStorage.removeItem('token');
 
       // Make a request to the backend to invalidate the token
-      await axios.delete('http://localhost:4000/logout');
+      await axios.delete('https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/logout');
 
       // Navigate to the login screen
       navigation.navigate("Login");

@@ -21,7 +21,7 @@ export default function ExperienceForm({ setExperiences }) {
   const { currentUser } = useContext(UserContext);
 
   const handleSubmit = () => {
-    axios.post(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/experiences`, { experience: data })
+    axios.post(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/employees/experiences`, { experience: data })
       .then(response => {
         setExperiences(prevExperiences => [...prevExperiences, response.data.data]);
         // Navigate back to profile page after adding experience

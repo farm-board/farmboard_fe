@@ -1,37 +1,33 @@
-import React, { useState, useContext, useEffect } from 'react'
+import React, { useState, useContext, useEffect } from 'react';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
-import { Text, View, TouchableOpacity, StyleSheet, Alert } from 'react-native'
+import { Text, View, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { UserContext } from '../../contexts/UserContext';
 import axios from 'axios';
-import KeyboardAvoidingContainer from "../Containers/KeyboardAvoidingContainer";
-import StyledTextInput from "../Inputs/StyledTextInput";
+import KeyboardAvoidingContainer from '../Containers/KeyboardAvoidingContainer';
+import StyledTextInput from '../Inputs/StyledTextInput';
 import StyledText from '../Texts/StyledText';
 import StyledSwitch from '../Inputs/StyledSwitch';
 import SkillsSelect from '../skills/SkillSelect';
 import StyledSelectDropdown from '../Inputs/StyledSelectDropdown';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-
 export default function FarmProfileAddPostings() {
   const [data, setData] = useState({
-    attributes: {
-      title: '',
-      salary: '',
-      payment_type: '',
-      duration: '',
-      age_requirement: 0,
-      offers_lodging: false,
-      skill_requirements: [],
-      description: '',
-    }
+    title: '',
+    salary: '',
+    payment_type: '',
+    duration: '',
+    age_requirement: 0,
+    offers_lodging: false,
+    skill_requirements: [],
+    description: '',
   });
 
   const [accommodationData, setAccommodationData] = useState({});
   
-  const durationList = [ "Full-Time", "Part-Time", "Seasonal", "Contract"];
-
-  const paymentTypeList = [ "Hourly", "Salary"];
+  const durationList = ['Full-Time', 'Part-Time', 'Seasonal', 'Contract'];
+  const paymentTypeList = ['Hourly', 'Salary'];
 
   const navigation = useNavigation();
   const route = useRoute();
@@ -41,11 +37,11 @@ export default function FarmProfileAddPostings() {
 
   const onSelectedItemsChange = (selectedItems, selectedSkills) => {
     setSelectedItems(selectedItems);
-    setData({...data, attributes: { ...data.attributes, skill_requirements: selectedSkills}});
-  }
+    setData({ ...data, skill_requirements: selectedSkills });
+  };
 
   const fetchAccommodationData = () => {
-    axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/accommodation`)
+    axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/accommodation`)
       .then((accommodationResponse) => {
         if (accommodationResponse.data && accommodationResponse.data.data && accommodationResponse.data.data.attributes) {
           setAccommodationData(accommodationResponse.data.data.attributes);
@@ -59,65 +55,72 @@ export default function FarmProfileAddPostings() {
   };
 
   const handleSubmit = () => {
-    if (!data.attributes.title) {
+    if (!data.title) {
       Alert.alert('Posting Incomplete', 'A Job Title is required for this Posting.');
       return;
     }
-    if (!data.attributes.salary) {
+    if (!data.salary) {
       Alert.alert('Posting Incomplete', 'A Payment Amount is required for this Posting.');
       return;
     }
-    if (!data.attributes.payment_type) {
+    if (!data.payment_type) {
       Alert.alert('Posting Incomplete', 'A Payment Type is required for this Posting.');
       return;
     }
-    if (!data.attributes.duration) {
+    if (!data.duration) {
       Alert.alert('Posting Incomplete', 'A Duration is required for this Posting.');
       return;
     }
-    if (!data.attributes.skill_requirements || data.attributes.skill_requirements.length === 0) {
+    if (!data.skill_requirements || data.skill_requirements.length === 0) {
       Alert.alert('Posting Incomplete', 'Skill Requirements are required for this Posting.');
       return;
     }
-    if (!data.attributes.description) {
+    if (!data.description) {
       Alert.alert('Posting Incomplete', 'A Description is required for this Posting.');
       return;
     }
+
     const postData = {
-      posting: {
-        attributes: { ...data.attributes }
-      }
+      title: data.title,
+      salary: data.salary,
+      payment_type: data.payment_type,
+      duration: data.duration,
+      age_requirement: data.age_requirement,
+      offers_lodging: data.offers_lodging,
+      skill_requirements: data.skill_requirements,
+      description: data.description,
     };
-    axios.post(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/postings`, postData)
-    .then(response => {
-      console.log(response.data);
-      if (route.params.sourceStack === 'Profile') {
-        navigation.navigate('Profile');
-      } else if (route.params.sourceStack === 'Home') {
-        navigation.navigate('Home');
-      }
-    })
-    .catch(error => {
-      console.log('Unable to add posting', error);
-    })
-  }
+
+    axios.post(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/postings`, { posting: postData })
+      .then(response => {
+        console.log(response.data);
+        if (route.params.sourceStack === 'Profile') {
+          navigation.navigate('Profile');
+        } else if (route.params.sourceStack === 'Home') {
+          navigation.navigate('Home');
+        }
+      })
+      .catch(error => {
+        console.log('Unable to add posting', error);
+        Alert.alert('Error', 'Unable to add posting. Please try again.');
+      });
+  };
 
   useEffect(() => {
     fetchAccommodationData();
-  }
-  , []);
+  }, []);
 
   return (
     <KeyboardAvoidingContainer style={styles.container} behavior="padding">
       <View style={styles.content}>
-        <Animated.View entering={FadeInDown.duration(1000).springify()}style={styles.inputContainer}>
+        <Animated.View entering={FadeInDown.duration(1000).springify()} style={styles.inputContainer}>
           <StyledTextInput
             placeholder="Job Title"
             icon="account-outline"
             label="Job Title:"
             maxLength={45}
-            labelStyle={{fontSize: 18, color: 'white'}}
-            onChangeText={(text) => setData({ ...data, attributes: { ...data.attributes, title: text } })}
+            labelStyle={{ fontSize: 18, color: 'white' }}
+            onChangeText={(text) => setData({ ...data, title: text })}
           />
         </Animated.View>
         <View style={styles.paymentInfo}>
@@ -126,9 +129,9 @@ export default function FarmProfileAddPostings() {
               placeholder="Amount"
               icon="city-variant-outline"
               label="Payment Amount:"
-              labelStyle={{fontSize: 18, color: 'white'}}
+              labelStyle={{ fontSize: 18, color: 'white' }}
               keyboardType="numeric"
-              onChangeText={(text) => setData({ ...data, attributes: { ...data.attributes, salary: text } })}
+              onChangeText={(text) => setData({ ...data, salary: text })}
             />
           </Animated.View>
           <Animated.View entering={FadeInDown.delay(200).duration(1000).springify()} style={styles.inputContainerPayment}>
@@ -136,10 +139,8 @@ export default function FarmProfileAddPostings() {
               listData={paymentTypeList}
               fieldPlaceholder="Payment Type"
               label="Payment Type:"
-              labelStyle={{fontSize: 18, color: 'white'}}
-              onSelect={(selectedItem) => {
-                setData({ ...data, attributes: { ...data.attributes, payment_type: selectedItem } });
-              }}
+              labelStyle={{ fontSize: 18, color: 'white' }}
+              onSelect={(selectedItem) => setData({ ...data, payment_type: selectedItem })}
             />
           </Animated.View>
         </View>
@@ -148,38 +149,36 @@ export default function FarmProfileAddPostings() {
             listData={durationList}
             fieldPlaceholder="Duration"
             label="Duration:"
-            onSelect={(selectedItem) => {
-              setData({ ...data, attributes: { ...data.attributes, duration: selectedItem } });
-            }}
+            onSelect={(selectedItem) => setData({ ...data, duration: selectedItem })}
           />
         </Animated.View>
-        <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} >
-        <Text style={{ alignSelf: 'flex-start', color: 'white', marginBottom: 10, fontSize: 18 }}>Relevant Skills:</Text>
-            <SkillsSelect selectedItems={selectedItems} onSelectedItemsChange={onSelectedItemsChange} />
+        <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()}>
+          <Text style={{ alignSelf: 'flex-start', color: 'white', marginBottom: 10, fontSize: 18 }}>Relevant Skills:</Text>
+          <SkillsSelect selectedItems={selectedItems} onSelectedItemsChange={onSelectedItemsChange} />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputContainer}>
-        <StyledTextInput
-          placeholder="Description"
-          icon="pencil-outline"
-          multiline={true}
-          maxLength={255}
-          label="Description:"
-          labelStyle={{fontSize: 18, color: 'white'}}
-          onChangeText={(text) => setData({ ...data, attributes: { ...data.attributes, description: text } })}
-        />
+          <StyledTextInput
+            placeholder="Description"
+            icon="pencil-outline"
+            multiline={true}
+            maxLength={255}
+            label="Description:"
+            labelStyle={{ fontSize: 18, color: 'white' }}
+            onChangeText={(text) => setData({ ...data, description: text })}
+          />
         </Animated.View>
-        { accommodationData.housing || accommodationData.meals || accommodationData.transportation ?
-          <Animated.View entering={FadeInDown.delay(1000).duration(1000).springify()}style={styles.inputContainer}>
+        {accommodationData.housing || accommodationData.meals || accommodationData.transportation ?
+          <Animated.View entering={FadeInDown.delay(1000).duration(1000).springify()} style={styles.inputContainer}>
             <StyledSwitch
               placeholder="Offers Accommodations"
               icon="home-outline"
               label="Offers Accommodations:"
-              value={data.attributes.offers_lodging}
-              onValueChange={(newValue) => setData({ ...data, attributes: { ...data.attributes, offers_lodging: newValue } })}
+              value={data.offers_lodging}
+              onValueChange={(newValue) => setData({ ...data, offers_lodging: newValue })}
             />
-            {data.attributes.offers_lodging === false ? 
-              null 
-              : 
+            {data.offers_lodging === false ?
+              null
+              :
               <View style={styles.accommodationsContainer}>
                 <Text style={styles.accommodationTitle}>
                   <StyledText big bold style={styles.accommodationTitle}>
@@ -187,30 +186,29 @@ export default function FarmProfileAddPostings() {
                   </StyledText>
                 </Text>
                 <Text style={styles.accommodationListItem}>
-                  <StyledText small >
+                  <StyledText small>
                     Offers Housing: {accommodationData.housing ? "Yes" : "No"}
                   </StyledText>
                 </Text>
                 <Text style={styles.accommodationListItem}>
-                  <StyledText small >
+                  <StyledText small>
                     Offers Meals: {accommodationData.meals ? "Yes" : "No"}
                   </StyledText>
                 </Text>
                 <Text style={styles.accommodationListItem}>
-                  <StyledText small >
-                    Offers Transporation: {accommodationData.transportation ? "Yes" : "No"}
+                  <StyledText small>
+                    Offers Transportation: {accommodationData.transportation ? "Yes" : "No"}
                   </StyledText>
                 </Text>
                 <Text style={styles.accommodationDisclaimer}>
-                  <Text >
+                  <Text>
                     If you would like to change these selections, please visit the edit profile page.
                   </Text>
                 </Text>
               </View>
             }
           </Animated.View>
-        : null}
-        {/* Submit button */}
+          : null}
         <Animated.View entering={FadeInDown.delay(1400).duration(1000).springify()} style={styles.submitButtonContainer}>
           <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
             <Text style={styles.submitButtonText}>Create Posting</Text>
@@ -222,7 +220,7 @@ export default function FarmProfileAddPostings() {
       </View>
     </KeyboardAvoidingContainer>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {

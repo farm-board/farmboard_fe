@@ -39,7 +39,7 @@ export default function ReferenceForm( { setReferences }) {
       return;
     }
   
-    axios.post(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/references`, { reference: data })
+    axios.post(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/employees/references`, { reference: data })
       .then(response => {
         setReferences(prevReferences => [...prevReferences, response.data.data]);
         navigation.navigate('Profile');

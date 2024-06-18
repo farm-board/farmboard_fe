@@ -17,7 +17,7 @@ export default function FarmProfileEditAccommodations() {
   const { currentUser } = useContext(UserContext);
 
   const handleSubmit = () => {
-    axios.put(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/accommodation`, data )
+    axios.put(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/accommodation`, data )
     .then(response => {
       console.log(response.data);
       navigation.push('Edit Profile');
@@ -28,7 +28,7 @@ export default function FarmProfileEditAccommodations() {
   }
 
   const fetchAccommodationData = async () => {
-    axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/accommodation`)
+    axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/accommodation`)
     .then((accommodationResponse) => {
       console.log('current accommodations:', accommodationResponse.data);
       setData({
@@ -44,7 +44,7 @@ export default function FarmProfileEditAccommodations() {
   };
 
   const handleAccommodationsDelete = () => {
-    axios.delete(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/accommodation`)
+    axios.delete(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/accommodation`)
     .then(response => {
       console.log(response.data);
       navigation.push('Edit Profile');

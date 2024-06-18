@@ -25,7 +25,7 @@ export default function ResetPasswordScreen() {
     
     const handleSubmit = () => {
       // Call your API to request password reset
-      axios.patch('http://localhost:4000/password', {
+      axios.patch('https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/password', {
         user: {
           reset_password_token: passwordResetToken,
           password: password,

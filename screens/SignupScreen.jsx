@@ -42,7 +42,7 @@ export default function SignupScreen() {
             }
         };
 
-        axios.post('http://localhost:4000/', user)
+        axios.post('https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/', user)
         .then(response => {
             setCurrentUser(response.data.data);
             AsyncStorage.setItem('token', response.headers.authorization);

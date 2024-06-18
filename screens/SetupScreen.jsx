@@ -1,5 +1,4 @@
-import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet } from 'react-native'
-import Animated, { FadeIn, FadeInUp, FadeOut, FadeInDown } from 'react-native-reanimated';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import React, { useContext, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { UserContext } from '../contexts/UserContext';
@@ -8,7 +7,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import FarmForm from '../components/Farm/FarmForm';
 import EmployeeForm from '../components/employee/EmployeeForm';
-
 
 export default function SetupScreen() {
   const roleTypes = { 0: "no_role", 1: "farm", 2: "employee" };
@@ -20,32 +18,34 @@ export default function SetupScreen() {
   }
 
   const handleRoleChange = async (role) => {
-    // Get the token from AsyncStorage
-    const token = await AsyncStorage.getItem('token');
+    try {
+      // Get the token from AsyncStorage
+      const token = await AsyncStorage.getItem('token');
+      console.log("Token:", token);
 
-    axios.patch('http://localhost:4000/current_user/update', {
-      user: {
-          role_type: role
-      }
-    },
-    {
-      headers: {
-          Authorization: token
-      }
+      const response = await axios.patch(
+        'https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/current_user/update',
+        {
+          user: {
+            role_type: role
+          }
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}` // Ensure token is in the correct format
+          }
+        }
+      );
+
+      console.log('User role updated successfully:', response.data);
+      setCurrentUser({
+        ...currentUser,
+        role_type: roleTypes[role]
+      });
+    } catch (error) {
+      console.error('There was an error updating the user role:', error);
     }
-    )
-    .then(response => {
-        console.log(currentUser.role_type);
-        console.log('User role updated successfully:', response.data);
-        setCurrentUser({
-          ...currentUser,
-          role_type: roleTypes[role]
-        });
-    })
-    .catch(error => {
-        console.error('There was an error updating the user role:', error);
-    });
-  }
+  };
 
   return (
     <View style={styles.container}>
