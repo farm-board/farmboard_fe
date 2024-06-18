@@ -7,6 +7,7 @@ import axios from 'axios';
 import { UserContext } from '../contexts/UserContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { baseUrl } from '../config'; 
 
 export default function SignupScreen() {
     const [data, setData] = useState({
@@ -42,7 +43,7 @@ export default function SignupScreen() {
             }
         };
 
-        axios.post('http://localhost:4000/', user)
+        axios.post(`${baseUrl}/`, user)
         .then(response => {
             setCurrentUser(response.data.data);
             AsyncStorage.setItem('token', response.headers.authorization);

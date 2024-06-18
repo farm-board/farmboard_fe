@@ -13,6 +13,7 @@ import StyledText from '../Texts/StyledText';
 import SkillSelect from '../../components/skills/SkillSelect';
 import StyledSelectDropdown from '../Inputs/StyledSelectDropdown';
 import { MaterialCommunityIcons, MaterialIcons, FontAwesome } from '@expo/vector-icons';
+import { baseUrl } from '../../config';
 
 export default function EmployeeForm() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -71,7 +72,7 @@ export default function EmployeeForm() {
 
   const handleSubmit = () => {
     if (validateForm()) {
-      axios.put(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`, { employee: { ...data, setup_complete: true } })
+      axios.put(`${baseUrl}/api/v1/users/${currentUser.id}/employees`, { employee: { ...data, setup_complete: true } })
         .then(response => {
           console.log(response.data);
           setSetupComplete(true);
@@ -124,7 +125,7 @@ export default function EmployeeForm() {
       });
 
       // Upload image to Amazon S3
-      let response = await axios.post(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/upload_image`, formData, {
+      let response = await axios.post(`${baseUrl}/api/v1/users/${currentUser.id}/employees/upload_image`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -136,7 +137,7 @@ export default function EmployeeForm() {
 
   const fetchProfileImage = async () => {
     try {
-      let response = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/image`);
+      let response = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/employees/image`);
       setData({ ...data, image: response.data.image_url });
     } catch (error) {
       console.log('Unable to fetch profile image', error);

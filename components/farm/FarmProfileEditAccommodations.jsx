@@ -8,27 +8,33 @@ import KeyboardAvoidingContainer from "../Containers/KeyboardAvoidingContainer";
 import StyledText from '../Texts/StyledText';
 import StyledSwitch from '../Inputs/StyledSwitch';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { baseUrl } from '../../config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 export default function FarmProfileEditAccommodations() {
   const [data, setData] = useState({})
 
   const navigation = useNavigation();
-  const { currentUser } = useContext(UserContext);
+  const { currentUser, setProfileRefresh, setEditProfileRefresh, profileRefresh, editProfileRefresh } = useContext(UserContext);
 
   const handleSubmit = () => {
-    axios.put(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/accommodation`, data )
-    .then(response => {
+    axios.put(`${baseUrl}/api/v1/users/${currentUser.id}/farms/accommodation`, data )
+    .then(async response => {
       console.log(response.data);
-      navigation.push('Edit Profile');
+      setProfileRefresh(true);
+      setEditProfileRefresh(true);
+      await AsyncStorage.setItem('hasFetchedAccommodations', 'false'); // Reset the flag
+      await AsyncStorage.setItem('hasFetchedAccommodationsEditProfile', 'false'); // Reset the flag
     })
     .catch(error => {
       console.log('Unable to register user', error);
     })
   }
+  
 
   const fetchAccommodationData = async () => {
-    axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/accommodation`)
+    axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/farms/accommodation`)
     .then((accommodationResponse) => {
       console.log('current accommodations:', accommodationResponse.data);
       setData({
@@ -44,15 +50,23 @@ export default function FarmProfileEditAccommodations() {
   };
 
   const handleAccommodationsDelete = () => {
-    axios.delete(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/accommodation`)
-    .then(response => {
+    axios.delete(`${baseUrl}/api/v1/users/${currentUser.id}/farms/accommodation`)
+    .then(async response => {
       console.log(response.data);
-      navigation.push('Edit Profile');
+      setProfileRefresh(true);
+      await AsyncStorage.removeItem('accommodations');
+      await AsyncStorage.setItem('hasFetchedAccommodations', 'false'); // Reset the flag
     })
     .catch(error => {
       console.log('Unable to register user', error);
     })
   };
+
+  useEffect(() => {
+    if (profileRefresh || editProfileRefresh) {
+      navigation.push('Edit Profile');
+    }
+  }, [profileRefresh, editProfileRefresh]);
 
   useEffect(() => {
     fetchAccommodationData()

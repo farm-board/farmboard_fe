@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Modal, ScrollView, Button } from 'react-native'
-import React, { useContext, useState, useEffect } from 'react'
+import React, { useContext, useState, useEffect, useCallback } from 'react'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { UserContext } from '../../contexts/UserContext'
 import axios from 'axios'
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated'
@@ -7,9 +8,11 @@ import Avatar from '../Profile/Avatar'
 import StyledText from '../Texts/StyledText'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useNavigation, useFocusEffect } from '@react-navigation/native'
+import { baseUrl } from '../../config'
+
 
 export default function FarmHome() {
-  const {currentUser} = useContext(UserContext);
+  const {currentUser, refresh, setRefresh} = useContext(UserContext);
   const [farm, setFarm] = useState({});
   const [expandedMap, setExpandedMap] = useState({});
   const [postings, setPostings] = useState([]);
@@ -21,10 +24,24 @@ export default function FarmHome() {
   const width = Dimensions.get('window').width;
   const navigation = useNavigation();
 
-  const fetchPostings = async () => {
+
+  const fetchPostings = async (refresh) => {
     try {
-      const postingsResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/postings`);
-      return postingsResponse;
+      // Skip the cache check when refresh is true
+      if (!refresh) {
+        const cachedPostings = await AsyncStorage.getItem('postings');
+        if (cachedPostings !== null) {
+          return JSON.parse(cachedPostings);
+        }
+      }
+  
+      const postingsResponse = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/farms/postings`);
+      const sortedPostings = postingsResponse.data.data.sort((a, b) => new Date(b.attributes.created_at) - new Date(a.attributes.created_at));
+      const postingsData = { ...postingsResponse, data: { ...postingsResponse.data, data: sortedPostings } };
+  
+      await AsyncStorage.setItem('postings', JSON.stringify(postingsData));
+  
+      return postingsData;
     } catch (error) {
       console.error("There was an error fetching the farm's postings:", error);
     }
@@ -32,8 +49,21 @@ export default function FarmHome() {
   
   const fetchApplicantsCount = async (postingId) => {
     try {
-      const applicantsResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/postings/${postingId}/applicants`);
+      const cachedApplicants = await AsyncStorage.getItem(`applicants_${postingId}`);
+      if (cachedApplicants !== null) {
+        const applicantsData = JSON.parse(cachedApplicants);
+        setApplicants(applicantsData);
+        setApplicantsMap(prevMap => ({
+          ...prevMap,
+          [postingId]: applicantsData.length,
+        }));
+        return;
+      }
+  
+      const applicantsResponse = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/farms/postings/${postingId}/applicants`);
       console.log('Applicants:', applicantsResponse.data);
+  
+      await AsyncStorage.setItem(`applicants_${postingId}`, JSON.stringify(applicantsResponse.data));
   
       // Set applicants only for the current posting being viewed
       setApplicants(applicantsResponse.data);
@@ -47,59 +77,50 @@ export default function FarmHome() {
       console.error(`Error fetching applicants for posting ${postingId}:`, error);
     }
   };
+  
+  const fetchData = async () => {
+    try {
+      const cachedFarm = await AsyncStorage.getItem(`farm_${currentUser.id}`);
+      if (cachedFarm !== null) {
+        const farmData = JSON.parse(cachedFarm);
+        setFarm(farmData);
+      } else {
+        const farmResponse = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/farms`);
+        console.log('current farm:', farmResponse.data.data);
+        setFarm(farmResponse.data.data);
+        await AsyncStorage.setItem(`farm_${currentUser.id}`, JSON.stringify(farmResponse.data.data));
+      }
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const farmResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`);
-        console.log('current farm:', farmResponse.data.data.attributes);
-        setFarm(farmResponse.data.data.attributes);
-  
-        const postingsResponse = await fetchPostings();
-        if (postingsResponse) {
-          console.log('Postings:', postingsResponse.data.data);
-          setPostings(postingsResponse.data.data);
-  
-          // Fetch applicants for each posting
-          await Promise.all(postingsResponse.data.data.map(posting => fetchApplicantsCount(posting.id)));
-        }
+      const postingsResponse = await fetchPostings(refresh);
+      if (postingsResponse) {
+        console.log('Postings:', postingsResponse.data.data);
+        setPostings(postingsResponse.data.data);
+
+        // Fetch applicants for each posting
+        await Promise.all(postingsResponse.data.data.map(posting => fetchApplicantsCount(posting.id)));
+      }
       } catch (error) {
         console.error('Error fetching data:', error);
       }
-    };
-  
-    fetchData();
-  }, [currentUser.id]); // Only trigger on currentUser.id changes
-  
-  if (farm === undefined) {
-    return <Text>Loading...</Text>;
-  }
+  };
+
+  useEffect(() => {
+    if (refresh) {
+      fetchData();
+      setRefresh(false);
+    }
+  }, [refresh]); // Trigger on refresh changes
 
   useFocusEffect(
     React.useCallback(() => {
-      const fetchData = async () => {
-        try {
-          const farmResponse = await axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`);
-          console.log('current farm:', farmResponse.data.data.attributes);
-          setFarm(farmResponse.data.data.attributes);
-    
-          const postingsResponse = await fetchPostings();
-          if (postingsResponse) {
-            console.log('Postings:', postingsResponse.data.data);
-            setPostings(postingsResponse.data.data);
-    
-            // Fetch applicants for each posting
-            await Promise.all(postingsResponse.data.data.map(posting => fetchApplicantsCount(posting.id)));
-          }
-        } catch (error) {
-          console.error('Error fetching data:', error);
-        }
-      };
-    
       fetchData();
-    }, [currentUser.id]) // Only trigger on currentUser.id changes
+    }, [currentUser.id, refresh]) // Trigger on currentUser.id or refresh changes
   );
-
+    
+  if (farm === undefined) {
+    return <Text>Loading...</Text>;
+  }
+  
   const calculateDaysAgo = (createdAt) => {
   
     const createdDate = new Date(createdAt);

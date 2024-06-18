@@ -6,6 +6,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { UserContext } from '../contexts/UserContext';
 import StyledSelectDropdown from '../components/Inputs/StyledSelectDropdown';
 import Avatar from '../components/Profile/Avatar';
+import { baseUrl } from '../config';
 
 const FeedScreen = () => {
   const [postings, setPostings] = useState([]);
@@ -57,8 +58,8 @@ const FeedScreen = () => {
   const fetchPostings = (page) => {
     if (allPagesFetched) return;
   
-    setLoadingNextPage(true);
-    axios.get(`http://localhost:4000/api/v1/feed?page=${page}`)
+    setLoadingNextPage(true)
+    axios.get(`${baseUrl}/api/v1/feed?page=${page}`)
       .then((response) => {
         if (response.data.data.length === 0) {
           setLoadingNextPage(false);
@@ -168,7 +169,7 @@ const FeedScreen = () => {
 
   const applyToPosting = async () => {
     try {
-      const response = await axios.post(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/postings/${selectedPosting.id}/apply`);
+      const response = await axios.post(`${baseUrl}/api/v1/users/${currentUser.id}/farms/postings/${selectedPosting.id}/apply`);
       if (response.status === 200) {
         alert("Application submitted successfully!");
         setAppliedPostings(prev => new Set(prev).add(selectedPosting.id));
@@ -192,14 +193,26 @@ const FeedScreen = () => {
 
   const fetchPostingProfileImage = (farmId) => {
     console.log('Fetching posting profile photo for farm:', farmId);
-    axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/${farmId}/profile_info`)
+    axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/farms/${farmId}/profile_info`)
       .then((response) => {
-        console.log('Posting profile Accommodation Housing:', response.data.accommodations.housing);
         console.log('Posting profile photo:', response.data.attributes.image_url);
         setPostingProfilePhoto(response.data.attributes.image_url);
-        setPostHousing(response.data.accommodations.housing);
-        setPostMeals(response.data.accommodations.meals);
-        setPostTransportation(response.data.accommodations.transportation);
+  
+        if (response.data.accommodations) {
+          console.log('Posting profile Accommodation Housing:', response.data.accommodations.housing);
+          
+          if (response.data.accommodations.housing !== null) {
+            setPostHousing(response.data.accommodations.housing);
+          }
+  
+          if (response.data.accommodations.meals !== null) {
+            setPostMeals(response.data.accommodations.meals);
+          }
+  
+          if (response.data.accommodations.transportation !== null) {
+            setPostTransportation(response.data.accommodations.transportation);
+          }
+        }
       })
       .catch(error => {
         console.error('There was an error fetching the posting profile photo:', error);

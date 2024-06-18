@@ -13,6 +13,7 @@ import SelectDropdown from 'react-native-select-dropdown';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; 
 import StyledSelectDropdown from '../Inputs/StyledSelectDropdown';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { baseUrl } from '../../config';
 
 
 export default function FarmProfileEditPostings() {
@@ -36,7 +37,7 @@ export default function FarmProfileEditPostings() {
   const paymentTypeList = [ "Hourly", "Salary"];
 
   const navigation = useNavigation();
-  const { currentUser } = useContext(UserContext);
+  const { currentUser, setRefresh, refresh, setProfileRefresh, profileRefresh } = useContext(UserContext);
   const route = useRoute();
   const { postingId } = route.params;
 
@@ -49,7 +50,7 @@ export default function FarmProfileEditPostings() {
 
   const fetchPosting = () => {
     console.log('Posting ID:', postingId );
-    axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/postings/${postingId}`)
+    axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/farms/postings/${postingId}`)
     .then((postingsResponse) => {
       console.log('Posting:', postingsResponse.data.data);
       setData(postingsResponse.data.data);
@@ -72,15 +73,12 @@ export default function FarmProfileEditPostings() {
         {
           text: 'Delete',
           onPress: () => {
-            axios.delete(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/postings/${postingId}`)
+            axios.delete(`${baseUrl}/api/v1/users/${currentUser.id}/farms/postings/${postingId}`)
             .then(response => {
               console.log('Posting deleted:', postingId);
               Alert.alert('Posting deleted');
-              if (route.params.sourceStack === 'Profile') {
-                navigation.navigate('Profile');
-              } else if (route.params.sourceStack === 'Home') {
-                navigation.navigate('Home');
-              }
+              setRefresh(true);
+              setProfileRefresh(true);
             })
             .catch(error => {
               console.log('Unable to delete posting', error);
@@ -92,7 +90,7 @@ export default function FarmProfileEditPostings() {
   }
 
   const fetchAccommodationData = () => {
-    axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/accommodation`)
+    axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/farms/accommodation`)
       .then((accommodationResponse) => {
         if (accommodationResponse.data && accommodationResponse.data.data && accommodationResponse.data.data.attributes) {
           setAccommodationData(accommodationResponse.data.data.attributes);
@@ -112,20 +110,29 @@ export default function FarmProfileEditPostings() {
         attributes: { ...data.attributes }
       }
     };
-    axios.put(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/postings/${postingId}`, postData)
+    axios.put(`${baseUrl}/api/v1/users/${currentUser.id}/farms/postings/${postingId}`, postData)
       .then(response => {
         console.log(response.data);
-        // Check the sourceStack parameter and navigate accordingly
-        if (route.params.sourceStack === 'Profile') {
-          navigation.navigate('Profile');
-        } else if (route.params.sourceStack === 'Home') {
-          navigation.navigate('Home');
-        }
+        // Set refresh to true to trigger data fetch in other components
+        setRefresh(true);
+        setProfileRefresh(true);
       })
       .catch(error => {
         console.log('Unable to edit posting', error);
       });
   }
+
+  useEffect(() => {
+    if (refresh || profileRefresh) {
+      // Check the sourceStack parameter and navigate accordingly
+      if (route.params.sourceStack === 'Profile') {
+        navigation.navigate('Profile');
+      } else if (route.params.sourceStack === 'Home') {
+        navigation.navigate('Home');
+      }
+    }
+  }, [refresh]);
+
   useEffect(() => {
     if (postingId) fetchPosting();
     fetchAccommodationData();

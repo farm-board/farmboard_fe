@@ -20,7 +20,7 @@ const AvatarEdit = ({
     >
       <TouchableOpacity onPress={onPress}>
         <Image
-          source={uri ? { uri } : placeholder}
+          source={uri ? { uri } : require('../../assets/images/FarmProfilePlaceholder.png')}
           style={[
             styles.image,
             aviOnly && { height: 35, width: 35, borderWidth: 0 },

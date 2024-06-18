@@ -8,6 +8,7 @@ import KeyboardAvoidingContainer from "../Containers/KeyboardAvoidingContainer";
 import StyledText from '../Texts/StyledText';
 import StyledSwitch from '../Inputs/StyledSwitch';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { baseUrl } from '../../config';
 
 
 export default function FarmProfileAddAccommodations() {
@@ -18,12 +19,13 @@ export default function FarmProfileAddAccommodations() {
   })
 
   const navigation = useNavigation();
-  const { currentUser } = useContext(UserContext);
+  const { currentUser, setProfileRefresh, setEditProfileRefresh } = useContext(UserContext);
 
   const handleSubmit = () => {
-    axios.post(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/accommodation`, data )
+    axios.post(`${baseUrl}/api/v1/users/${currentUser.id}/farms/accommodation`, data )
     .then(response => {
       console.log(response.data);
+      setProfileRefresh(true);
       navigation.push('Edit Profile');
     })
     .catch(error => {

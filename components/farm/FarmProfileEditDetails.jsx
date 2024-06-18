@@ -10,6 +10,8 @@ import UploadModal from '../Profile/UploadModal';
 import StyledText from '../Texts/StyledText';
 import StyledSelectDropdown from '../Inputs/StyledSelectDropdown';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { baseUrl } from '../../config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 export default function FarmProfileEditDetails() {
@@ -37,23 +39,26 @@ export default function FarmProfileEditDetails() {
 ]
 
   const navigation = useNavigation();
-  const { currentUser, setUserName } = useContext(UserContext);
+  const { currentUser, setUserName, setProfileRefresh, setEditProfileRefresh, editProfileRefresh, profileRefresh } = useContext(UserContext);
 
-  const handleSubmit = () => {
-    axios.put(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`, { farm: data})
-    .then(response => {
-      console.log(response.data);
-      navigation.push('Edit Profile');
+  const handleSubmit = async () => {
+    try {
+      await axios.put(`${baseUrl}/api/v1/users/${currentUser.id}/farms`, { farm: data})
+      console.log('Updated farm data');
+      // Clear the cache and wait for it to complete
+      await AsyncStorage.removeItem('farm');
+      console.log('Cleared farm data from cache');
+      setProfileRefresh(true);
+      setEditProfileRefresh(true);
       setUserName(data.name);
-    })
-    .catch(error => {
+    } catch (error) {
       console.log('Unable to register user', error);
-    })
+    }
   }
 
   const fetchProfileData = async () => {
     Promise.all([
-      axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`),
+      axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/farms`),
     ])
     .then(([farmResponse, imageResponse]) => {
       setData({
@@ -69,6 +74,12 @@ export default function FarmProfileEditDetails() {
       console.error('There was an error fetching the farm:', error);
     });
   };
+
+  useEffect(() => {
+    if (profileRefresh || editProfileRefresh) {
+      navigation.push('Edit Profile');
+    }
+  }, [profileRefresh, editProfileRefresh]);
 
   useEffect(() => {
     fetchProfileData()

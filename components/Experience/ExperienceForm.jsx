@@ -8,6 +8,8 @@ import StyledText from '../Texts/StyledText';
 import { UserContext } from '../../contexts/UserContext';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { baseUrl } from '../../config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function ExperienceForm({ setExperiences }) {
   const [data, setData] = useState({
@@ -18,19 +20,27 @@ export default function ExperienceForm({ setExperiences }) {
   });
 
   const navigation = useNavigation();
-  const { currentUser } = useContext(UserContext);
+  const { currentUser, setProfileRefresh, setEditProfileRefresh, editProfileRefresh, profileRefresh } = useContext(UserContext);
 
-  const handleSubmit = () => {
-    axios.post(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/experiences`, { experience: data })
-      .then(response => {
-        setExperiences(prevExperiences => [...prevExperiences, response.data.data]);
-        // Navigate back to profile page after adding experience
-        navigation.navigate('Profile');
-      })
-      .catch(error => {
-        console.error('There was an error creating the experience:', error);
-      });
-  };
+  const handleSubmit = async () => {
+    try {
+      const response = await axios.post(`${baseUrl}/api/v1/users/${currentUser.id}/employees/experiences`, { experience: data });
+      setExperiences(prevExperiences => [...prevExperiences, response.data.data]);
+      // Clear the cache and wait for it to complete
+      await AsyncStorage.removeItem('experiences');
+      console.log('Cleared experiences data from cache');
+      setProfileRefresh(true);
+      setEditProfileRefresh(true);
+    } catch (error) {
+      console.error('There was an error creating the experience:', error);
+    }
+  }
+
+  useEffect(() => {
+    if (profileRefresh || editProfileRefresh) {
+      navigation.push('Edit Profile');
+    }
+  }, [profileRefresh, editProfileRefresh]);
 
   return (
     <KeyboardAvoidingContainer style={{paddingTop: 10, paddingBottom: 25, paddingHorizontal: 5}}>

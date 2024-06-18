@@ -13,6 +13,8 @@ import StyledText from '../Texts/StyledText';
 import SkillSelect from '../../components/skills/SkillSelect';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import StyledSelectDropdown from '../Inputs/StyledSelectDropdown';
+import { baseUrl } from '../../config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function EmployeeProfileEditDetails() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -51,93 +53,29 @@ export default function EmployeeProfileEditDetails() {
   };
 
   const navigation = useNavigation();
-  const { currentUser, setUserFirstName, setUserLastName } = useContext(UserContext);
+  const { currentUser, setUserFirstName, setUserLastName, editProfileRefresh, setEditProfileRefresh, profileRefresh, setProfileRefresh } = useContext(UserContext);
 
-  const handleSubmit = () => {
-    axios.put(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`, { employee: data})
-    .then(response => {
-      console.log(response.data);
+  const handleSubmit = async () => {
+    try {
+      await axios.put(`${baseUrl}/api/v1/users/${currentUser.id}/employees`, { employee: data });
+      console.log('Updated employee data');
+      // Clear the cache and wait for it to complete
+      await AsyncStorage.removeItem('employee');
+      console.log('Cleared employee data from cache');
+      setProfileRefresh(true);
+      setEditProfileRefresh(true);
       setUserFirstName(data.first_name);
       setUserLastName(data.last_name);
-      navigation.navigate('Profile');
-    })
-    .catch(error => {
+    } catch (error) {
       console.log('Unable to register user', error);
-    })
+    }
   }
-
-  const toggleExperienceForm = () => {
-    setShowExperienceForm(!showExperienceForm);
-  };
-
-  const toggleReferenceForm = () => {
-    setShowReferencesForm(!showReferencesForm);
-    axios.put(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`, { employee: data })
-      .then(response => {
-        console.log(response.data);
-        navigation.navigate('Profile');
-      })
-      .catch(error => {
-        console.log('Unable to register user', error);
-      });
-  };
-
-  const pickImage = async (mode) => {
-    try {
-      let result = {};
-      if (mode === "gallery") {
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-        result = await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,
-          allowsEditing: true,
-          aspect: [1, 1],
-          quality: 1,
-        });
-      } else {
-        await ImagePicker.requestCameraPermissionsAsync();
-        result = await ImagePicker.launchCameraAsync({
-          cameraType: ImagePicker.CameraType.front,
-          allowsEditing: true,
-          aspect: [1, 1],
-          quality: 1,
-        });
-      }
-
-      if (!result.canceled) {
-        setData({ ...data, image: result.assets[0].uri });
-        uploadImage(result.assets[0].uri);
-        setModalVisible(false);
-      }
-    } catch (error) {
-      console.log('Unable to pick image', error);
-      setModalVisible(false);
-    }
-  };
-
-  const uploadImage = async (uri) => {
-    try {
-      let formData = new FormData();
-      formData.append('image', {
-        uri,
-        type: 'image/jpeg',
-        name: `profile_${currentUser.id}.jpg`,
-      });
-
-      await axios.post(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/upload_image`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-    } catch (error) {
-      console.log('Unable to upload image', error);
-    }
-  };
 
   const fetchProfileData = async () => {
     try {
       const [employeeResponse, imageResponse] = await Promise.all([
-        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`),
-        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees/image`).catch(error => {
+        axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/employees`),
+        axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/employees/image`).catch(error => {
           if (error.response && error.response.status === 404) {
             return { data: { image_url: null } };
           }
@@ -166,6 +104,12 @@ export default function EmployeeProfileEditDetails() {
   useEffect(() => {
     fetchProfileData();
   }, []);
+
+  useEffect(() => {
+    if (profileRefresh || editProfileRefresh) {
+      navigation.push('Edit Profile');
+    }
+  }, [profileRefresh, editProfileRefresh]);
 
   return (
     <KeyboardAvoidingContainer style={styles.container} behavior="padding">

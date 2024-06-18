@@ -8,6 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import FarmForm from '../components/Farm/FarmForm';
 import EmployeeForm from '../components/employee/EmployeeForm';
+import { baseUrl } from '../config';
 
 
 export default function SetupScreen() {
@@ -23,7 +24,7 @@ export default function SetupScreen() {
     // Get the token from AsyncStorage
     const token = await AsyncStorage.getItem('token');
 
-    axios.patch('http://localhost:4000/current_user/update', {
+    axios.patch(`${baseUrl}/current_user/update`, {
       user: {
           role_type: role
       }

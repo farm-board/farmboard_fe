@@ -11,6 +11,7 @@ import StyledSwitch from '../Inputs/StyledSwitch';
 import SkillsSelect from '../skills/SkillSelect';
 import StyledSelectDropdown from '../Inputs/StyledSelectDropdown';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { baseUrl } from '../../config';
 
 
 export default function FarmProfileAddPostings() {
@@ -35,7 +36,7 @@ export default function FarmProfileAddPostings() {
 
   const navigation = useNavigation();
   const route = useRoute();
-  const { currentUser } = useContext(UserContext);
+  const { currentUser, setRefresh, refresh, setProfileRefresh, profileRefresh } = useContext(UserContext);
 
   const [selectedItems, setSelectedItems] = useState([]);
 
@@ -45,7 +46,7 @@ export default function FarmProfileAddPostings() {
   }
 
   const fetchAccommodationData = () => {
-    axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/accommodation`)
+    axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/farms/accommodation`)
       .then((accommodationResponse) => {
         if (accommodationResponse.data && accommodationResponse.data.data && accommodationResponse.data.data.attributes) {
           setAccommodationData(accommodationResponse.data.data.attributes);
@@ -88,19 +89,27 @@ export default function FarmProfileAddPostings() {
         attributes: { ...data.attributes }
       }
     };
-    axios.post(`http://localhost:4000/api/v1/users/${currentUser.id}/farms/postings`, postData)
+    axios.post(`${baseUrl}/api/v1/users/${currentUser.id}/farms/postings`, postData)
     .then(response => {
       console.log(response.data);
-      if (route.params.sourceStack === 'Profile') {
-        navigation.navigate('Profile');
-      } else if (route.params.sourceStack === 'Home') {
-        navigation.navigate('Home');
-      }
+      setRefresh(true);
+      setProfileRefresh(true);
     })
     .catch(error => {
       console.log('Unable to add posting', error);
     })
   }
+
+  useEffect(() => {
+    if (refresh || profileRefresh) {
+      // Check the sourceStack parameter and navigate accordingly
+      if (route.params.sourceStack === 'Profile') {
+        navigation.navigate('Profile');
+      } else if (route.params.sourceStack === 'Home') {
+        navigation.navigate('Home');
+      }
+    }
+  }, [refresh]);
 
   useEffect(() => {
     fetchAccommodationData();

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import { baseUrl } from '../config';
 
 export const UserContext = React.createContext();
 
@@ -12,6 +13,9 @@ export const UserProvider = ({ children }) => {
   const [userFirstName, setUserFirstName] = useState('');
   const [userLastName, setUserLastName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [refresh, setRefresh] = useState(false);
+  const [profileRefresh, setProfileRefresh] = useState(false);
+  const [editProfileRefresh, setEditProfileRefresh] = useState(false);
 
   // Load any saved user data when the component mounts
   useEffect(() => {
@@ -28,7 +32,7 @@ export const UserProvider = ({ children }) => {
     if (currentUser) {
       if (currentUser.role_type === "farm") {
         setLoading(true);
-        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/farms`)
+        axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/farms`)
         .then(response => {
           // Update the setupComplete state
           console.log("setup Complete:", response.data.data.attributes.setup_complete);
@@ -43,7 +47,7 @@ export const UserProvider = ({ children }) => {
   
       if (currentUser.role_type === "employee") {
         setLoading(true);
-        axios.get(`http://localhost:4000/api/v1/users/${currentUser.id}/employees`)
+        axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/employees`)
         .then(response => {
           // Update the setupComplete state
           console.log("setup complete:", response.data);
@@ -71,10 +75,10 @@ export const UserProvider = ({ children }) => {
       // Clear user data from AsyncStorage
       await AsyncStorage.removeItem('user');
       await AsyncStorage.removeItem('token');
+      await AsyncStorage.clear();
 
       // Make a request to the backend to invalidate the token
-      await axios.delete('http://localhost:4000/logout');
-
+      await axios.delete(`${baseUrl}/logout`);
       // Navigate to the login screen
       navigation.navigate("Login");
     } catch (error) {
@@ -85,7 +89,7 @@ export const UserProvider = ({ children }) => {
   };
 
   return (
-    <UserContext.Provider value={{ currentUser, setCurrentUser, logout, loading, setupComplete, setSetupComplete, userName, setUserName, userAvatar, setUserAvatar, userFirstName, setUserFirstName, userLastName, setUserLastName }}>
+    <UserContext.Provider value={{ currentUser, setCurrentUser, logout, loading, setupComplete, setSetupComplete, userName, setUserName, userAvatar, setUserAvatar, userFirstName, setUserFirstName, userLastName, setUserLastName, refresh, setRefresh, profileRefresh, setProfileRefresh, editProfileRefresh, setEditProfileRefresh }}>
       {children}
     </UserContext.Provider>
   );
