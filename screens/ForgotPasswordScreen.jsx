@@ -6,6 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import { UserContext } from '../contexts/UserContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { baseUrl } from '../config';
 
 export default function ForgotPasswordScreen() {
     const [email, setEmail] = useState('');
@@ -16,7 +17,7 @@ export default function ForgotPasswordScreen() {
 
     const handleSubmit = () => {
         // Call your API to request password reset
-        axios.post(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/password`, { user: { email: email } })
+        axios.post(`${baseUrl}/password`, { user: { email: email } })
           .then(response => {
             // Handle success
             console.log('Password reset link sent');

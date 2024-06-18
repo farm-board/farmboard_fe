@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Modal, ScrollView, Button } from 'react-native'
 import React, { useContext, useState, useEffect } from 'react'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { UserContext } from '../../contexts/UserContext'
 import axios from 'axios'
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated'
@@ -9,9 +10,10 @@ import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { colors } from '../../config/theme'
 import { useNavigation, useFocusEffect } from '@react-navigation/native'
 import Gallery from '../Profile/Gallery';
+import { baseUrl } from '../../config';
 
 export default function FarmProfile() {
-  const {currentUser, setUserAvatar} = useContext(UserContext);
+  const {currentUser, setUserAvatar, profileRefresh, setProfileRefresh} = useContext(UserContext);
   const [farm, setFarm] = useState({});
   const [accommodations, setAccommodations] = useState(null);
   const [expandedMap, setExpandedMap] = useState({});
@@ -26,38 +28,69 @@ export default function FarmProfile() {
   const width = Dimensions.get('window').width;
   const navigation = useNavigation();
   
-  const fetchAccommodations = () => {
-    axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/accommodation`)
-      .then((accommodationResponse) => {
-        if (accommodationResponse.data && accommodationResponse.data.data && accommodationResponse.data.data.attributes) {
-          console.log("accommodations:", accommodationResponse.data.data.attributes)
-          setAccommodations(accommodationResponse.data.data.attributes);
-        } else {
-          setAccommodations(null);
-          console.log('No accommodations found for this farm.', accommodations);
-        }
-      })
-      .catch(error => {
-        console.error('There was an error fetching the accommodations:', error);
-      });
-  };
-
-  const fetchGalleryImages = () => {
-    axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/gallery_photos`)
-    .then((galleryResponse) => {
-      console.log('gallery images:', galleryResponse.data.gallery_photos);
-      setGalleryImages(galleryResponse.data.gallery_photos);
-    })
-    .catch(error => {
-      console.error('There was an error fetching the gallery images:', error);
-    });
-  };
-
-  const fetchPostings = async () => {
+  const fetchAccommodations = async (refresh) => {
     try {
-      const postingsResponse = await axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/postings`);
+      const cachedAccommodations = await AsyncStorage.getItem('accommodations');
+      const hasFetchedBefore = await AsyncStorage.getItem('hasFetchedAccommodations');
+  
+      if (cachedAccommodations !== null && !refresh && hasFetchedBefore === 'true') {
+        console.log('Loaded accommodations from cache');
+        setAccommodations(JSON.parse(cachedAccommodations));
+        return;
+      }
+  
+      const accommodationResponse = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/farms/accommodation`);
+      if (accommodationResponse.data && accommodationResponse.data.data && accommodationResponse.data.data.attributes) {
+        console.log("Fetched accommodations from API:", accommodationResponse.data.data.attributes);
+        setAccommodations(accommodationResponse.data.data.attributes);
+        await AsyncStorage.setItem('accommodations', JSON.stringify(accommodationResponse.data.data.attributes));
+      } else {
+        setAccommodations(null);
+        console.log('No accommodations found for this farm.');
+      }
+  
+      // Set the flag to indicate that a fetch has been attempted
+      await AsyncStorage.setItem('hasFetchedAccommodations', 'true');
+    } catch (error) {
+      console.error('Error fetching accommodations:', error);
+    }
+  };
+  
+  const fetchGalleryImages = async (refresh) => {
+    try {
+      const cachedGalleryImages = await AsyncStorage.getItem('gallery_images');
+      if (cachedGalleryImages !== null && !refresh) {
+        console.log('Loaded gallery images from cache');
+        setGalleryImages(JSON.parse(cachedGalleryImages));
+        return;
+      }
+  
+      const galleryResponse = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/farms/gallery_photos`);
+      console.log('Fetched gallery images from API:', galleryResponse.data.gallery_photos);
+      setGalleryImages(galleryResponse.data.gallery_photos);
+      await AsyncStorage.setItem('gallery_images', JSON.stringify(galleryResponse.data.gallery_photos));
+    } catch (error) {
+      console.error('Error fetching gallery images:', error);
+    }
+  };
+  
+  const fetchPostings = async (refresh) => {
+    try {
+      // Skip the cache check when refresh is true
+      if (!refresh) {
+        const cachedPostings = await AsyncStorage.getItem('postings');
+        if (cachedPostings !== null) {
+          return JSON.parse(cachedPostings);
+        }
+      }
+  
+      const postingsResponse = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/farms/postings`);
       const sortedPostings = postingsResponse.data.data.sort((a, b) => new Date(b.attributes.created_at) - new Date(a.attributes.created_at));
-      return { ...postingsResponse, data: { ...postingsResponse.data, data: sortedPostings } };
+      const postingsData = { ...postingsResponse, data: { ...postingsResponse.data, data: sortedPostings } };
+  
+      await AsyncStorage.setItem('postings', JSON.stringify(postingsData));
+  
+      return postingsData;
     } catch (error) {
       console.error("There was an error fetching the farm's postings:", error);
     }
@@ -65,13 +98,23 @@ export default function FarmProfile() {
   
   const fetchApplicantsCount = async (postingId) => {
     try {
-      const applicantsResponse = await axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/postings/${postingId}/applicants`);
-      console.log('Applicants:', applicantsResponse.data);
+      const cachedApplicants = await AsyncStorage.getItem(`applicants_${postingId}`);
+      if (cachedApplicants !== null) {
+        const applicantsData = JSON.parse(cachedApplicants);
+        setApplicants(applicantsData);
+        setApplicantsMap(prevMap => ({
+          ...prevMap,
+          [postingId]: applicantsData.length,
+        }));
+        return;
+      }
   
-      // Set applicants only for the current posting being viewed
+      const applicantsResponse = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/farms/postings/${postingId}/applicants`);
+      console.log('Fetched applicants from API:', applicantsResponse.data);
+  
+      await AsyncStorage.setItem(`applicants_${postingId}`, JSON.stringify(applicantsResponse.data));
+  
       setApplicants(applicantsResponse.data);
-  
-      // Set applicantsMap for the current posting
       setApplicantsMap(prevMap => ({
         ...prevMap,
         [postingId]: applicantsResponse.data.length,
@@ -80,86 +123,82 @@ export default function FarmProfile() {
       console.error(`Error fetching applicants for posting ${postingId}:`, error);
     }
   };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Fetch farm data
-        const farmResponse = await axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms`);
-        console.log('current farm:', farmResponse.data.data.attributes);
-        setFarm(farmResponse.data.data.attributes);
   
-        // Fetch profile photo separately
+  const fetchData = async (refresh) => {
+    try {
+      if (!refresh) {
+        const cachedFarm = await AsyncStorage.getItem('farm');
+        if (cachedFarm !== null) {
+          console.log('Loaded farm data from cache');
+          setFarm(JSON.parse(cachedFarm));
+        } else {
+          const farmResponse = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/farms`);
+          console.log('Fetched farm data from API:', farmResponse.data.data);
+          setFarm(farmResponse.data.data.attributes);
+          await AsyncStorage.setItem('farm', JSON.stringify(farmResponse.data.data.attributes));
+        }
+      } else {
+        const farmResponse = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/farms`);
+        console.log('Refreshed farm data from API:', farmResponse.data.data);
+        setFarm(farmResponse.data.data.attributes);
+        await AsyncStorage.setItem('farm', JSON.stringify(farmResponse.data.data.attributes));
+      }
+  
+      const cachedProfilePhoto = await AsyncStorage.getItem('profile_photo');
+      const hasFetchedProfilePhotoBefore = await AsyncStorage.getItem('hasFetchedProfilePhoto');
+
+      if (cachedProfilePhoto !== null && !refresh && hasFetchedProfilePhotoBefore === 'true') {
+        console.log('Loaded profile photo from cache');
+        setProfilePhoto(cachedProfilePhoto);
+        setUserAvatar(cachedProfilePhoto);
+      } else {
         try {
-          const imageResponse = await axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/image`);
+          const imageResponse = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/farms/image`);
+          console.log('Fetched profile photo from API:', imageResponse.data.image_url);
           setProfilePhoto(imageResponse.data.image_url);
           setUserAvatar(imageResponse.data.image_url);
-        } catch (imageError) {
-          console.error('Error fetching profile photo:', imageError);
-          setProfilePhoto(null); // Handle the absence of profile photo appropriately
+          await AsyncStorage.setItem('profile_photo', imageResponse.data.image_url);
+        } catch (error) {
+          console.log('Error fetching profile photo:', error);
+          setProfilePhoto(null);
+          setUserAvatar(null);
+          await AsyncStorage.setItem('hasFetchedProfilePhoto', 'false'); // Set to 'false' on error
         }
+        await AsyncStorage.setItem('hasFetchedProfilePhoto', 'true'); // Set to 'true' once at the end
+      }
   
-        fetchGalleryImages();
-        fetchAccommodations();
+      await fetchGalleryImages(refresh);
+      await fetchAccommodations(refresh);
   
-        const postingsResponse = await fetchPostings();
-        if (postingsResponse) {
-          console.log('Postings:', postingsResponse.data.data);
-          setPostings(postingsResponse.data.data);
-  
-          // Fetch applicants for each posting
-          await Promise.all(postingsResponse.data.data.map(async (posting) => {
-            // Fetch applicants count for each posting
-            await fetchApplicantsCount(posting.id);
-          }));
-        }
+      const postingsResponse = await fetchPostings(refresh);
+      if (postingsResponse) {
+        console.log('Postings:', postingsResponse.data.data);
+        setPostings(postingsResponse.data.data);
+
+        // Fetch applicants for each posting
+        await Promise.all(postingsResponse.data.data.map(posting => fetchApplicantsCount(posting.id)));
+      }
       } catch (error) {
         console.error('Error fetching data:', error);
       }
-    };
-  
-    fetchData();
-  }, [currentUser.id]);
+  };
 
+  useEffect(() => {
+    if (profileRefresh) {
+      fetchData(profileRefresh);
+      setProfileRefresh(false);
+    }
+  }, [profileRefresh]); // Trigger on refresh changes
+  
   useFocusEffect(
     React.useCallback(() => {
-      const fetchData = async () => {
-        try {
-        // Fetch farm data
-          const farmResponse = await axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms`);
-          console.log('current farm:', farmResponse.data.data.attributes);
-          setFarm(farmResponse.data.data.attributes);
-
-          // Fetch profile photo separately
-          try {
-            const imageResponse = await axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/image`);
-            setProfilePhoto(imageResponse.data.image_url);
-          } catch (imageError) {
-            console.error('Error fetching profile photo:', imageError);
-            setProfilePhoto(null); // Handle the absence of profile photo appropriately
-          }
-    
-          fetchGalleryImages();
-          fetchAccommodations();
-
-          const postingsResponse = await fetchPostings();
-          if (postingsResponse) {
-            console.log('Postings:', postingsResponse.data.data);
-            setPostings(postingsResponse.data.data);
-    
-            // Fetch applicants for each posting
-            await Promise.all(postingsResponse.data.data.map(async (posting) => {
-              // Fetch applicants count for each posting
-              await fetchApplicantsCount(posting.id);
-            }));
-          }
-        } catch (error) {
-          console.error('Error fetching data:', error);
-        }
-      };
-    
-      fetchData();
-    }, [currentUser.id]) // Only trigger on currentUser.id changes
+      console.log('Profile screen focus, profileRefresh:', profileRefresh);
+      fetchData(profileRefresh);
+      if (profileRefresh) {
+        setProfileRefresh(false);
+        console.log('Profile data fetched and profileRefresh reset to false');
+      }
+    }, [profileRefresh])
   );
   
   if (farm === undefined) {
@@ -780,6 +819,7 @@ const styles = StyleSheet.create({
   infoMessage: {
     backgroundColor: '#333',
     padding: 10,
+    marginBottom: 10,
     width: '100%',
   },
 });

@@ -7,6 +7,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import FarmForm from '../components/Farm/FarmForm';
 import EmployeeForm from '../components/employee/EmployeeForm';
+import { baseUrl } from '../config';
+
 
 export default function SetupScreen() {
   const roleTypes = { 0: "no_role", 1: "farm", 2: "employee" };

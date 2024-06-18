@@ -8,6 +8,8 @@ import KeyboardAvoidingContainer from "../Containers/KeyboardAvoidingContainer";
 import StyledTextInput from "../Inputs/StyledTextInput";
 import StyledText from '../Texts/StyledText';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { baseUrl } from '../../config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function ReferenceForm( { setReferences }) {
   const [data, setData] = useState({
@@ -19,35 +21,43 @@ export default function ReferenceForm( { setReferences }) {
   })
 
   const navigation = useNavigation();
-  const { currentUser, references } = useContext(UserContext); 
+  const { currentUser, references, setProfileRefresh, profileRefresh, setEditProfileRefresh, editProfileRefresh } = useContext(UserContext); 
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
 
     if (!data.first_name || !data.last_name) {
       alert('Please enter both first name and last name');
       return;
     }
   
-
     if (!data.phone && !data.email) {
       alert('Please provide either phone number or email');
       return;
     }
-
+  
     if (!data.relationship) {
       alert('Please provide relationship to the reference');
       return;
     }
   
-    axios.post(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/employees/references`, { reference: data })
-      .then(response => {
-        setReferences(prevReferences => [...prevReferences, response.data.data]);
-        navigation.navigate('Profile');
-      })
-      .catch(error => {
-        console.error('There was an error creating the reference:', error);
-      });
+    try {
+      const response = await axios.post(`${baseUrl}/api/v1/users/${currentUser.id}/employees/references`, { reference: data });
+      setReferences(prevReferences => [...prevReferences, response.data.data]);
+      // Clear the cache and wait for it to complete
+      await AsyncStorage.removeItem('references');
+      console.log('Cleared references data from cache');
+      setProfileRefresh(true);
+      setEditProfileRefresh(true);
+    } catch (error) {
+      console.error('There was an error creating the reference:', error);
+    }
   }
+
+  useEffect(() => {
+    if (profileRefresh || editProfileRefresh) {
+      navigation.push('Edit Profile');
+    }
+  }, [profileRefresh, editProfileRefresh]);
 
   return (
     <KeyboardAvoidingContainer style={{paddingTop: 10, paddingBottom: 25, paddingHorizontal: 5}}>

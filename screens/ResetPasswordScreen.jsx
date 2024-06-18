@@ -6,6 +6,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import axios from 'axios';
 import { UserContext } from '../contexts/UserContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { baseUrl } from '../config';
 
 export default function ResetPasswordScreen() {
     const [passwordResetToken, setPasswordResetToken] = useState('');
@@ -25,7 +26,7 @@ export default function ResetPasswordScreen() {
     
     const handleSubmit = () => {
       // Call your API to request password reset
-      axios.patch('https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/password', {
+      axios.patch(`${baseUrl}/password`, {
         user: {
           reset_password_token: passwordResetToken,
           password: password,

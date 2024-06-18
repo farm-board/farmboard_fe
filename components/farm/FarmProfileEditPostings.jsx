@@ -11,6 +11,7 @@ import StyledSwitch from '../Inputs/StyledSwitch';
 import SkillsSelect from '../skills/SkillSelect';
 import StyledSelectDropdown from '../Inputs/StyledSelectDropdown';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { baseUrl } from '../../config';
 
 export default function FarmProfileEditPostings() {
   const [data, setData] = useState({
@@ -32,7 +33,7 @@ export default function FarmProfileEditPostings() {
   const paymentTypeList = ["Hourly", "Salary"];
 
   const navigation = useNavigation();
-  const { currentUser } = useContext(UserContext);
+  const { currentUser, setRefresh, refresh, setProfileRefresh, profileRefresh } = useContext(UserContext);
   const route = useRoute();
   const { postingId } = route.params;
 
@@ -44,16 +45,16 @@ export default function FarmProfileEditPostings() {
   };
 
   const fetchPosting = () => {
-    console.log('Posting ID:', postingId);
-    axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/postings/${postingId}`)
-      .then((postingsResponse) => {
-        console.log('Posting:', postingsResponse.data.data);
-        setData(postingsResponse.data.data);
-        setSelectedItems(postingsResponse.data.data.attributes.skill_requirements);
-      })
-      .catch(error => {
-        console.error("There was an error fetching the farm's postings:", error);
-      });
+    console.log('Posting ID:', postingId );
+    axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/farms/postings/${postingId}`)
+    .then((postingsResponse) => {
+      console.log('Posting:', postingsResponse.data.data);
+      setData(postingsResponse.data.data);
+      setSelectedItems(postingsResponse.data.data.attributes.skill_requirements);
+    })
+    .catch(error => {
+      console.error("There was an error fetching the farm's postings:", error);
+    });
   };
 
   const handleDeletePosting = () => {
@@ -68,19 +69,16 @@ export default function FarmProfileEditPostings() {
         {
           text: 'Delete',
           onPress: () => {
-            axios.delete(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/postings/${postingId}`)
-              .then(response => {
-                console.log('Posting deleted:', postingId);
-                Alert.alert('Posting deleted');
-                if (route.params.sourceStack === 'Profile') {
-                  navigation.navigate('Profile');
-                } else if (route.params.sourceStack === 'Home') {
-                  navigation.navigate('Home');
-                }
-              })
-              .catch(error => {
-                console.log('Unable to delete posting', error);
-              });
+            axios.delete(`${baseUrl}/api/v1/users/${currentUser.id}/farms/postings/${postingId}`)
+            .then(response => {
+              console.log('Posting deleted:', postingId);
+              Alert.alert('Posting deleted');
+              setRefresh(true);
+              setProfileRefresh(true);
+            })
+            .catch(error => {
+              console.log('Unable to delete posting', error);
+            });
           }
         }
       ]
@@ -88,7 +86,7 @@ export default function FarmProfileEditPostings() {
   };
 
   const fetchAccommodationData = () => {
-    axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/accommodation`)
+    axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/farms/accommodation`)
       .then((accommodationResponse) => {
         if (accommodationResponse.data && accommodationResponse.data.data && accommodationResponse.data.data.attributes) {
           setAccommodationData(accommodationResponse.data.data.attributes);
@@ -112,21 +110,29 @@ export default function FarmProfileEditPostings() {
       skill_requirements: data.attributes.skill_requirements,
       description: data.attributes.description,
     };
-
-    axios.put(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/postings/${postingId}`, { posting: postData })
+    axios.put(`${baseUrl}/api/v1/users/${currentUser.id}/farms/postings/${postingId}`, postData)
       .then(response => {
         console.log(response.data);
-        if (route.params.sourceStack === 'Profile') {
-          navigation.navigate('Profile');
-        } else if (route.params.sourceStack === 'Home') {
-          navigation.navigate('Home');
-        }
+        // Set refresh to true to trigger data fetch in other components
+        setRefresh(true);
+        setProfileRefresh(true);
       })
       .catch(error => {
         console.log('Unable to edit posting', error);
         Alert.alert('Error', 'Unable to edit posting. Please try again.');
       });
-  };
+  }
+
+  useEffect(() => {
+    if (refresh || profileRefresh) {
+      // Check the sourceStack parameter and navigate accordingly
+      if (route.params.sourceStack === 'Profile') {
+        navigation.navigate('Profile');
+      } else if (route.params.sourceStack === 'Home') {
+        navigation.navigate('Home');
+      }
+    }
+  }, [refresh, profileRefresh]);
 
   useEffect(() => {
     if (postingId) fetchPosting();

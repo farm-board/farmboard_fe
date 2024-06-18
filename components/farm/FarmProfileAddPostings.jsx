@@ -11,6 +11,7 @@ import StyledSwitch from '../Inputs/StyledSwitch';
 import SkillsSelect from '../skills/SkillSelect';
 import StyledSelectDropdown from '../Inputs/StyledSelectDropdown';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { baseUrl } from '../../config';
 
 export default function FarmProfileAddPostings() {
   const [data, setData] = useState({
@@ -31,7 +32,7 @@ export default function FarmProfileAddPostings() {
 
   const navigation = useNavigation();
   const route = useRoute();
-  const { currentUser } = useContext(UserContext);
+  const { currentUser, setRefresh, refresh, setProfileRefresh, profileRefresh } = useContext(UserContext);
 
   const [selectedItems, setSelectedItems] = useState([]);
 
@@ -41,7 +42,7 @@ export default function FarmProfileAddPostings() {
   };
 
   const fetchAccommodationData = () => {
-    axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/accommodation`)
+    axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/farms/accommodation`)
       .then((accommodationResponse) => {
         if (accommodationResponse.data && accommodationResponse.data.data && accommodationResponse.data.data.attributes) {
           setAccommodationData(accommodationResponse.data.data.attributes);
@@ -90,21 +91,27 @@ export default function FarmProfileAddPostings() {
       skill_requirements: data.skill_requirements,
       description: data.description,
     };
+    axios.post(`${baseUrl}/api/v1/users/${currentUser.id}/farms/postings`, { posting: postData })
+    .then(response => {
+      console.log(response.data);
+      setRefresh(true);
+      setProfileRefresh(true);
+    })
+    .catch(error => {
+      console.log('Unable to add posting', error);
+    })
+  }
 
-    axios.post(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/postings`, { posting: postData })
-      .then(response => {
-        console.log(response.data);
-        if (route.params.sourceStack === 'Profile') {
-          navigation.navigate('Profile');
-        } else if (route.params.sourceStack === 'Home') {
-          navigation.navigate('Home');
-        }
-      })
-      .catch(error => {
-        console.log('Unable to add posting', error);
-        Alert.alert('Error', 'Unable to add posting. Please try again.');
-      });
-  };
+  useEffect(() => {
+    if (refresh || profileRefresh) {
+      // Check the sourceStack parameter and navigate accordingly
+      if (route.params.sourceStack === 'Profile') {
+        navigation.navigate('Profile');
+      } else if (route.params.sourceStack === 'Home') {
+        navigation.navigate('Home');
+      }
+    }
+  }, [refresh]);
 
   useEffect(() => {
     fetchAccommodationData();

@@ -7,6 +7,8 @@ import Avatar from '../Profile/Avatar';
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { colors } from '../../config/theme'
 import StyledText from '../Texts/StyledText'
+import { baseUrl } from '../../config'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function ViewEmployeeProfile() {
   const navigation = useNavigation();
@@ -26,20 +28,45 @@ export default function ViewEmployeeProfile() {
   const route = useRoute();
   const { employeeId } = route.params;
 
-  useEffect(() => {
+  const fetchProfileData = async () => {
     setLoading(true);
-    axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/employees/${employeeId}/profile_info`)
-      .then((employeeResponse) => {
-        setEmployee(employeeResponse.data.attributes);
-        setExperiences(employeeResponse.data.experiences);
-        setReferences(employeeResponse.data.references);
+  
+    try {
+      // Try to get the cached data
+      const cachedData = await AsyncStorage.getItem(`employee_profile_info_${currentUser.id}_${employeeId}`);
+      if (cachedData !== null) {
+        const parsedData = JSON.parse(cachedData);
+        setEmployee(parsedData.employee);
+        setExperiences(parsedData.experiences);
+        setReferences(parsedData.references);
         setLoading(false);
-      })
-      .catch(error => {
-        console.error('There was an error fetching the employee or experiences:', error);
-        setLoading(false); // Set loading state to false in case of error
-      });
-  }, [currentUser.id]);
+        return;
+      }
+  
+      // If there's no cached data, fetch from the server
+      const response = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/employees/${employeeId}/profile_info`);
+      console.log('employee response:', response.data.attributes);
+      setEmployee(response.data.attributes);
+      setExperiences(response.data.experiences);
+      setReferences(response.data.references);
+  
+      // Cache the data
+      const dataToCache = {
+        employee: response.data.attributes,
+        experiences: response.data.experiences,
+        references: response.data.references,
+      };
+      await AsyncStorage.setItem(`employee_profile_info_${currentUser.id}_${employeeId}`, JSON.stringify(dataToCache));
+    } catch (error) {
+      console.error('There was an error accessing the cache:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  useEffect(() => {
+    fetchProfileData();
+  }, [currentUser.id, employeeId]);
 
   if (loading) {
     return <Text>Loading...</Text>; // Render loading indicator

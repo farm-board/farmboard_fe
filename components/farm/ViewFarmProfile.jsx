@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Modal, ScrollView, Button } from 'react-native'
 import React, { useContext, useState, useEffect } from 'react'
 import { UserContext } from '../../contexts/UserContext'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios'
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated'
 import Avatar from '../Profile/Avatar'
@@ -9,6 +10,8 @@ import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { colors } from '../../config/theme'
 import { useNavigation, useRoute } from '@react-navigation/native'
 import Gallery from '../Profile/Gallery';
+import { baseUrl } from '../../config';
+
 
 export default function ViewFarmProfile() {
   const {currentUser} = useContext(UserContext);
@@ -26,25 +29,50 @@ export default function ViewFarmProfile() {
 
   const route = useRoute();
   const { farmId } = route.params;
-  
 
-  useEffect(() => {
-    setLoading(true); 
-    axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/${farmId}/profile_info`)
-    .then((farmResponse) => {
-      console.log('farm response:', farmResponse.data.postings);
-      setFarm(farmResponse.data.attributes);
-      setAccommodations(farmResponse.data.accommodations); 
-      const sortedPostings = farmResponse.data.postings.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-      setPostings(sortedPostings); 
-      setGalleryImages(farmResponse.data.gallery_photos);
-      setLoading(false); 
-    })
-    .catch(error => {
+  const fetchProfileData = async () => {
+    setLoading(true);
+  
+    try {
+      // Try to get the cached data
+      const cachedData = await AsyncStorage.getItem(`profile_info_${currentUser.id}_${farmId}`);
+      if (cachedData !== null) {
+        const parsedData = JSON.parse(cachedData);
+        setFarm(parsedData.farm);
+        setAccommodations(parsedData.accommodations);
+        setPostings(parsedData.postings);
+        setGalleryImages(parsedData.galleryPhotos);
+        setLoading(false);
+        return;
+      }
+  
+      // If there's no cached data, fetch from the server
+      const response = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/farms/${farmId}/profile_info`);
+      console.log('farm response:', response.data.postings);
+      setFarm(response.data.attributes);
+      setAccommodations(response.data.accommodations);
+      const sortedPostings = response.data.postings.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      setPostings(sortedPostings);
+      setGalleryImages(response.data.gallery_photos);
+  
+      // Cache the data
+      const dataToCache = {
+        farm: response.data.attributes,
+        accommodations: response.data.accommodations,
+        postings: sortedPostings,
+        galleryPhotos: response.data.gallery_photos,
+      };
+      await AsyncStorage.setItem(`profile_info_${currentUser.id}_${farmId}`, JSON.stringify(dataToCache));
+    } catch (error) {
       console.error('There was an error fetching the farm:', error);
+    } finally {
       setLoading(false);
-    });
-  }, [currentUser.id]);
+    }
+  };
+  
+  useEffect(() => {
+    fetchProfileData();
+  }, [currentUser.id, farmId]);
   
   const toggleExpanded = (postingId) => {
     setExpandedMap(prevState => ({

@@ -7,10 +7,12 @@ import Avatar from '../Profile/Avatar';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { colors } from '../../config/theme';
 import StyledText from '../Texts/StyledText';
+import { baseUrl } from '../../config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function EmployeeProfile() {
   const navigation = useNavigation();
-  const { currentUser, setUserAvatar } = useContext(UserContext);
+  const { currentUser, setUserAvatar, profileRefresh, setProfileRefresh } = useContext(UserContext);
   const [employee, setEmployee] = useState({});
   const [experiences, setExperiences] = useState([]);
   const [references, setReferences] = useState([]); 
@@ -19,33 +21,97 @@ export default function EmployeeProfile() {
   const [expanded, setExpanded] = useState(false); 
   const [selectedTab, setSelectedTab] = useState('Experience'); 
 
-  const fetchEmployeeData = async () => {
+  const fetchEmployeeData = async (refresh) => {
     setLoading(true);
-
+  
     try {
-      const [employeeResponse, experiencesResponse, referenceResponse, imageResponse] = await Promise.all([
-        axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/employees`),
-        axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/employees/experiences`),
-        axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/employees/references`),
-        axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/employees/image`),
-      ]);
-
-      setEmployee(employeeResponse.data.data.attributes);
-      setExperiences(experiencesResponse.data.data);
-      setReferences(referenceResponse.data.data);
-      setProfilePhoto(imageResponse.data.image_url);
-      setUserAvatar(imageResponse.data.image_url);
+      if (!refresh) {
+        const cachedEmployee = await AsyncStorage.getItem('employee');
+        if (cachedEmployee !== null) {
+          console.log('Loaded employee data from cache');
+          setEmployee(JSON.parse(cachedEmployee));
+        } else {
+          const employeeResponse = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/employees`);
+          console.log('Fetched employee data from API:', employeeResponse.data.data);
+          setEmployee(employeeResponse.data.data.attributes);
+          await AsyncStorage.setItem('employee', JSON.stringify(employeeResponse.data.data.attributes));
+        }
+      } else {
+        const employeeResponse = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/employees`);
+        console.log('Refreshed employee data from API:', employeeResponse.data.data);
+        setEmployee(employeeResponse.data.data.attributes);
+        await AsyncStorage.setItem('employee', JSON.stringify(employeeResponse.data.data.attributes));
+      }
+  
+      const cachedProfilePhoto = await AsyncStorage.getItem('employee_profile_photo');
+      const hasFetchedProfilePhotoBefore = await AsyncStorage.getItem('hasFetchedEmployeeProfilePhoto');
+  
+      if (cachedProfilePhoto !== null && !refresh && hasFetchedProfilePhotoBefore === 'true') {
+        console.log('Loaded profile photo from cache');
+        setProfilePhoto(cachedProfilePhoto);
+        setUserAvatar(cachedProfilePhoto);
+      } else {
+        try {
+          const imageResponse = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/employees/image`);
+          console.log('Fetched profile photo from API:', imageResponse.data.image_url);
+          setProfilePhoto(imageResponse.data.image_url);
+          setUserAvatar(imageResponse.data.image_url);
+          await AsyncStorage.setItem('employee_profile_photo', imageResponse.data.image_url);
+        } catch (error) {
+          console.log('Error fetching profile photo:', error);
+          setProfilePhoto(null);
+          setUserAvatar(null);
+          await AsyncStorage.setItem('hasFetchedEmployeeProfilePhoto', 'false'); // Set to 'false' on error
+        }
+        await AsyncStorage.setItem('hasFetchedEmployeeProfilePhoto', 'true'); // Set to 'true' once at the end
+      }
+  
+      // Fetch experiences data
+      const cachedExperiences = await AsyncStorage.getItem('experiences');
+      if (cachedExperiences !== null && !refresh) {
+        console.log('Loaded experiences data from cache');
+        setExperiences(JSON.parse(cachedExperiences));
+      } else {
+        const experiencesResponse = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/employees/experiences`);
+        console.log('Fetched experiences data from API:', experiencesResponse.data.data);
+        setExperiences(experiencesResponse.data.data);
+        await AsyncStorage.setItem('experiences', JSON.stringify(experiencesResponse.data.data));
+      }
+  
+      // Fetch references data
+      const cachedReferences = await AsyncStorage.getItem('references');
+      if (cachedReferences !== null && !refresh) {
+        console.log('Loaded references data from cache');
+        setReferences(JSON.parse(cachedReferences));
+      } else {
+        const referenceResponse = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/employees/references`);
+        console.log('Fetched references data from API:', referenceResponse.data.data);
+        setReferences(referenceResponse.data.data);
+        await AsyncStorage.setItem('references', JSON.stringify(referenceResponse.data.data));
+      }
     } catch (error) {
-      console.error('Error fetching employee data:', error);
+      console.error('Error fetching data:', error);
     }
-
+  
     setLoading(false);
   };
-
+  
+  useEffect(() => {
+    if (profileRefresh) {
+      fetchEmployeeData(profileRefresh);
+      setProfileRefresh(false);
+    }
+  }, [profileRefresh]); // Trigger on refresh changes
+  
   useFocusEffect(
     React.useCallback(() => {
-      fetchEmployeeData();
-    }, [currentUser.id])
+      console.log('Profile screen focus, profileRefresh:', profileRefresh);
+      fetchEmployeeData(profileRefresh);
+      if (profileRefresh) {
+        setProfileRefresh(false);
+        console.log('Profile data fetched and profileRefresh reset to false');
+      }
+    }, [profileRefresh])
   );
 
   if (loading) {

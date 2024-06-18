@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react'
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
 import { Text, View, TextInput, TouchableOpacity, StyleSheet, Dimensions, Alert } from 'react-native'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { UserContext } from '../../contexts/UserContext';
 import axios from 'axios';
@@ -14,12 +15,15 @@ import ProfileInfo from '../Profile/ProfileInfo';
 import SectionHeader from '../Texts/SectionHeader';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import GalleryEdit from '../Profile/GalleryEdit';
+import { baseUrl } from '../../config';
 
 
 export default function FarmProfileEdit() {
   const [modalVisible, setModalVisible] = useState(false);
   const [accommodations, setAccommodations] = useState({});
   const [galleryImages, setGalleryImages] = useState([]);
+  const [hasMounted, setHasMounted] = useState(false);
+
   const [data, setData] = useState({
     name: '',
     state: '',
@@ -32,7 +36,7 @@ export default function FarmProfileEdit() {
   const width = Dimensions.get('window').width;
 
   const navigation = useNavigation();
-  const { currentUser, setUserAvatar } = useContext(UserContext);
+  const { currentUser, setUserAvatar, setProfileRefresh, profileRefresh, editProfileRefresh, setEditProfileRefresh } = useContext(UserContext);
 
   const pickImage = async (mode) => {
     try {
@@ -74,22 +78,39 @@ export default function FarmProfileEdit() {
         type: 'image/jpeg',
         name: `profile_${currentUser.id}.jpg`,
       });
-
+  
       // Upload image to Amazon S3
-      let response = await axios.post(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/upload_image`, formData, {
+      const imageResponse = await axios.post(`${baseUrl}/api/v1/users/${currentUser.id}/farms/upload_image`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
+      setUserAvatar(imageResponse.data.image_url);
+      setProfileRefresh(true);
+      console.log('Profile image updated and profileRefresh set to true');
+  
+      // Reset the flag
+      await AsyncStorage.setItem('hasFetchedProfilePhoto', 'false');
     } catch (error) {
       console.log('Unable to upload image', error);
     }
   };
-
-  const removeImage = () => {
+  
+  const removeImage = async () => {
     setData({ ...data, image: null});
-    axios.delete(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/delete_image`);
-    setModalVisible(false);
+    try {
+      await axios.delete(`${baseUrl}/api/v1/users/${currentUser.id}/farms/delete_image`);
+      AsyncStorage.removeItem('profile_photo');
+      setUserAvatar('');
+      setProfileRefresh(true);
+      setModalVisible(false);
+  
+      // Reset the flags
+      await AsyncStorage.setItem('hasFetchedProfilePhoto', 'false');
+      await AsyncStorage.setItem('profilePhotoExists', 'false'); // Set to 'false' when image is removed
+    } catch (error) {
+      console.error('Error deleting image:', error);
+    }
   };
 
   const handleGalleryImageUpload = async () => {
@@ -124,14 +145,14 @@ export default function FarmProfileEdit() {
         type: 'image/jpeg',
         name: `profile_${currentUser.id}.jpg`,
       });
-
       // Upload image to Amazon S3
-      let response = await axios.post(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/upload_gallery_photo`, formData, {
+      let response = await axios.post(`${baseUrl}/api/v1/users/${currentUser.id}/farms/upload_gallery_photo`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
-      fetchGalleryImages();
+      setProfileRefresh(true);
+      fetchGalleryImages(true);
     } catch (error) {
       console.log('Unable to upload image', error);
     }
@@ -148,88 +169,175 @@ export default function FarmProfileEdit() {
         },
         {
           text: 'Delete',
-          onPress: () => {
-            axios.delete(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/delete_gallery_photo/${photoId}`);
-            console.log('Deleted photo:', photoId);
-            setGalleryImages(galleryImages.filter(galleryPhoto => galleryPhoto.id !== photoId));
+          onPress: async () => {
+            try {
+              await axios.delete(`${baseUrl}/api/v1/users/${currentUser.id}/farms/delete_gallery_photo/${photoId}`);
+              console.log('Deleted photo:', photoId);
+              setGalleryImages(galleryImages.filter(galleryPhoto => galleryPhoto.id !== photoId));
+              setProfileRefresh(true);
+            } catch (error) {
+              console.log('Error deleting photo:', error);
+            }
           }
         }
       ],
     );
   };
 
-  const fetchProfileData = async () => {
+  const fetchProfileData = async (refresh) => {
     try {
-      // Fetch user data
-      const farmResponse = await axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms`);
-  
-      // Update state with user data
-      setData(prevData => ({
-        ...prevData,
-        name: farmResponse.data.data.attributes.name,
-        state: farmResponse.data.data.attributes.state,
-        city: farmResponse.data.data.attributes.city,
-        zip_code: farmResponse.data.data.attributes.zip_code,
-        bio: farmResponse.data.data.attributes.bio,
-      }));
-  
-      try {
-        // Fetch user avatar image
-        const imageResponse = await axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/image`);
-        // Update state with image URL
+      if (!refresh) {
+        const cachedFarm = await AsyncStorage.getItem('farm');
+        if (cachedFarm !== null) {
+          console.log('Loaded farm data from cache');
+          setData(prevData => ({
+            ...prevData,
+            name: JSON.parse(cachedFarm).name,
+            state: JSON.parse(cachedFarm).state,
+            city: JSON.parse(cachedFarm).city,
+            zip_code: JSON.parse(cachedFarm).zip_code,
+            bio: JSON.parse(cachedFarm).bio,
+          }));
+        } else {
+          const farmResponse = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/farms`);
+          console.log('Fetched farm data from API:', farmResponse.data.data);
+          setData(prevData => ({
+            ...prevData,
+            name: farmResponse.data.data.attributes.name,
+            state: farmResponse.data.data.attributes.state,
+            city: farmResponse.data.data.attributes.city,
+            zip_code: farmResponse.data.data.attributes.zip_code,
+            bio: farmResponse.data.data.attributes.bio,
+          }));
+          await AsyncStorage.setItem('farm', JSON.stringify(farmResponse.data.data.attributes));
+        }
+      } else {
+        const farmResponse = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/farms`);
+        console.log('Fetched farm data from API:', farmResponse.data.data);
         setData(prevData => ({
           ...prevData,
-          image: imageResponse.data.image_url,
+          name: farmResponse.data.data.attributes.name,
+          state: farmResponse.data.data.attributes.state,
+          city: farmResponse.data.data.attributes.city,
+          zip_code: farmResponse.data.data.attributes.zip_code,
+          bio: farmResponse.data.data.attributes.bio,
         }));
-        setUserAvatar(imageResponse.data.image_url);
-      } catch (imageError) {
-        setData(prevData => ({
-          ...prevData,
-          image: null, // or set a default image URL here if you have one
-        }));
+        await AsyncStorage.setItem('farm', JSON.stringify(farmResponse.data.data.attributes));
       }
   
+      const cachedProfilePhoto = await AsyncStorage.getItem('profile_photo');
+      const hasFetchedProfilePhotoBefore = await AsyncStorage.getItem('hasFetchedProfilePhoto');
+  
+      if (cachedProfilePhoto !== null && !refresh && hasFetchedProfilePhotoBefore === 'true') {
+        console.log('Loaded profile photo from cache');
+        setData(prevData => ({
+          ...prevData,
+          image: cachedProfilePhoto,
+        }));
+        setUserAvatar(cachedProfilePhoto);
+      } else {
+        try {
+          const imageResponse = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/farms/image`);
+          console.log('Fetched profile photo from API:', imageResponse.data.image_url);
+          setData(prevData => ({
+            ...prevData,
+            image: imageResponse.data.image_url,
+          }));
+          setUserAvatar(imageResponse.data.image_url);
+          await AsyncStorage.setItem('profile_photo', imageResponse.data.image_url);
+          await AsyncStorage.setItem('hasFetchedProfilePhoto', 'true');
+        } catch (imageError) {
+          console.log('Error fetching profile photo:', imageError);
+          setData(prevData => ({
+            ...prevData,
+            image: null, // or set a default image URL here if you have one
+          }));
+          await AsyncStorage.setItem('hasFetchedProfilePhoto', 'false');
+        }
+      }
+
+      await fetchGalleryImages(refresh);
+      await fetchAccommodationData(refresh);
     } catch (farmError) {
       console.error('There was an error fetching the farm:', farmError);
     }
   };
 
-  const fetchAccommodationData = async () => {
-    axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/accommodation`)
-      .then((accommodationResponse) => {
-        if (accommodationResponse.data && accommodationResponse.data.data && accommodationResponse.data.data.attributes) {
-          setAccommodations(accommodationResponse.data.data.attributes);
-        } else {
-          console.log('No accommodations found for this farm.');
-        }
-      })
-      .catch(error => {
-        console.error('There was an error fetching the accommodations:', error);
-      });
+  const fetchAccommodationData = async (refresh) => {
+    try {
+      const cachedAccommodations = await AsyncStorage.getItem('accommodations');
+      const hasFetchedBeforeEditProfile = await AsyncStorage.getItem('hasFetchedAccommodationsEditProfile');
+  
+      if (cachedAccommodations !== null && !refresh && hasFetchedBeforeEditProfile === 'true') {
+        console.log('Loaded accommodations from cache');
+        setAccommodations(JSON.parse(cachedAccommodations));
+        return;
+      }
+  
+      const accommodationResponse = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/farms/accommodation`);
+      if (accommodationResponse.data && accommodationResponse.data.data && accommodationResponse.data.data.attributes) {
+        console.log("Fetched accommodations from API:", accommodationResponse.data.data.attributes);
+        setAccommodations(accommodationResponse.data.data.attributes);
+        await AsyncStorage.setItem('accommodations', JSON.stringify(accommodationResponse.data.data.attributes));
+      } else {
+        setAccommodations({});
+        console.log('No accommodations found for this farm.', accommodations);
+      }
+  
+      // Set the flag to indicate that a fetch has been attempted
+      await AsyncStorage.setItem('hasFetchedAccommodationsEditProfile', 'true');
+    } catch (error) {
+      console.error('There was an error fetching the accommodations:', error);
+    }
   };
 
+  const fetchGalleryImages = async (refresh) => {
+    try {
+      const cachedGalleryImages = await AsyncStorage.getItem('gallery_images');
+      const hasFetchedBefore = await AsyncStorage.getItem('hasFetchedGalleryImages');
+      if (cachedGalleryImages !== null && !refresh && hasFetchedBefore === 'true') {
+        console.log('Loaded gallery images from cache');
+        setGalleryImages(JSON.parse(cachedGalleryImages));
+        return;
+      } else {
 
-  const fetchGalleryImages = () => {
-    axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/farms/gallery_photos`)
-    .then((galleryResponse) => {
-      console.log('gallery images:', galleryResponse.data.gallery_photos);
+      const galleryResponse = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/farms/gallery_photos`);
+      console.log('Fetched gallery images from API:', galleryResponse.data.gallery_photos);
       setGalleryImages(galleryResponse.data.gallery_photos);
-    })
-    .catch(error => {
-      console.error('There was an error fetching the gallery images:', error);
-    });
+      await AsyncStorage.setItem('gallery_images', JSON.stringify(galleryResponse.data.gallery_photos));
+      }
+      await AsyncStorage.setItem('hasFetchedGalleryImages', 'true');
+    } catch (error) {
+      console.error('Error fetching gallery images:', error);
+    }
   };
 
   const handleAddAccommodation = () => {
     navigation.navigate('Farm Profile Add Accommodations');
   }
-
+  
+  // This useEffect runs when editProfileRefresh chang
   useEffect(() => {
-    fetchProfileData()
-    fetchGalleryImages();
-    fetchAccommodationData();
-  }, [currentUser.id]);
-
+    fetchProfileData(editProfileRefresh);
+    setHasMounted(true);
+  }, [editProfileRefresh]); // Empty dependency array means this useEffect runs once on mount
+  
+  // This useEffect runs when editProfileRefresh changes
+  useEffect(() => {
+    if (editProfileRefresh && hasMounted) {
+      fetchProfileData(true);
+      setEditProfileRefresh(false);
+    }
+  }, [editProfileRefresh, hasMounted]); // Trigger on refresh changes
+  
+  useFocusEffect(
+    React.useCallback(() => {
+      if (editProfileRefresh && hasMounted) { // Check if the component has mounted
+        fetchProfileData(true);
+        setEditProfileRefresh(false); // Reset the flag
+      }
+    }, [editProfileRefresh, hasMounted]) // Add hasMounted to the dependency array
+  );
 
   return (
     <KeyboardAvoidingContainer style={styles.container} behavior="padding">

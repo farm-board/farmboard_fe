@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
 import { Text, View, TouchableOpacity, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { UserContext } from '../../contexts/UserContext';
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
@@ -12,6 +12,8 @@ import StyledText from '../Texts/StyledText';
 import SectionHeader from '../Texts/SectionHeader';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import ProfileInfo from '../Profile/ProfileInfo';
+import { baseUrl } from '../../config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function EmployeeProfileEdit() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -34,37 +36,94 @@ export default function EmployeeProfileEdit() {
 
   const [selectedItems, setSelectedItems] = useState([]);
 
+  const [hasMounted, setHasMounted] = useState(false);
+
   const onSelectedItemsChange = (selectedItems, selectedSkills) => {
     setSelectedItems(selectedItems);
     setData({ ...data, skills: selectedSkills });
   }
 
   const navigation = useNavigation();
-  const { currentUser, setUserAvatar } = useContext(UserContext);
+  const { currentUser, setUserAvatar, editProfileRefresh, setEditProfileRefresh } = useContext(UserContext);
 
   useEffect(() => {
-    fetchProfileData();
-  }, []);
-
-  const fetchProfileData = async () => {
+    fetchProfileData(editProfileRefresh);
+    setHasMounted(true);
+  }, [editProfileRefresh]);
+  
+  // Add another useEffect that runs when editProfileRefresh and hasMounted changes
+  useEffect(() => {
+    if (editProfileRefresh && hasMounted) {
+      fetchProfileData(true);
+      setEditProfileRefresh(false);
+    }
+  }, [editProfileRefresh, hasMounted]);
+  
+  // Add a useFocusEffect that triggers fetchProfileData when the component is focused
+  useFocusEffect(
+    React.useCallback(() => {
+      if (editProfileRefresh && hasMounted) {
+        fetchProfileData(true);
+        setEditProfileRefresh(false);
+      }
+    }, [editProfileRefresh, hasMounted])
+  );
+  
+  const fetchProfileData = async (refresh) => {
     try {
-      const [employeeResponse, experiencesResponse, referencesResponse] = await Promise.all([
-        axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/employees`),
-        axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/employees/experiences`),
-        axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/employees/references`)
-      ]);
-
-      let imageResponse;
-      try {
-        imageResponse = await axios.get(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/employees/image`);
-      } catch (error) {
-        if (error.response && error.response.status === 404) {
-          imageResponse = { data: { image_url: null } }; // Default value if image is not found
-        } else {
-          throw error; // Rethrow if it's a different error
+      let employeeResponse, experiencesResponse, referencesResponse, imageResponse;
+  
+      if (!refresh) {
+        const cachedEmployee = await AsyncStorage.getItem('employee');
+        const cachedExperiences = await AsyncStorage.getItem('experiences');
+        const cachedReferences = await AsyncStorage.getItem('references');
+        const cachedImage = await AsyncStorage.getItem('employee_image');
+  
+        if (cachedEmployee !== null) {
+          employeeResponse = { data: { data: { attributes: JSON.parse(cachedEmployee) } } };
+        }
+  
+        if (cachedExperiences !== null) {
+          experiencesResponse = { data: { data: JSON.parse(cachedExperiences) } };
+        }
+  
+        if (cachedReferences !== null) {
+          referencesResponse = { data: { data: JSON.parse(cachedReferences) } };
+        }
+  
+        if (cachedImage !== null) {
+          imageResponse = { data: { image_url: cachedImage } };
         }
       }
-
+  
+      if (!employeeResponse) {
+        employeeResponse = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/employees`);
+        await AsyncStorage.setItem('employee', JSON.stringify(employeeResponse.data.data.attributes));
+      }
+  
+      if (!experiencesResponse) {
+        experiencesResponse = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/employees/experiences`);
+        await AsyncStorage.setItem('experiences', JSON.stringify(experiencesResponse.data.data));
+      }
+  
+      if (!referencesResponse) {
+        referencesResponse = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/employees/references`);
+        await AsyncStorage.setItem('references', JSON.stringify(referencesResponse.data.data));
+      }
+  
+      if (!imageResponse) {
+        try {
+          imageResponse = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/employees/image`);
+          await AsyncStorage.setItem('employee_image', imageResponse.data.image_url);
+        } catch (error) {
+          if (error.response && error.response.status === 404) {
+            imageResponse = { data: { image_url: null } }; // Default value if image is not found
+          } else {
+            throw error; // Rethrow if it's a different error
+          }
+        }
+      }
+  
       setExperiences(experiencesResponse.data.data);
       setReferences(referencesResponse.data.data);
       setUserAvatar(imageResponse.data.image_url);
@@ -125,7 +184,7 @@ export default function EmployeeProfileEdit() {
         type: 'image/jpeg',
         name: `profile_${currentUser.id}.jpg`,
       });
-      await axios.post(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/employees/upload_image`, formData, {
+      await axios.post(`${baseUrl}/api/v1/users/${currentUser.id}/employees/upload_image`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -137,8 +196,8 @@ export default function EmployeeProfileEdit() {
 
   const deleteExperience = async (experienceId) => {
     try {
-      await axios.delete(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/employees/experiences/${experienceId}`);
-      fetchExperiences();
+      await axios.delete(`${baseUrl}/api/v1/users/${currentUser.id}/employees/experiences/${experienceId}`);
+      fetchProfileData(true);
     } catch (error) {
       console.error('Error deleting experience:', error);
     }
@@ -146,8 +205,8 @@ export default function EmployeeProfileEdit() {
 
   const deleteReference = async (referenceId) => {
     try {
-      await axios.delete(`https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/api/v1/users/${currentUser.id}/employees/references/${referenceId}`);
-      fetchReferences();
+      await axios.delete(`${baseUrl}/api/v1/users/${currentUser.id}/employees/references/${referenceId}`);
+      fetchProfileData(true);
     } catch (error) {
       console.error('Error deleting references:', error);
     }
