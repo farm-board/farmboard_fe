@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { UserContext } from '../../contexts/UserContext';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import axios from 'axios';
@@ -19,7 +19,7 @@ export default function EmployeeProfile() {
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [loading, setLoading] = useState(true); 
   const [expanded, setExpanded] = useState(false); 
-  const [selectedTab, setSelectedTab] = useState('Experience'); // New state for toggle
+  const [selectedTab, setSelectedTab] = useState('Experience'); 
 
   const fetchEmployeeData = async (refresh) => {
     setLoading(true);
@@ -115,16 +115,12 @@ export default function EmployeeProfile() {
   );
 
   if (loading) {
-    return <Text>Loading...</Text>; // Render loading indicator
+    return <ActivityIndicator size="large" color={colors.primary} />;
   }
 
   const onEditButtonPress = () => {
     navigation.navigate("Edit Profile");
-  }
-
-  const goToFeedScreen = () => {
-    navigation.navigate('Feed'); // Navigate to the Feed screen
-  }
+  };
 
   const renderContent = () => {
     if (selectedTab === 'Experience') {
@@ -198,11 +194,7 @@ export default function EmployeeProfile() {
     <View style={styles.container}>
       <View style={styles.topSectionContainer}>
         <TouchableOpacity style={styles.editButton} onPress={onEditButtonPress}>
-          <MaterialCommunityIcons
-            name="pencil-outline"
-            size={25}
-            color="white"
-          />
+          <MaterialCommunityIcons name="pencil-outline" size={25} color="white" />
         </TouchableOpacity>
         <View style={styles.leftContent}>
           <View style={[styles.avatarContainer, styles.marginBottom3]}>
@@ -210,16 +202,8 @@ export default function EmployeeProfile() {
           </View>
         </View>
         <View style={styles.rightContent}>
-          <Text style={styles.name}>
-            <StyledText big tanColor style={styles.name}>
-              {`${employee.first_name} ${employee.last_name}`}
-            </StyledText>
-          </Text>
-          <Text style={styles.location}>
-            <StyledText tanColor style={styles.location}>
-              {`${employee.city}, ${employee.state}`}
-            </StyledText>
-          </Text>
+          <StyledText big tanColor style={styles.name}>{`${employee.first_name} ${employee.last_name}`}</StyledText>
+          <StyledText tanColor style={styles.location}>{`${employee.city}, ${employee.state}`}</StyledText>
         </View>
       </View>
       <View style={styles.subContentContainerTwo}>

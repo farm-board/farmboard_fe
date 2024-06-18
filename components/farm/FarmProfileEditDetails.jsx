@@ -41,6 +41,7 @@ export default function FarmProfileEditDetails() {
   const navigation = useNavigation();
   const { currentUser, setUserName, setProfileRefresh, setEditProfileRefresh, editProfileRefresh, profileRefresh } = useContext(UserContext);
 
+
   const handleSubmit = async () => {
     try {
       await axios.put(`${baseUrl}/api/v1/users/${currentUser.id}/farms`, { farm: data})

@@ -1,20 +1,17 @@
-import React, { useState, useContext, useEffect } from 'react'
+import React, { useState, useContext, useEffect } from 'react';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
-import { Text, View, TouchableOpacity, StyleSheet, Alert } from 'react-native'
+import { Text, View, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { UserContext } from '../../contexts/UserContext';
 import axios from 'axios';
-import KeyboardAvoidingContainer from "../Containers/KeyboardAvoidingContainer";
-import StyledTextInput from "../Inputs/StyledTextInput";
+import KeyboardAvoidingContainer from '../Containers/KeyboardAvoidingContainer';
+import StyledTextInput from '../Inputs/StyledTextInput';
 import StyledText from '../Texts/StyledText';
 import StyledSwitch from '../Inputs/StyledSwitch';
 import SkillsSelect from '../skills/SkillSelect';
-import SelectDropdown from 'react-native-select-dropdown';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; 
 import StyledSelectDropdown from '../Inputs/StyledSelectDropdown';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { baseUrl } from '../../config';
-
 
 export default function FarmProfileEditPostings() {
   const [data, setData] = useState({
@@ -32,9 +29,8 @@ export default function FarmProfileEditPostings() {
 
   const [accommodationData, setAccommodationData] = useState({});
 
-  const durationList = [ "Full-Time", "Part-Time", "Seasonal", "Contract"];
-
-  const paymentTypeList = [ "Hourly", "Salary"];
+  const durationList = ["Full-Time", "Part-Time", "Seasonal", "Contract"];
+  const paymentTypeList = ["Hourly", "Salary"];
 
   const navigation = useNavigation();
   const { currentUser, setRefresh, refresh, setProfileRefresh, profileRefresh } = useContext(UserContext);
@@ -46,7 +42,7 @@ export default function FarmProfileEditPostings() {
   const onSelectedItemsChange = (selectedItems, selectedSkills) => {
     setSelectedItems(selectedItems);
     setData({...data, attributes: { ...data.attributes, skill_requirements: selectedSkills}});
-  }
+  };
 
   const fetchPosting = () => {
     console.log('Posting ID:', postingId );
@@ -87,7 +83,7 @@ export default function FarmProfileEditPostings() {
         }
       ]
     );
-  }
+  };
 
   const fetchAccommodationData = () => {
     axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/farms/accommodation`)
@@ -103,12 +99,16 @@ export default function FarmProfileEditPostings() {
       });
   };
 
-
   const handleSubmit = () => {
     const postData = {
-      posting: {
-        attributes: { ...data.attributes }
-      }
+      title: data.attributes.title,
+      salary: data.attributes.salary,
+      payment_type: data.attributes.payment_type,
+      duration: data.attributes.duration,
+      age_requirement: data.attributes.age_requirement,
+      offers_lodging: data.attributes.offers_lodging,
+      skill_requirements: data.attributes.skill_requirements,
+      description: data.attributes.description,
     };
     axios.put(`${baseUrl}/api/v1/users/${currentUser.id}/farms/postings/${postingId}`, postData)
       .then(response => {
@@ -119,6 +119,7 @@ export default function FarmProfileEditPostings() {
       })
       .catch(error => {
         console.log('Unable to edit posting', error);
+        Alert.alert('Error', 'Unable to edit posting. Please try again.');
       });
   }
 
@@ -131,7 +132,7 @@ export default function FarmProfileEditPostings() {
         navigation.navigate('Home');
       }
     }
-  }, [refresh]);
+  }, [refresh, profileRefresh]);
 
   useEffect(() => {
     if (postingId) fetchPosting();
@@ -141,8 +142,8 @@ export default function FarmProfileEditPostings() {
   return (
     <KeyboardAvoidingContainer style={styles.container} behavior="padding">
       <View style={styles.content}>
-        <Animated.View entering={FadeInDown.duration(1000).springify()}style={styles.inputContainer}>
-        <StyledTextInput
+        <Animated.View entering={FadeInDown.duration(1000).springify()} style={styles.inputContainer}>
+          <StyledTextInput
             placeholder="Job Title"
             icon="account-outline"
             label="Job Title:"
@@ -187,9 +188,9 @@ export default function FarmProfileEditPostings() {
             }}
           />
         </Animated.View>
-        <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} >
-        <Text style={{ alignSelf: 'flex-start', color: 'white', marginBottom: 10, fontSize: 18 }}>Relevant Skills:</Text>
-            <SkillsSelect selectedItems={selectedItems} onSelectedItemsChange={onSelectedItemsChange}/>
+        <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()}>
+          <Text style={{ alignSelf: 'flex-start', color: 'white', marginBottom: 10, fontSize: 18 }}>Relevant Skills:</Text>
+          <SkillsSelect selectedItems={selectedItems} onSelectedItemsChange={onSelectedItemsChange}/>
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(1200).duration(1000).springify()} style={styles.inputContainer}>
           <StyledTextInput
@@ -204,7 +205,7 @@ export default function FarmProfileEditPostings() {
           />
         </Animated.View>
         { accommodationData.housing || accommodationData.meals || accommodationData.transportation ?
-          <Animated.View entering={FadeInDown.delay(1000).duration(1000).springify()}style={styles.inputContainerAccommodations}>
+          <Animated.View entering={FadeInDown.delay(1000).duration(1000).springify()} style={styles.inputContainerAccommodations}>
             <StyledSwitch
               placeholder="Offers Accommodations"
               icon="home-outline"
