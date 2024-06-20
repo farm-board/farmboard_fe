@@ -1,1 +1,1 @@
-export const baseUrl = 'http://localhost:4000';
+export const baseUrl = 'https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2'

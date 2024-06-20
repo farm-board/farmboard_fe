@@ -44,7 +44,7 @@ export default function EmployeeProfileEdit() {
   }
 
   const navigation = useNavigation();
-  const { currentUser, setUserAvatar, editProfileRefresh, setEditProfileRefresh } = useContext(UserContext);
+  const { currentUser, setUserAvatar, editProfileRefresh, setEditProfileRefresh, profileRefresh, setProfileRefresh } = useContext(UserContext);
 
   useEffect(() => {
     fetchProfileData(editProfileRefresh);
@@ -184,13 +184,33 @@ export default function EmployeeProfileEdit() {
         type: 'image/jpeg',
         name: `profile_${currentUser.id}.jpg`,
       });
-      await axios.post(`${baseUrl}/api/v1/users/${currentUser.id}/employees/upload_image`, formData, {
+      const imageResponse = await axios.post(`${baseUrl}/api/v1/users/${currentUser.id}/employees/upload_image`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
+      setUserAvatar(imageResponse.data.image_url);
+      setProfileRefresh(true);
+      console.log('Profile image updated and profileRefresh set to true');
     } catch (error) {
       console.log('Unable to upload image', error);
+    }
+  };
+
+  const removeImage = async () => {
+    setData({ ...data, image: null});
+    try {
+      await axios.delete(`${baseUrl}/api/v1/users/${currentUser.id}/employees/delete_image`);
+      AsyncStorage.removeItem('employee_image');
+      setUserAvatar('');
+      setProfileRefresh(true);
+      setModalVisible(false);
+  
+      // Reset the flags
+      await AsyncStorage.setItem('hasFetchedProfilePhoto', 'false');
+      await AsyncStorage.setItem('profilePhotoExists', 'false'); // Set to 'false' when image is removed
+    } catch (error) {
+      console.error('Error deleting image:', error);
     }
   };
 

@@ -148,7 +148,7 @@ export default function FarmProfile() {
       const hasFetchedProfilePhotoBefore = await AsyncStorage.getItem('hasFetchedProfilePhoto');
 
       if (cachedProfilePhoto !== null && !refresh && hasFetchedProfilePhotoBefore === 'true') {
-        console.log('Loaded profile photo from cache');
+        console.log('Loaded profile photo from cache', cachedProfilePhoto);
         setProfilePhoto(cachedProfilePhoto);
         setUserAvatar(cachedProfilePhoto);
       } else {
@@ -565,7 +565,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 25,
     paddingVertical: 10,
     backgroundColor: '#3A4D39',
-    marginVertical: 10,
+    marginBottom: 10,
     shadowRadius: 20,
     shadowColor: 'black',
     shadowOpacity: 0.3,
@@ -613,6 +613,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'space-between',
     maxWidth: '100%',
+    marginBottom: 10,
     shadowRadius: 20,
     shadowColor: 'black',
     shadowOpacity: 0.4,
