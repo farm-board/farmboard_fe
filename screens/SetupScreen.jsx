@@ -26,7 +26,7 @@ export default function SetupScreen() {
       console.log("Token:", token);
 
       const response = await axios.patch(
-        'https://walrus-app-bfv5e.ondigitalocean.app/farm-board-be2/current_user/update',
+        `${baseUrl}/current_user/update`,
         {
           user: {
             role_type: role
