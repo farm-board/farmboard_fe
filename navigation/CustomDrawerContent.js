@@ -67,6 +67,7 @@ function CustomDrawerContent(props) {
         {
           text: 'Log Out',
           onPress: () => {
+          setUserAvatar('');
           logout(navigation);
         }
       }
@@ -187,8 +188,8 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    marginTop: 3,
-    marginRight: 45,
+    marginRight: 50,
+    lineHeight: 25,
     fontWeight: 'bold',
     color: "white",
   },
