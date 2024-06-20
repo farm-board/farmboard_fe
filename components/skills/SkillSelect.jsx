@@ -8,6 +8,17 @@ import { colors } from '../../config/theme';
 const onIOS = Platform.OS == "ios";
 
 const skills = [
+    { name: 'General Farm Work', id: 6,
+      skills: [
+          { name: 'Fencing', id: 600 },
+          { name: 'Landscaping', id: 601 },
+          { name: 'Building Maintenance', id: 602 },
+          { name: 'Cleaning and Sanitation', id: 603 },
+          { name: 'General Repairs', id: 604 },
+          { name: 'Painting', id: 605 },
+          { name: 'General Labor', id: 606 },
+        ]
+    },
     { name: 'Agriculture', id: 1,
       skills: [
           { name: 'Crop rotation planning', id: 100 },
@@ -53,9 +64,17 @@ const skills = [
           { name: 'Load Securing', id: 501 },
           { name: 'Navigation Skills', id: 502 },
           { name: 'Communication and Coordination', id: 503 },
-          { name: 'Tractor Trailer - CDL', id: 504 },
-          { name: 'Tractor Trailer - NO CDL', id: 505 },
-          { name: 'Livestock Transportation', id: 506 },
+          { name: 'Tractor Trailer - CDL Class A', id: 504 },
+          { name: 'Tractor Trailer - CDL Class B', id: 505 },
+          { name: 'Tractor Trailer - CDL Class C', id: 506 },
+          { name: 'Tractor Trailer - NO CDL', id: 507 },
+          { name: 'Livestock Transportation', id: 508 },
+        ]
+    },
+    { name: 'Other', id: 7,
+      skills: [
+          { name: 'English Speaking', id: 700 },
+          { name: 'Spanish Speaking', id: 701 },
         ]
     },
 ];
