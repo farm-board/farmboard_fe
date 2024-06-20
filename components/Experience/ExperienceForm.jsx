@@ -64,20 +64,24 @@ export default function ExperienceForm({ setExperiences }) {
         </Animated.View>
         <Animated.View entering={FadeInDown.duration(1000).springify()}style={styles.inputContainer}>
           <StyledTextInput
-            placeholder="Date Started"
-            icon="account-outline"
+            placeholder="DD-MM-YYYY"
+            icon="calendar"
             label="Date Started:"
+            maxLength={10}
             labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
             onChangeText={(text) => setData({...data, started_at: text})}
+            keyboardType="numeric"
           />
         </Animated.View>
         <Animated.View entering={FadeInDown.duration(1000).springify()}style={styles.inputContainer}>
           <StyledTextInput
-            placeholder="Date Ended"
-            icon="city-variant-outline"
+            placeholder="DD-MM-YYYY"
+            icon="calendar"
             label="Date Ended:"
+            maxLength={10}
             labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
             onChangeText={(text) => setData({...data, ended_at: text})}
+            keyboardType="numeric"
           />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputContainer}>
