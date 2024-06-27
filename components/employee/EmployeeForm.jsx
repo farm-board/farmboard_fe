@@ -219,6 +219,7 @@ export default function EmployeeForm() {
             placeholder="Phone"
             icon="phone"
             label="Phone number that potential employers can contact you at:"
+            maxLength={10}
             labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
             keyboardType="numeric"
             onChangeText={(text) => setData({ ...data, phone: text })}
@@ -308,7 +309,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffb900',
     borderRadius: 50,
     paddingVertical: 30,
-    paddingHorizontal: 130,
+    width: '100%',
   },
   submitButtonText: {
     fontSize: 16,
