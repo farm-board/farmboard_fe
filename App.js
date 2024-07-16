@@ -453,7 +453,7 @@ function App() {
   const { currentUser } = useContext(UserContext);
   
   const linking = {
-    prefixes: ['exp://10.0.0.15:8081/', 'myapp://'], // Add your production URL here
+    prefixes: ['exp://10.0.0.15:8081/'], // Add your production URL here
     config: {
       screens: {
         ResetPassword: '--/password/edit',

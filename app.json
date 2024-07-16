@@ -19,7 +19,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yourcompany.farmboard",
+      "bundleIdentifier": "com.farmspheredynamics.farmboard",
       "buildNumber": "1.0.0",
       "config": {
         "usesNonExemptEncryption": false

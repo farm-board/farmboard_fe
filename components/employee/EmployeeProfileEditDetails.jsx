@@ -200,7 +200,7 @@ export default function EmployeeProfileEditDetails() {
             icon="pencil-outline"
             multiline={true}
             label="Bio:"
-            maxLength={255}
+            maxLength={3000}
             labelStyle={{ fontSize: 18, color: 'white' }}
             value={data.bio}
             onChangeText={(text) => setData({ ...data, bio: text })}

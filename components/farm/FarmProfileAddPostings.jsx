@@ -168,7 +168,7 @@ export default function FarmProfileAddPostings() {
             placeholder="Description"
             icon="pencil-outline"
             multiline={true}
-            maxLength={255}
+            maxLength={3000}
             label="Description:"
             labelStyle={{ fontSize: 18, color: 'white' }}
             onChangeText={(text) => setData({ ...data, description: text })}

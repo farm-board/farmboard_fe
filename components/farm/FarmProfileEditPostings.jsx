@@ -197,7 +197,7 @@ export default function FarmProfileEditPostings() {
             placeholder="Description"
             icon="pencil-outline"
             multiline={true}
-            maxLength={255}
+            maxLength={3000}
             label="Description:"
             labelStyle={{fontSize: 18, color: 'white'}}
             value={data.attributes.description}
