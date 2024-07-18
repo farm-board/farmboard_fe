@@ -281,7 +281,7 @@ function EmployeeProfileStackNav() {
           }}/>
         <Stack.Screen name="Employee Profile Edit Details" component={EmployeeProfileEditDetailsScreen}
           options={{ 
-            title: 'Edit Display',
+            title: 'Edit Display Info',
             headerLeft: () => {
               return (
                 <TouchableOpacity onPress={() => navigation.navigate('Edit Profile')}>
@@ -453,7 +453,7 @@ function App() {
   const { currentUser } = useContext(UserContext);
   
   const linking = {
-    prefixes: ['exp://10.0.0.15:8081/', 'myapp://'], // Add your production URL here
+    prefixes: ['exp://10.0.0.15:8081/'], // Add your production URL here
     config: {
       screens: {
         ResetPassword: '--/password/edit',

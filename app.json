@@ -19,7 +19,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yourcompany.farmboard",
+      "bundleIdentifier": "com.farmspheredynamics.farmboard",
       "buildNumber": "1.0.0",
       "config": {
         "usesNonExemptEncryption": false
@@ -34,7 +34,12 @@
       "favicon": "./assets/favicon.png"
     },
     "extra": {
-      "paths": ["/--/password/edit"]
+      "paths": [
+        "/--/password/edit"
+      ],
+      "eas": {
+        "projectId": "81949f52-2b6e-4afe-bbcb-d56cab6bc007"
+      }
     }
   }
 }

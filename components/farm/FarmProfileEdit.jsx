@@ -409,7 +409,7 @@ export default function FarmProfileEdit() {
           <View style={styles.inputContainer}>
             { Object.keys(accommodations).length === 0 ?
               <View>
-                <StyledText bold >
+                <StyledText bold style={styles.galleryPhotosNotFoundText}>
                   No accommodations found. Click on the button below to add accommodations to your profile.
                 </StyledText>
                 <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.submitButtonContainer}>

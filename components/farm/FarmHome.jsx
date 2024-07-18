@@ -49,26 +49,10 @@ export default function FarmHome() {
   
   const fetchApplicantsCount = async (postingId) => {
     try {
-      const cachedApplicants = await AsyncStorage.getItem(`applicants_${postingId}`);
-      if (cachedApplicants !== null) {
-        const applicantsData = JSON.parse(cachedApplicants);
-        setApplicants(applicantsData);
-        setApplicantsMap(prevMap => ({
-          ...prevMap,
-          [postingId]: applicantsData.length,
-        }));
-        return;
-      }
-  
       const applicantsResponse = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/farms/postings/${postingId}/applicants`);
       console.log('Applicants:', applicantsResponse.data);
   
-      await AsyncStorage.setItem(`applicants_${postingId}`, JSON.stringify(applicantsResponse.data));
-  
-      // Set applicants only for the current posting being viewed
       setApplicants(applicantsResponse.data);
-  
-      // Set applicantsMap for the current posting
       setApplicantsMap(prevMap => ({
         ...prevMap,
         [postingId]: applicantsResponse.data.length,
@@ -78,9 +62,10 @@ export default function FarmHome() {
     }
   };
   
-  const fetchData = async () => {
+  
+  const fetchData = async (useCache = true) => {
     try {
-      const cachedFarm = await AsyncStorage.getItem(`farm_${currentUser.id}`);
+      const cachedFarm = useCache ? await AsyncStorage.getItem(`farm_${currentUser.id}`) : null;
       if (cachedFarm !== null) {
         const farmData = JSON.parse(cachedFarm);
         setFarm(farmData);
@@ -90,31 +75,31 @@ export default function FarmHome() {
         setFarm(farmResponse.data.data);
         await AsyncStorage.setItem(`farm_${currentUser.id}`, JSON.stringify(farmResponse.data.data));
       }
-
-      const postingsResponse = await fetchPostings(refresh);
+  
+      const postingsResponse = await fetchPostings(!useCache);
       if (postingsResponse) {
         console.log('Postings:', postingsResponse.data.data);
         setPostings(postingsResponse.data.data);
-
+  
         // Fetch applicants for each posting
         await Promise.all(postingsResponse.data.data.map(posting => fetchApplicantsCount(posting.id)));
       }
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
   };
-
+  
   useEffect(() => {
     if (refresh) {
-      fetchData();
+      fetchData(false);
       setRefresh(false);
     }
-  }, [refresh]); // Trigger on refresh changes
+  }, [refresh]);
 
   useFocusEffect(
     React.useCallback(() => {
       fetchData();
-    }, [currentUser.id, refresh]) // Trigger on currentUser.id or refresh changes
+    }, [currentUser.id, refresh])
   );
     
   if (farm === undefined) {
@@ -131,12 +116,12 @@ export default function FarmHome() {
   };
 
   const handlePostingCreate = () => {
-    navigation.navigate('Farm Profile Add Postings', {sourceStack: 'Home'});
+    navigation.push('Farm Profile Add Postings', {sourceStack: 'Home'});
   }
   
   const handlePostingEdit = (postingId) => {
     console.log('Posting ID:', postingId);
-    navigation.navigate('Farm Profile Edit Postings', {postingId, sourceStack: 'Home'}); // Pass postingId as a parameter
+    navigation.push('Farm Profile Edit Postings', {postingId, sourceStack: 'Home'}); // Pass postingId as a parameter
   }
 
   const handleEmployeeProfileView = (employeeId) => {

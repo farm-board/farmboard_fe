@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native'
 import React, { useContext, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { UserContext } from '../contexts/UserContext';
@@ -53,7 +53,7 @@ export default function SetupScreen() {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
       <View style={styles.contentContainer}>
-        {currentUser.role_type === "no_role" ? (
+        {currentUser.role_type === "no_role" ? (   
           <View style={styles.introContainer}>
             <Text style={styles.introText}>Welcome to FarmBoard! What will you be using this application for?</Text>
             <TouchableOpacity
@@ -88,6 +88,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#3A4D39',
   },
+  logoImageTop: {
+    height: '40%',
+    maxWidth: '90%',
+    marginBottom: 10,
+  },
   backgroundImage: {
     flex: 1,
     position: 'absolute',
@@ -109,6 +114,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingBottom: 10,
     margin: 10,
+    marginHorizontal: 15,
   },
   button: {
     minWidth: '90%',

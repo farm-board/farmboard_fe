@@ -142,7 +142,7 @@ export default function FarmProfileEditDetails() {
           placeholder="Bio"
           icon="pencil-outline"
           multiline={true}
-          maxLength={255}
+          maxLength={3000}
           label="Bio:"
           labelStyle={{fontSize: 18, color: 'white'}}
           value={data.bio}
