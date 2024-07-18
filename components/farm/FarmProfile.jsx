@@ -98,21 +98,8 @@ export default function FarmProfile() {
   
   const fetchApplicantsCount = async (postingId) => {
     try {
-      const cachedApplicants = await AsyncStorage.getItem(`applicants_${postingId}`);
-      if (cachedApplicants !== null) {
-        const applicantsData = JSON.parse(cachedApplicants);
-        setApplicants(applicantsData);
-        setApplicantsMap(prevMap => ({
-          ...prevMap,
-          [postingId]: applicantsData.length,
-        }));
-        return;
-      }
-  
       const applicantsResponse = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/farms/postings/${postingId}/applicants`);
-      console.log('Fetched applicants from API:', applicantsResponse.data);
-  
-      await AsyncStorage.setItem(`applicants_${postingId}`, JSON.stringify(applicantsResponse.data));
+      console.log('Applicants:', applicantsResponse.data);
   
       setApplicants(applicantsResponse.data);
       setApplicantsMap(prevMap => ({

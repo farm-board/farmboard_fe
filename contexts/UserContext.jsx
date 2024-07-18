@@ -29,37 +29,31 @@ export const UserProvider = ({ children }) => {
   
   // Make API call when currentUser changes
   useEffect(() => {
+  const fetchUserData = async () => {
     if (currentUser) {
-      if (currentUser.role_type === "farm") {
-        setLoading(true);
-        axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/farms`)
-        .then(response => {
-          // Update the setupComplete state
-          console.log("setup Complete:", response.data.data.attributes.setup_complete);
+      setLoading(true);
+      try {
+        let response;
+        if (currentUser.role_type === "farm") {
+          response = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/farms`);
+        } else if (currentUser.role_type === "employee") {
+          response = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/employees`);
+        }
+
+        if (response) {
           setSetupComplete(response.data.data.attributes.setup_complete);
           setUserName(response.data.data.attributes.name);
-          setLoading(false);
-        })
-        .catch(error => {
-          console.log('Unable to fetch user data', error);
-        });
-      } 
-  
-      if (currentUser.role_type === "employee") {
-        setLoading(true);
-        axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/employees`)
-        .then(response => {
-          // Update the setupComplete state
-          console.log("setup complete:", response.data);
-          setSetupComplete(response.data.data.attributes.setup_complete);
-          setLoading(false);
-        })
-        .catch(error => {
-          console.log('Unable to fetch user data', error);
-        });
+        }
+      } catch (error) {
+        console.error('Unable to fetch user data', error);
+      } finally {
+        setLoading(false);
       }
     }
-  }, [currentUser]);
+  };
+
+  fetchUserData();
+}, [currentUser]);
   
   // Save any changes to user data
   useEffect(() => {

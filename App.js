@@ -281,7 +281,7 @@ function EmployeeProfileStackNav() {
           }}/>
         <Stack.Screen name="Employee Profile Edit Details" component={EmployeeProfileEditDetailsScreen}
           options={{ 
-            title: 'Edit Display',
+            title: 'Edit Display Info',
             headerLeft: () => {
               return (
                 <TouchableOpacity onPress={() => navigation.navigate('Edit Profile')}>
