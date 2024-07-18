@@ -42,8 +42,23 @@ export default function ExperienceForm({ setExperiences }) {
     }
   }, [profileRefresh, editProfileRefresh]);
 
+  const formatDate = (text) => {
+    const cleaned = ('' + text).replace(/\D/g, '');
+    const match = cleaned.match(/^(\d{2})(\d{2})(\d{4})$/);
+    if (match) {
+      return `${match[1]}-${match[2]}-${match[3]}`;
+    } else if (cleaned.length <= 2) {
+      return cleaned;
+    } else if (cleaned.length <= 4) {
+      return `${cleaned.slice(0, 2)}-${cleaned.slice(2)}`;
+    } else if (cleaned.length <= 8) {
+      return `${cleaned.slice(0, 2)}-${cleaned.slice(2, 4)}-${cleaned.slice(4)}`;
+    }
+    return text;
+  };
+
   return (
-    <KeyboardAvoidingContainer style={{paddingTop: 10, paddingBottom: 25, paddingHorizontal: 5}}>
+    <KeyboardAvoidingContainer style={{ paddingTop: 10, paddingBottom: 25, paddingHorizontal: 5 }}>
       <View style={styles.content}>
         <View style={styles.mb3}>
           <Animated.Text >
@@ -52,36 +67,38 @@ export default function ExperienceForm({ setExperiences }) {
             </StyledText>
           </Animated.Text>
         </View>
-        <Animated.View entering={FadeInDown.duration(1000).springify()}style={styles.inputTopContainer}>
+        <Animated.View entering={FadeInDown.duration(1000).springify()} style={styles.inputTopContainer}>
           <StyledTextInput
             placeholder="Company Name"
             icon="account-outline"
             label="Company Name:"
             maxLength={35}
-            labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
-            onChangeText={(text) => setData({...data, company_name: text})}
+            labelStyle={{ fontSize: 18, color: 'white' }} 
+            onChangeText={(text) => setData({ ...data, company_name: text })}
           />
         </Animated.View>
-        <Animated.View entering={FadeInDown.duration(1000).springify()}style={styles.inputContainer}>
+        <Animated.View entering={FadeInDown.duration(1000).springify()} style={styles.inputContainer}>
           <StyledTextInput
-            placeholder="DD-MM-YYYY"
+            placeholder="MM-DD-YYYY"
             icon="calendar"
             label="Date Started:"
             maxLength={10}
-            labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
-            onChangeText={(text) => setData({...data, started_at: text})}
+            labelStyle={{ fontSize: 18, color: 'white' }}
             keyboardType="numeric"
+            value={data.started_at}
+            onChangeText={(text) => setData({ ...data, started_at: formatDate(text) })}
           />
         </Animated.View>
-        <Animated.View entering={FadeInDown.duration(1000).springify()}style={styles.inputContainer}>
+        <Animated.View entering={FadeInDown.duration(1000).springify()} style={styles.inputContainer}>
           <StyledTextInput
-            placeholder="DD-MM-YYYY"
+            placeholder="MM-DD-YYYY"
             icon="calendar"
             label="Date Ended:"
             maxLength={10}
-            labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
-            onChangeText={(text) => setData({...data, ended_at: text})}
+            labelStyle={{ fontSize: 18, color: 'white' }} 
             keyboardType="numeric"
+            value={data.ended_at}
+            onChangeText={(text) => setData({ ...data, ended_at: formatDate(text) })}
           />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputContainer}>
@@ -91,21 +108,21 @@ export default function ExperienceForm({ setExperiences }) {
             multiline={true}
             label="Description:"
             maxLength={255}
-            labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
-            onChangeText={(text) => setData({...data, description: text})}
+            labelStyle={{ fontSize: 18, color: 'white' }}
+            onChangeText={(text) => setData({ ...data, description: text })}
           />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.submitButtonContainer}>
-            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-              <Text style={styles.submitButtonText}>
-                Add Experience
-              </Text>
-              <View style={styles.submitArrow}>
-                <MaterialCommunityIcons name="arrow-right" size={24} color="white" />
+          <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+            <Text style={styles.submitButtonText}>
+              Add Experience
+            </Text>
+            <View style={styles.submitArrow}>
+              <MaterialCommunityIcons name="arrow-right" size={24} color="white" />
             </View>
-            </TouchableOpacity>
+          </TouchableOpacity>
         </Animated.View>
-    </View>
+      </View>
     </KeyboardAvoidingContainer>
   );
 }

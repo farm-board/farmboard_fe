@@ -91,9 +91,9 @@ export default function FarmProfileEditDetails() {
       <View style={styles.content}>
         <Animated.View entering={FadeInDown.duration(1000).springify()}style={styles.inputContainer}>
           <StyledTextInput
-            placeholder="Name"
+            placeholder="Business Name"
             icon="account-outline"
-            label="Name:"
+            label="Business Name:"
             maxLength={35}
             labelStyle={{fontSize: 18, color: 'white'}}
             value={data.name}

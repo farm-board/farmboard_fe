@@ -105,6 +105,15 @@ export default function EmployeeProfileEditDetails() {
     fetchProfileData();
   }, []);
 
+  const formatPhoneNumber = (text) => {
+    const cleaned = ('' + text).replace(/\D/g, '');
+    const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+    if (match) {
+      return `(${match[1]}) ${match[2]}-${match[3]}`;
+    }
+    return text;
+  };
+
   useEffect(() => {
     if (profileRefresh || editProfileRefresh) {
       navigation.push('Edit Profile');
@@ -178,10 +187,11 @@ export default function EmployeeProfileEditDetails() {
             placeholder="Phone"
             icon="phone"
             label="Phone:"
+            maxLength={14}
             keyboardType="numeric"
             value={data.phone}
             labelStyle={{ fontSize: 18, color: 'white' }}
-            onChangeText={(text) => setData({ ...data, phone: text })}
+            onChangeText={(text) => setData({ ...data, phone: formatPhoneNumber(text) })}
           />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.inputContainer}>
