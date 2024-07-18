@@ -376,7 +376,7 @@ export default function FarmProfileEdit() {
               Display Info
             </SectionHeader>
             <Animated.View entering={FadeInDown.duration(1000).springify()}style={styles.inputItem}>
-            <ProfileInfo label="Name" icon="account-outline">
+            <ProfileInfo label="Business Name" icon="account-outline">
               <StyledText style={styles.existingData}>
                 {data.name.length > 15 ? `${data.name.substring(0, 15)}...` : data.name}
               </StyledText>

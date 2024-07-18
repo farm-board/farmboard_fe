@@ -12,7 +12,7 @@ import UploadModal from '../Profile/UploadModal';
 import StyledText from '../Texts/StyledText';
 import SkillSelect from '../../components/skills/SkillSelect';
 import StyledSelectDropdown from '../Inputs/StyledSelectDropdown';
-import { MaterialCommunityIcons, MaterialIcons, FontAwesome } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { baseUrl } from '../../config';
 
 export default function EmployeeForm() {
@@ -148,6 +148,15 @@ export default function EmployeeForm() {
     fetchProfileImage();
   }, []);
 
+  const formatPhoneNumber = (text) => {
+    const cleaned = ('' + text).replace(/\D/g, '');
+    const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+    if (match) {
+      return `(${match[1]}) ${match[2]}-${match[3]}`;
+    }
+    return text;
+  };
+
   return (
     <KeyboardAvoidingContainer style={styles.container} behavior="padding">
       <View style={styles.content}>
@@ -219,10 +228,11 @@ export default function EmployeeForm() {
             placeholder="Phone"
             icon="phone"
             label="Phone number that potential employers can contact you at:"
-            maxLength={10}
+            maxLength={14} // Adjust max length for formatted phone number
             labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
             keyboardType="numeric"
-            onChangeText={(text) => setData({ ...data, phone: text })}
+            value={data.phone}
+            onChangeText={(text) => setData({ ...data, phone: formatPhoneNumber(text) })}
           />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputContainer}>

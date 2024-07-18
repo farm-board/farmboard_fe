@@ -8,7 +8,7 @@ import { colors } from '../../config/theme';
 const onIOS = Platform.OS == "ios";
 
 const skills = [
-    { name: 'General Farm Work', id: 6,
+    { name: 'General Farm Work', id: 6, selectable: false,
       skills: [
           { name: 'Fencing', id: 600 },
           { name: 'Landscaping', id: 601 },
@@ -19,7 +19,7 @@ const skills = [
           { name: 'General Labor', id: 606 },
         ]
     },
-    { name: 'Agriculture', id: 1,
+    { name: 'Agriculture', id: 1, selectable: false,
       skills: [
           { name: 'Crop rotation planning', id: 100 },
           { name: 'Soil testing and analysis', id: 101 },
@@ -27,7 +27,7 @@ const skills = [
           { name: 'Irrigation system maintenance', id: 103 },
         ]
     },
-    { name: 'Livestock Type', id: 2,
+    { name: 'Livestock Type', id: 2, selectable: false,
       skills: [
           { name: 'Cattle', id: 200 },
           { name: 'Dairy Cattle', id: 201 },
@@ -38,7 +38,7 @@ const skills = [
           { name: 'Other', id: 206 },
         ]
     },
-    { name: 'Livestock Operations', id: 3,
+    { name: 'Livestock Operations', id: 3, selectable: false,
       skills: [
           { name: 'Livestock Handling', id: 300 },
           { name: 'Animal Health Management', id: 301 },
@@ -47,7 +47,7 @@ const skills = [
           { name: 'Facility Maintenance and Infrastructure', id: 304 },
         ]
     },
-    { name: 'Equipment Operation and Maintenance', id: 4,
+    { name: 'Equipment Operation and Maintenance', id: 4, selectable: false,
       skills: [
           { name: 'Heavy Machinery Operation', id: 400 },
           { name: 'Agriculture Machinery Operation', id: 401 },
@@ -58,7 +58,7 @@ const skills = [
           { name: 'Adaptability with New Technology', id: 406 },
         ]
     },
-    { name: 'Hauling & Driving', id: 5,
+    { name: 'Hauling & Driving', id: 5, selectable: false,
       skills: [
           { name: 'Vehicle Maintenance', id: 500 },
           { name: 'Load Securing', id: 501 },
@@ -71,10 +71,10 @@ const skills = [
           { name: 'Livestock Transportation', id: 508 },
         ]
     },
-    { name: 'Other', id: 7,
+    { name: 'Other', id: 7, selectable: false,
       skills: [
-          { name: 'English Speaking', id: 700 },
-          { name: 'Spanish Speaking', id: 701 },
+          { name: 'Bilingual - English/Spanish', id: 700 },
+          { name: 'Bilingual - Other', id: 701 },
         ]
     },
 ];
@@ -96,7 +96,7 @@ export default function SkillsSelect({ selectedItems, onSelectedItemsChange }) {
     return selectedSkills;
   };
   
-    return (
+  return (
     <View style={styles.container}>
      <View style={styles.leftIcon}>
         <MaterialCommunityIcons name={"tools"} size={30} color={colors.accent} />
@@ -105,7 +105,6 @@ export default function SkillsSelect({ selectedItems, onSelectedItemsChange }) {
       <SectionedMultiSelect
         items={skills}
         IconRenderer={Icon}
-        selectChildren={true}
         modalWithSafeAreaView={true}
         colors={{primary: '#4F6F52', subText: '#000000'}}
         selectText="Select Skills"
@@ -114,6 +113,8 @@ export default function SkillsSelect({ selectedItems, onSelectedItemsChange }) {
         subKey="skills"
         onSelectedItemsChange={handleSelectedItemsChange}
         selectedItems={selectedItems}
+        showDropDowns={true}
+        readOnlyHeadings={true}
         styles={{
           chipContainer: styles.multiSelectChipContainer,
           chipText: styles.multiSelectChipText,

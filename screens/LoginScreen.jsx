@@ -1,4 +1,4 @@
-import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native'
+import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet, Alert, TouchableWithoutFeedback, Keyboard } from 'react-native'
 import React, { useState, useContext } from 'react'
 import { StatusBar } from 'expo-status-bar';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
@@ -50,62 +50,64 @@ export default function LoginScreen() {
     };
 
     return (
-        <View style={styles.container}>
-          <StatusBar style="light" />
-          <Image style={styles.background} source={require('../assets/images/backgroundUpdatedColors.png')} />
-          {/* Title and Form */}
-          <View style={styles.titleAndForm}>
-            {/* Title */}
-            <View style={styles.logoContainer}>
-            <Animated.Image entering={FadeInUp.delay(1000).duration(1000).springify()} style={styles.logoImageTop} source={require('../assets/images/logowithbarn-transformed-top.png')} />
-            <Animated.Image entering={FadeInUp.delay(400).duration(1000).springify()} style={styles.logoImageBottom} source={require('../assets/images/logowithbarn-transformed-bottom-fix.png')} />
-        </View>
-    
-            {/* Form */}
-            <View style={styles.formContainer}>
-              <Animated.View entering={FadeInDown.delay(200).duration(1000).springify()}style={styles.inputContainer}>
-                <TextInput
-                  style={styles.input}
-                  placeholder='Email'
-                  placeholderTextColor='gray'
-                  onChangeText={text => setData({ ...data, email: text })}
-                />
-              </Animated.View>
-              <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.inputContainer}>
-                <TextInput
-                  style={styles.input}
-                  placeholder='Password'
-                  placeholderTextColor='gray'
-                  secureTextEntry={!showPassword}
-                  onChangeText={text => setData({ ...data, password: text })}
-                />
-                <TouchableOpacity onPress={togglePasswordVisibility}>
-                    <Icon name={showPassword ? "eye-off" : "eye"} size={24} color="gray" />
-                </TouchableOpacity>
-              </Animated.View>
-              <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()}>
-                <TouchableOpacity
-                    style={styles.button}
-                    onPress={handleSubmit}>
-                    <Text style={styles.buttonText}>
-                    Login
-                    </Text>
-                </TouchableOpacity>
-              </Animated.View>
-              <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.signUpTextContainer}>
-                <Text>Don't have an account?</Text>
-                <TouchableOpacity onPress={() => navigation.push('SignUp')}>
-                  <Text style={styles.signUpText}>Sign Up</Text>
-                </TouchableOpacity>
-              </Animated.View>
-              <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.signUpTextContainer}>
-                <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
-                  <Text style={styles.signUpText}>Forgot Password?</Text>
-                </TouchableOpacity>
-              </Animated.View>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.container}>
+              <StatusBar style="light" />
+              <Image style={styles.background} source={require('../assets/images/backgroundUpdatedColors.png')} />
+              {/* Title and Form */}
+              <View style={styles.titleAndForm}>
+                {/* Title */}
+                <View style={styles.logoContainer}>
+                <Animated.Image entering={FadeInUp.delay(1000).duration(1000).springify()} style={styles.logoImageTop} source={require('../assets/images/logowithbarn-transformed-top.png')} />
+                <Animated.Image entering={FadeInUp.delay(400).duration(1000).springify()} style={styles.logoImageBottom} source={require('../assets/images/logowithbarn-transformed-bottom-fix.png')} />
             </View>
-          </View>
-        </View>
+        
+                {/* Form */}
+                <View style={styles.formContainer}>
+                  <Animated.View entering={FadeInDown.delay(200).duration(1000).springify()}style={styles.inputContainer}>
+                    <TextInput
+                      style={styles.input}
+                      placeholder='Email'
+                      placeholderTextColor='gray'
+                      onChangeText={text => setData({ ...data, email: text })}
+                    />
+                  </Animated.View>
+                  <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.inputContainer}>
+                    <TextInput
+                      style={styles.input}
+                      placeholder='Password'
+                      placeholderTextColor='gray'
+                      secureTextEntry={!showPassword}
+                      onChangeText={text => setData({ ...data, password: text })}
+                    />
+                    <TouchableOpacity onPress={togglePasswordVisibility}>
+                        <Icon name={showPassword ? "eye-off" : "eye"} size={24} color="gray" />
+                    </TouchableOpacity>
+                  </Animated.View>
+                  <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()}>
+                    <TouchableOpacity
+                        style={styles.button}
+                        onPress={handleSubmit}>
+                        <Text style={styles.buttonText}>
+                        Login
+                        </Text>
+                    </TouchableOpacity>
+                  </Animated.View>
+                  <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.signUpTextContainer}>
+                    <Text>Don't have an account?</Text>
+                    <TouchableOpacity onPress={() => navigation.push('SignUp')}>
+                      <Text style={styles.signUpText}>Sign Up</Text>
+                    </TouchableOpacity>
+                  </Animated.View>
+                  <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.signUpTextContainer}>
+                    <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
+                      <Text style={styles.signUpText}>Forgot Password?</Text>
+                    </TouchableOpacity>
+                  </Animated.View>
+                </View>
+              </View>
+            </View>
+        </TouchableWithoutFeedback>
       );
     };
 

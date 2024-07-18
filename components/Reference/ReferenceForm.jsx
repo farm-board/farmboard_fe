@@ -1,6 +1,6 @@
-import React, { useState, useContext, useEffect } from 'react'
+import React, { useState, useContext, useEffect } from 'react';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
-import { Text, View, TouchableOpacity, StyleSheet} from 'react-native'
+import { Text, View, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { UserContext } from '../../contexts/UserContext';
 import axios from 'axios';
@@ -11,35 +11,34 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { baseUrl } from '../../config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function ReferenceForm( { setReferences }) {
+export default function ReferenceForm({ setReferences }) {
   const [data, setData] = useState({
     first_name: '',
     last_name: '',
     phone: '',
     email: '',
     relationship: '',
-  })
+  });
 
   const navigation = useNavigation();
-  const { currentUser, references, setProfileRefresh, profileRefresh, setEditProfileRefresh, editProfileRefresh } = useContext(UserContext); 
+  const { currentUser, setProfileRefresh, profileRefresh, setEditProfileRefresh, editProfileRefresh } = useContext(UserContext);
 
   const handleSubmit = async () => {
-
     if (!data.first_name || !data.last_name) {
-      alert('Please enter both first name and last name');
+      Alert.alert('Error', 'Please enter both first name and last name');
       return;
     }
-  
+
     if (!data.phone && !data.email) {
-      alert('Please provide either phone number or email');
+      Alert.alert('Error', 'Please provide either phone number or email');
       return;
     }
-  
+
     if (!data.relationship) {
-      alert('Please provide relationship to the reference');
+      Alert.alert('Error', 'Please provide relationship to the reference');
       return;
     }
-  
+
     try {
       const response = await axios.post(`${baseUrl}/api/v1/users/${currentUser.id}/employees/references`, { reference: data });
       setReferences(prevReferences => [...prevReferences, response.data.data]);
@@ -51,7 +50,7 @@ export default function ReferenceForm( { setReferences }) {
     } catch (error) {
       console.error('There was an error creating the reference:', error);
     }
-  }
+  };
 
   useEffect(() => {
     if (profileRefresh || editProfileRefresh) {
@@ -59,77 +58,88 @@ export default function ReferenceForm( { setReferences }) {
     }
   }, [profileRefresh, editProfileRefresh]);
 
+  const formatPhoneNumber = (text) => {
+    const cleaned = ('' + text).replace(/\D/g, '');
+    const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+    if (match) {
+      return `(${match[1]}) ${match[2]}-${match[3]}`;
+    }
+    return text;
+  };
+
   return (
-    <KeyboardAvoidingContainer style={{paddingTop: 10, paddingBottom: 25, paddingHorizontal: 5}}>
+    <KeyboardAvoidingContainer style={{ paddingTop: 10, paddingBottom: 25, paddingHorizontal: 5 }}>
       <View style={styles.content}>
         <View style={styles.mb3}>
-          <Animated.Text >
+          <Animated.Text>
             <StyledText entering={FadeInUp.duration(1000).springify()} big style={[styles.text, styles.pb10]}>
               Fill in Reference Details:
-              </StyledText>
+            </StyledText>
           </Animated.Text>
         </View>
-        <Animated.View entering={FadeInDown.duration(1000).springify()}style={styles.inputTopContainer}>
-            <StyledTextInput
-              placeholder="First Name"
-              icon="account-outline"
-              label="First Name:"
-              maxLength={25}
-              labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
-              onChangeText={(text) => setData({...data, first_name: text})}
-            />
+        <Animated.View entering={FadeInDown.duration(1000).springify()} style={styles.inputTopContainer}>
+          <StyledTextInput
+            placeholder="First Name"
+            icon="account-outline"
+            label="First Name:"
+            maxLength={25}
+            labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
+            onChangeText={(text) => setData({ ...data, first_name: text })}
+          />
         </Animated.View>
-        <Animated.View entering={FadeInDown.duration(1000).springify()}style={styles.inputContainer}>
-            <StyledTextInput
-              placeholder="Last Name"
-              icon="account-outline"
-              label="Last Name:"
-              maxLength={25}
-              labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
-              onChangeText={(text) => setData({...data, last_name: text})}
-            />
+        <Animated.View entering={FadeInDown.duration(1000).springify()} style={styles.inputContainer}>
+          <StyledTextInput
+            placeholder="Last Name"
+            icon="account-outline"
+            label="Last Name:"
+            maxLength={25}
+            labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
+            onChangeText={(text) => setData({ ...data, last_name: text })}
+          />
         </Animated.View>
-        <Animated.View entering={FadeInDown.duration(1000).springify()}style={styles.inputContainer}>
-            <StyledTextInput
-              placeholder="Phone Number"
-              icon="city-variant-outline"
-              label="Phone Number:"
-              keyboardType="numeric"
-              labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
-              onChangeText={(text) => setData({...data, phone: text})}
-            />
+        <Animated.View entering={FadeInDown.duration(1000).springify()} style={styles.inputContainer}>
+          <StyledTextInput
+            placeholder="Phone Number"
+            icon="phone"
+            label="Phone Number:"
+            keyboardType="numeric"
+            maxLength={14} // Adjust max length for formatted phone number
+            labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
+            value={data.phone}
+            onChangeText={(text) => setData({ ...data, phone: formatPhoneNumber(text) })}
+          />
         </Animated.View>
-        <Animated.View entering={FadeInDown.duration(1000).springify()}style={styles.inputContainer}>
-            <StyledTextInput
-              placeholder="Email"
-              icon="star-box-outline"
-              label="Email:"
-              labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
-              onChangeText={(text) => setData({...data, email: text})}
-            />
+        <Animated.View entering={FadeInDown.duration(1000).springify()} style={styles.inputContainer}>
+          <StyledTextInput
+            placeholder="Email"
+            icon="email"
+            label="Email:"
+            labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
+            onChangeText={(text) => setData({ ...data, email: text })}
+          />
         </Animated.View>
-        <Animated.View entering={FadeInDown.duration(1000).springify()}style={styles.inputContainer}>
-            <StyledTextInput
-              placeholder="Relationship"
-              icon="star-box-outline"
-              label="Relationship:"
-              labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
-              onChangeText={(text) => setData({...data, relationship: text})}
-            />
+        <Animated.View entering={FadeInDown.duration(1000).springify()} style={styles.inputContainer}>
+          <StyledTextInput
+            placeholder="Relationship"
+            icon="human-greeting-variant"
+            label="Relationship:"
+            labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
+            onChangeText={(text) => setData({ ...data, relationship: text })}
+          />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.submitButtonContainer}>
-            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-              <Text style={styles.submitButtonText}>
-                Add Reference
-              </Text>
-              <View style={styles.submitArrow}>
-                <MaterialCommunityIcons name="arrow-right" size={24} color="white" />
+          <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+            <Text style={styles.submitButtonText}>
+              Add Reference
+            </Text>
+            <View style={styles.submitArrow}>
+              <MaterialCommunityIcons name="arrow-right" size={24} color="white" />
             </View>
-            </TouchableOpacity>
+          </TouchableOpacity>
         </Animated.View>
-    </View>
+      </View>
     </KeyboardAvoidingContainer>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
