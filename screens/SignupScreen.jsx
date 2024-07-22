@@ -1,4 +1,4 @@
-import { View, Text, Image, TextInput, TouchableOpacity, Alert, StyleSheet, Modal, ScrollView, TouchableWithoutFeedback, Keyboard } from 'react-native'
+import { View, Text, Image, TextInput, TouchableOpacity, Alert, StyleSheet, Modal, ScrollView, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, Platform } from 'react-native'
 import Checkbox from 'expo-checkbox';
 import React, { useState, useContext } from 'react'
 import { StatusBar } from 'expo-status-bar';
@@ -151,7 +151,11 @@ export default function SignupScreen() {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-    <View style={styles.container}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={-180} 
+      >
         <StatusBar style="light" />
         <Image style={styles.background} source={require('../assets/images/backgroundUpdatedColors.png')} />
         {/* Title and Form */}
@@ -233,7 +237,7 @@ export default function SignupScreen() {
         </View>
         {termsAndConditionsModal()}
         {privacyPolicyModal()}
-    </View>
+    </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
     );
   };
