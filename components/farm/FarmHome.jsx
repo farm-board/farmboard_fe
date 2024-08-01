@@ -9,7 +9,9 @@ import StyledText from '../Texts/StyledText'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useNavigation, useFocusEffect } from '@react-navigation/native'
 import { baseUrl } from '../../config'
+import { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
 
+const iosAdmobBanner = "ca-app-pub-2707002194546287/9827918081";
 
 export default function FarmHome() {
   const {currentUser, refresh, setRefresh} = useContext(UserContext);
@@ -20,6 +22,7 @@ export default function FarmHome() {
   const [applicants, setApplicants] = useState([]);
   const [visibleModal, setVisibleModal] = useState(false);
   const [currentPostingId, setCurrentPostingId] = useState(null);
+  const [isAdLoaded, setIsAdLoaded] = useState(false);
 
   const width = Dimensions.get('window').width;
   const navigation = useNavigation();
@@ -105,6 +108,27 @@ export default function FarmHome() {
   if (farm === undefined) {
     return <Text>Loading...</Text>;
   }
+
+  const InlineAd = () => {
+    return (
+      <View style={{ height: isAdLoaded ? 'auto' : 0, alignItems: 'center', justifyContent: 'space-evenly', paddingTop: 10 }}>
+      <BannerAd
+        unitId={__DEV__ ? TestIds.BANNER : iosAdmobBanner}
+        size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+        requestOptions={{
+          requestNonPersonalizedAdsOnly: true,
+          networkExtras: {
+            collapsible: 'bottom',
+          },
+        }}
+        onAdLoaded={() => {
+          setIsAdLoaded(true);
+        }}
+        
+      />
+    </View>
+    );
+  };
   
   const calculateDaysAgo = (createdAt) => {
   
@@ -209,6 +233,7 @@ export default function FarmHome() {
 
   return (
     <View style={styles.container}>
+      <InlineAd />
       <View style={styles.postingsContainer}>
         {postings.length === 0 ?
         <StyledText bold style={styles.postingsNotFoundText}>

@@ -1,5 +1,6 @@
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import * as React from 'react';
+import { useEffect } from 'react';
 import * as Linking from 'expo-linking';
 import { TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -27,6 +28,7 @@ import FarmViewProfileScreen from './screens/FarmViewProfileScreen';
 import ForgotPasswordScreen from './screens/ForgotPasswordScreen.jsx';
 import ResetPasswordScreen from './screens/ResetPasswordScreen.jsx';
 import CustomDrawerContent from './navigation/CustomDrawerContent';
+import mobileAds from 'react-native-google-mobile-ads';
 
 const Stack = createNativeStackNavigator();
 
@@ -451,6 +453,19 @@ function DrawerNavigator() {
 
 function App() {
   const { currentUser } = useContext(UserContext);
+
+  useEffect(() => {
+    (async () => {
+      // Google AdMob will show any messages here that you just set up on the AdMob Privacy & Messaging page
+      const { status: trackingStatus } = await requestTrackingPermissionsAsync();
+      if (trackingStatus !== 'granted') {
+        // Do something here such as turn off Sentry tracking, store in context/redux to allow for personalized ads, etc.
+      }
+
+      // Initialize the ads
+      await mobileAds().initialize();
+    })();
+  }, []);
   
   const linking = {
     prefixes: ['exp://10.0.0.15:8081/'], // Add your production URL here
@@ -460,6 +475,7 @@ function App() {
       },
     },
   };
+
 
   return (
     <NavigationContainer linking={linking}>
