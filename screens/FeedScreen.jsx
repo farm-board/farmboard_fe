@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput, Button, Modal, ScrollView, Pressable, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput, Button, Modal, ScrollView, Pressable, ActivityIndicator, Dimensions, Image } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import axios from 'axios';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -7,6 +7,11 @@ import { UserContext } from '../contexts/UserContext';
 import StyledSelectDropdown from '../components/Inputs/StyledSelectDropdown';
 import Avatar from '../components/Profile/Avatar';
 import { baseUrl } from '../config';
+import { AdEventType, BannerAd, BannerAdSize, InterstitialAd, TestIds } from 'react-native-google-mobile-ads';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const iosAdmobBanner = "ca-app-pub-2707002194546287/9827918081";
+const iosAdmobInterstitial = "ca-app-pub-2707002194546287/7809604308";
 
 const FeedScreen = () => {
   const [postings, setPostings] = useState([]);
@@ -28,7 +33,8 @@ const FeedScreen = () => {
   const [postTransportation, setPostTransportation] = useState(false);
   const [postMeals, setPostMeals] = useState(false);
   const [appliedPostings, setAppliedPostings] = useState(new Set());
-  const [loadingNextPage, setLoadingNextPage] = useState(false); 
+  const [loadingNextPage, setLoadingNextPage] = useState(false);
+  const [isAdLoaded, setIsAdLoaded] = useState(false);
   const { currentUser } = useContext(UserContext);
   const navigation = useNavigation();
   const durationTypes = ['Part-Time', 'Full-Time', 'Seasonal', 'Contract'];
@@ -219,41 +225,137 @@ const FeedScreen = () => {
       });
   };
 
+  const InlineAd = () => {
+    return (
+      <View style={{ height: isAdLoaded ? 'auto' : 0, alignItems: 'center', justifyContent: 'space-evenly', paddingTop: 10 }}>
+      <BannerAd
+        unitId={__DEV__ ? TestIds.BANNER : iosAdmobBanner}
+        size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+        requestOptions={{
+          requestNonPersonalizedAdsOnly: true,
+          networkExtras: {
+            collapsible: 'bottom',
+          },
+        }}
+        onAdLoaded={() => {
+          setIsAdLoaded(true);
+        }}
+        
+      />
+    </View>
+    );
+  };
+
+  const adUnitId = __DEV__ ? TestIds.INTERSTITIAL : iosAdmobInterstitial;
+  const [loaded, setLoaded] = useState(false);
+  const [interstitial, setInterstitial] = useState(null);
+  const [adShown, setAdShown] = useState(false);
+
+  useEffect(() => {
+    const interstitialAd = InterstitialAd.createForAdRequest(adUnitId, {
+      keywords: ['food', 'cooking', 'fruit'],
+      requestNonPersonalizedAdsOnly: true,
+    });
+
+    setInterstitial(interstitialAd);
+
+    const unsubscribeLoaded = interstitialAd.addAdEventListener(AdEventType.LOADED, () => {
+      console.log('Interstitial ad loaded');
+      setLoaded(true);
+    });
+
+    const unsubscribeClosed = interstitialAd.addAdEventListener(AdEventType.CLOSED, () => {
+      console.log('Interstitial ad closed');
+      setLoaded(false);
+      interstitialAd.load(); // Load a new ad after the current one is closed
+    });
+
+    interstitialAd.load();
+
+    return () => {
+      unsubscribeLoaded();
+      unsubscribeClosed();
+    };
+  }, [adUnitId]);
+
+  const handleAdShow = async () => {
+    if (interstitial && loaded && !adShown) {
+      try {
+        const lastShown = await AsyncStorage.getItem('lastAdShown');
+        const now = Date.now();
+        if (!lastShown || (now - parseInt(lastShown, 10)) > 15 * 60 * 1000) {
+          interstitial.show().then(() => {
+            console.log('Interstitial ad shown');
+            setAdShown(true); // Mark the ad as shown
+            AsyncStorage.setItem('lastAdShown', now.toString()); // Store the current time
+          }).catch((error) => {
+            console.error('Failed to show interstitial ad', error);
+          });
+        } else {
+          console.log('Ad shown less than 15 minutes ago');
+        }
+      } catch (error) {
+        console.error('Error accessing AsyncStorage', error);
+      }
+    } else {
+      console.log('Interstitial ad not loaded yet or already shown');
+    }
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log('Screen focused, resetting adShown');
+      setAdShown(false); // Reset adShown when the screen is focused
+      // Run handleAdShow immediately when screen is focused
+      handleAdShow();
+    }, [loaded]) // Add loaded to dependencies
+  );
+
+  useEffect(() => {
+    if (!adShown) {
+      const timeoutId = setTimeout(() => {
+        handleAdShow();
+      }, 1000); // Check once after 1 second
+
+      return () => clearTimeout(timeoutId); // Cleanup the timeout on unmount
+    }
+  }, [loaded, adShown]); // Run when `loaded` or `adShown` changes
+
+
   const renderPostingItem = ({ item }) => (
-    <View style={styles.postingItem}>
-      <View style={styles.headerContainer}>
-        <View style={styles.companyLogoContainer}>
-          {/* Placeholder for company logo */}
-          <MaterialCommunityIcons name="barn" size={32} color="#AD110F"/>
-        </View>
-        <View style={styles.companyInfoContainer}>
-          <Text style={styles.companyName}>{item.attributes.farm_name}</Text>
-        </View>
+  <View style={styles.postingItem}>
+    <View style={styles.headerContainer}>
+      <View style={styles.companyLogoContainer}>
+        <MaterialCommunityIcons name="barn" size={32} color="#AD110F"/>
       </View>
-      <View style={styles.titleAndSalaryContainer}>
-        <Text style={styles.postingTitle}>{item.attributes.title}</Text>
-        <Text style={styles.postingSalary}>${item.attributes.salary} / {item.attributes.payment_type}</Text>
-      </View>
-      <Text style={styles.postingDescription}>
-        {item.attributes.description.length > 100 
-          ? item.attributes.description.substring(0, 100) + '...' 
-          : item.attributes.description}
-      </Text>
-      <Text style={styles.postingDate}>Posted: {new Date(item.attributes.created_at).toLocaleDateString()}</Text>
-      <View style={styles.locationAndButtonContainer}>
-        <Text style={styles.postingLocation}>{item.attributes.farm_city}, {"\n"}{item.attributes.farm_state}</Text>
-        <TouchableOpacity 
-          style={styles.detailsButton} 
-          onPress={() => { 
-            setSelectedPosting(item);
-            setModalPostingVisible(true); 
-            fetchPostingProfileImage(item.attributes.farm_id);
-          }}>
-          <Text style={styles.detailsButtonText}>Details</Text>
-        </TouchableOpacity>
+      <View style={styles.companyInfoContainer}>
+        <Text style={styles.companyName}>{item.attributes.farm_name}</Text>
       </View>
     </View>
-  );
+    <View style={styles.titleAndSalaryContainer}>
+      <Text style={styles.postingTitle}>{item.attributes.title}</Text>
+      <Text style={styles.postingSalary}>${item.attributes.salary} / {item.attributes.payment_type}</Text>
+    </View>
+    <Text style={styles.postingDescription}>
+      {item.attributes.description.length > 100 
+        ? item.attributes.description.substring(0, 100) + '...' 
+        : item.attributes.description}
+    </Text>
+    <Text style={styles.postingDate}>Posted: {new Date(item.attributes.created_at).toLocaleDateString()}</Text>
+    <View style={styles.locationAndButtonContainer}>
+      <Text style={styles.postingLocation}>{item.attributes.farm_city}, {"\n"}{item.attributes.farm_state}</Text>
+      <TouchableOpacity 
+        style={styles.detailsButton} 
+        onPress={() => { 
+          setSelectedPosting(item);
+          setModalPostingVisible(true);
+          fetchPostingProfileImage(item.attributes.farm_id);
+        }}>
+        <Text style={styles.detailsButtonText}>Details</Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+);
 
   const renderPostingModal = () => (
     <Modal
@@ -389,6 +491,7 @@ const FeedScreen = () => {
 
   return (
     <View style={styles.container}>
+      <InlineAd />
       <Text style={styles.TopHeading}>Job Postings</Text>
       <View style={styles.searchContainer}>
         <TextInput
@@ -693,8 +796,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#3A4D39',
-    padding: 20,
-    paddingTop: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
   },
   heading: {
     fontSize: 24,
@@ -708,13 +811,13 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: 'white',
-    marginBottom: 15,
+    marginVertical: 15,
     textAlign: 'center',
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 20,
   },
   searchInput: {
     flex: 1,
@@ -914,7 +1017,55 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   postingsContainer: {
-    paddingBottom: 100,
+    marginBottom: 170,
+  },
+  nativeAdContainer: {
+    marginVertical: 10,
+  },
+  nativeAd: {
+    flexDirection: 'row',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    padding: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 2,
+  },
+  adLogo: {
+    width: 32,
+    height: 32,
+    marginRight: 10,
+  },
+  adContent: {
+    flex: 1,
+  },
+  adHeadline: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  adBody: {
+    fontSize: 14,
+    color: '#666',
+  },
+  interstitialContainer: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    alignItems: 'center',
+    marginVertical: 8,
+    paddingHorizontal: 10,
+    marginTop: 120,
+  },
+  interstitialButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  interstitialText: {
+    marginHorizontal: 8,
+    fontSize: 16,
   },
 });
 
