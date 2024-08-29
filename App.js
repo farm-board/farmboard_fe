@@ -28,7 +28,8 @@ import FarmViewProfileScreen from './screens/FarmViewProfileScreen';
 import ForgotPasswordScreen from './screens/ForgotPasswordScreen.jsx';
 import ResetPasswordScreen from './screens/ResetPasswordScreen.jsx';
 import CustomDrawerContent from './navigation/CustomDrawerContent';
-import mobileAds from 'react-native-google-mobile-ads';
+import mobileAds, { TestIds } from 'react-native-google-mobile-ads';
+import { requestTrackingPermissionsAsync } from 'expo-tracking-transparency';
 
 const Stack = createNativeStackNavigator();
 
@@ -452,19 +453,31 @@ function DrawerNavigator() {
 
 
 function App() {
-  const { currentUser } = useContext(UserContext);
+  const { currentUser, setDeviceId } = useContext(UserContext);
 
   useEffect(() => {
-    (async () => {
-      // Google AdMob will show any messages here that you just set up on the AdMob Privacy & Messaging page
-      const { status: trackingStatus } = await requestTrackingPermissionsAsync();
-      if (trackingStatus !== 'granted') {
-        // Do something here such as turn off Sentry tracking, store in context/redux to allow for personalized ads, etc.
+    const initializeAds = async () => {
+      console.log('Starting useEffect');
+  
+      try {
+        // Step 1: Request tracking permissions
+        const { status: trackingStatus } = await requestTrackingPermissionsAsync();
+        console.log('Tracking status:', trackingStatus);
+  
+        if (trackingStatus !== 'granted') {
+          console.log('Tracking permissions not granted');
+        }
+  
+        // Step 2: Initialize mobile ads
+        await mobileAds().initialize();
+        console.log('Ads initialized');
+        
+      } catch (error) {
+        console.log('Error in initializing ads:', error);
       }
-
-      // Initialize the ads
-      await mobileAds().initialize();
-    })();
+    };
+  
+    initializeAds();
   }, []);
   
   const linking = {
