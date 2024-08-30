@@ -471,7 +471,7 @@ function App() {
         // Step 2: Initialize mobile ads
         await mobileAds().initialize();
         console.log('Ads initialized');
-        
+
       } catch (error) {
         console.log('Error in initializing ads:', error);
       }
@@ -481,7 +481,7 @@ function App() {
   }, []);
   
   const linking = {
-    prefixes: ['exp://10.0.0.15:8081/'], // Add your production URL here
+    prefixes: ['exp://10.0.0.15:8081/', 'com.farmspheredynamics.farmboard://'],
     config: {
       screens: {
         ResetPassword: '--/password/edit',

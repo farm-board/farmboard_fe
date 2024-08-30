@@ -233,6 +233,7 @@ const FeedScreen = () => {
         size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
         requestOptions={{
           requestNonPersonalizedAdsOnly: true,
+          keywords: ['Agriculture', 'Farming', 'Crops', 'Livestock', 'Farm Equipment', 'Tractors', 'Irrigation', 'Seeds', 'Harvesting', 'Rural Life', 'Farm Supplies', 'Farm Finance', 'Dairy Farming', 'Poultry Farming'],
           networkExtras: {
             collapsible: 'bottom',
           },
@@ -253,7 +254,7 @@ const FeedScreen = () => {
 
   useEffect(() => {
     const interstitialAd = InterstitialAd.createForAdRequest(adUnitId, {
-      keywords: ['food', 'cooking', 'fruit'],
+      keywords: ['Agriculture', 'Farming', 'Crops', 'Livestock', 'Farm Equipment', 'Tractors', 'Irrigation', 'Seeds', 'Harvesting', 'Rural Life', 'Farm Supplies', 'Farm Finance', 'Dairy Farming', 'Poultry Farming'],
       requestNonPersonalizedAdsOnly: true,
     });
 
