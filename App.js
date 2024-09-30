@@ -23,6 +23,8 @@ import EmployeeProfileEditDetailsScreen from './screens/EmployeeProfileEditDetai
 import EmployeeProfileAddExperiencesScreen from './screens/EmployeeProfileAddExperiencesScreen';
 import EmployeeProfileAddReferencesScreen from './screens/EmployeeProfileAddReferencesScreen';
 import FeedScreen from './screens/FeedScreen';
+import MarketplaceFeedScreen from './screens/MarketplaceFeedScreen';
+import MarketplaceAddPostingScreen from './screens/MarketplaceAddPostingScreen.jsx';
 import EmployeeViewProfileScreen from './screens/EmployeeViewProfileScreen';
 import FarmViewProfileScreen from './screens/FarmViewProfileScreen';
 import ForgotPasswordScreen from './screens/ForgotPasswordScreen.jsx';
@@ -370,12 +372,92 @@ function FeedStackNav() {
       }
       }}>
       <>
-        <Stack.Screen name="Feed" component={FeedScreen} />
+        <Stack.Screen name="Jobs" component={FeedScreen} />
         <Stack.Screen name="Farm Profile Add Postings" component={FarmProfileAddPostingsScreen} 
           options={{ 
             title: 'Add Job Posting',
             headerBackTitle: 'Home',
             headerBackTitleStyle: { fontSize: 15 },
+          }}
+        />
+        <Stack.Screen name="Farm Profile Edit Postings" component={FarmProfileEditPostingsScreen} 
+          options={{ 
+            title: 'Edit Job Posting',
+            headerBackTitle: 'Home',
+            headerBackTitleStyle: { fontSize: 15 },
+          }}
+        />
+        <Stack.Screen name="Farm Profile View" component={FarmViewProfileScreen}
+        options={{ 
+          title: 'Farm Profile',
+          headerLeft: () => {
+            return (
+              <TouchableOpacity onPress={() => navigation.navigate('Jobs')}>
+                <MaterialCommunityIcons
+                  name="arrow-left"
+                  size={30}
+                  color="white"
+                  style={{ marginLeft: 10 }}
+                />
+              </TouchableOpacity>
+            );
+          }
+        }}
+         />
+      </>
+    </Stack.Navigator>
+  );
+}
+
+function MarketplaceStackNav() {
+  const navigation = useNavigation();
+  return (
+    <Stack.Navigator screenOptions={{
+      drawerStyle: {
+        backgroundColor: '#4F6F52'
+      },
+      drawerLabelStyle: {  
+        color: 'white'
+      },
+      headerStyle: {
+        backgroundColor: '#4F6F52',
+      },
+      headerTintColor: 'white',
+      style: {
+        backgroundColor: '#4F6F52'
+      },
+      headerLeft: () => {
+        return (
+          <TouchableOpacity onPress={() => navigation.openDrawer()}>
+            <MaterialCommunityIcons
+              name="menu"
+              size={30}
+              color="white"
+              style={{ marginLeft: 10 }}
+            />
+          </TouchableOpacity>
+        );
+      }
+      }}>
+      <>
+        <Stack.Screen name="Marketplace" component={MarketplaceFeedScreen} />
+        <Stack.Screen name="Add Marketplace Posting" component={MarketplaceAddPostingScreen} 
+          options={{ 
+            title: 'Add Marketplace Posting',
+            headerBackTitle: 'Marketplace',
+            headerBackTitleStyle: { fontSize: 15 },
+            headerLeft: () => {
+              return (
+                <TouchableOpacity onPress={() => navigation.navigate('Marketplace')}>
+                  <MaterialCommunityIcons
+                    name="arrow-left"
+                    size={30}
+                    color="white"
+                    style={{ marginLeft: 10 }}
+                  />
+                </TouchableOpacity>
+              );
+            }
           }}
         />
         <Stack.Screen name="Farm Profile Edit Postings" component={FarmProfileEditPostingsScreen} 
@@ -430,6 +512,7 @@ function DrawerNavigator() {
         <Drawer.Screen name="Home Stack" component={HomeStackNav} />
         <Drawer.Screen name="Profile Stack" component={FarmProfileStackNav} />
         <Drawer.Screen name="Feed Stack" component={FeedStackNav} />
+        <Drawer.Screen name="Marketplace Stack" component={MarketplaceStackNav} />
       </Drawer.Navigator>
       : currentUser.role_type === 'employee' ?
       <Drawer.Navigator 

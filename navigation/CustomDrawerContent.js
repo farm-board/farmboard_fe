@@ -45,13 +45,15 @@ function CustomDrawerContent(props) {
   const DrawerList = currentUser.role_type === 'farm' ?
     [
       { icon: 'home-outline', label: 'Home', navigateTo: 'Home Stack' },
-      { icon: 'account-multiple', label: 'Profile', navigateTo: 'Profile Stack' },
-      { icon: 'clipboard-text-multiple-outline', label: 'Feed', navigateTo: 'Feed Stack' }
+      { icon: 'account-outline', label: 'Profile', navigateTo: 'Profile Stack' },
+      { icon: 'clipboard-text-multiple-outline', label: 'Jobs', navigateTo: 'Feed Stack' },
+      { icon: 'cart-outline', label: 'Marketplace', navigateTo: 'Marketplace Stack' }
     ]
     : currentUser.role_type === 'employee' ?
       [
-        { icon: 'account-multiple', label: 'Profile', navigateTo: 'Profile Stack' },
-        { icon: 'clipboard-text-multiple-outline', label: 'Feed', navigateTo: 'Feed Stack' }
+        { icon: 'account-outline', label: 'Profile', navigateTo: 'Profile Stack' },
+        { icon: 'clipboard-text-multiple-outline', label: 'Feed', navigateTo: 'Feed Stack' },
+        { icon: 'cart-outline', label: 'Marketplace', navigateTo: 'Marketplace Stack' }
       ]
       : [];
 
