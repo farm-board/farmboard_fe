@@ -229,10 +229,11 @@ const FeedScreen = () => {
     return (
       <View style={{ height: isAdLoaded ? 'auto' : 0, alignItems: 'center', justifyContent: 'space-evenly', paddingTop: 10 }}>
       <BannerAd
-        unitId={__DEV__ ? TestIds.BANNER : iosAdmobBanner}
+        unitId={TestIds.BANNER}
         size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
         requestOptions={{
           requestNonPersonalizedAdsOnly: true,
+          keywords: ['Agriculture', 'Farming', 'Crops', 'Livestock', 'Farm Equipment', 'Tractors', 'Irrigation', 'Seeds', 'Harvesting', 'Rural Life', 'Farm Supplies', 'Farm Finance', 'Dairy Farming', 'Poultry Farming'],
           networkExtras: {
             collapsible: 'bottom',
           },
@@ -246,14 +247,14 @@ const FeedScreen = () => {
     );
   };
 
-  const adUnitId = __DEV__ ? TestIds.INTERSTITIAL : iosAdmobInterstitial;
+  const adUnitId = TestIds.INTERSTITIAL;
   const [loaded, setLoaded] = useState(false);
   const [interstitial, setInterstitial] = useState(null);
   const [adShown, setAdShown] = useState(false);
 
   useEffect(() => {
     const interstitialAd = InterstitialAd.createForAdRequest(adUnitId, {
-      keywords: ['food', 'cooking', 'fruit'],
+      keywords: ['Agriculture', 'Farming', 'Crops', 'Livestock', 'Farm Equipment', 'Tractors', 'Irrigation', 'Seeds', 'Harvesting', 'Rural Life', 'Farm Supplies', 'Farm Finance', 'Dairy Farming', 'Poultry Farming'],
       requestNonPersonalizedAdsOnly: true,
     });
 

@@ -16,6 +16,7 @@ export const UserProvider = ({ children }) => {
   const [refresh, setRefresh] = useState(false);
   const [profileRefresh, setProfileRefresh] = useState(false);
   const [editProfileRefresh, setEditProfileRefresh] = useState(false);
+  const [deviceId, setDeviceId] = useState(null);
 
   // Load any saved user data when the component mounts
   useEffect(() => {
@@ -83,7 +84,7 @@ export const UserProvider = ({ children }) => {
   };
 
   return (
-    <UserContext.Provider value={{ currentUser, setCurrentUser, logout, loading, setupComplete, setSetupComplete, userName, setUserName, userAvatar, setUserAvatar, userFirstName, setUserFirstName, userLastName, setUserLastName, refresh, setRefresh, profileRefresh, setProfileRefresh, editProfileRefresh, setEditProfileRefresh }}>
+    <UserContext.Provider value={{ currentUser, setCurrentUser, logout, loading, setupComplete, setSetupComplete, userName, setUserName, userAvatar, setUserAvatar, userFirstName, setUserFirstName, userLastName, setUserLastName, refresh, setRefresh, profileRefresh, setProfileRefresh, editProfileRefresh, setEditProfileRefresh, deviceId, setDeviceId }}>
       {children}
     </UserContext.Provider>
   );

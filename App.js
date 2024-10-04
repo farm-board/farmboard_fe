@@ -23,12 +23,15 @@ import EmployeeProfileEditDetailsScreen from './screens/EmployeeProfileEditDetai
 import EmployeeProfileAddExperiencesScreen from './screens/EmployeeProfileAddExperiencesScreen';
 import EmployeeProfileAddReferencesScreen from './screens/EmployeeProfileAddReferencesScreen';
 import FeedScreen from './screens/FeedScreen';
+import MarketplaceFeedScreen from './screens/MarketplaceFeedScreen';
+import MarketplaceAddPostingScreen from './screens/MarketplaceAddPostingScreen.jsx';
 import EmployeeViewProfileScreen from './screens/EmployeeViewProfileScreen';
 import FarmViewProfileScreen from './screens/FarmViewProfileScreen';
 import ForgotPasswordScreen from './screens/ForgotPasswordScreen.jsx';
 import ResetPasswordScreen from './screens/ResetPasswordScreen.jsx';
 import CustomDrawerContent from './navigation/CustomDrawerContent';
-import mobileAds from 'react-native-google-mobile-ads';
+import mobileAds, { TestIds } from 'react-native-google-mobile-ads';
+import { requestTrackingPermissionsAsync } from 'expo-tracking-transparency';
 
 const Stack = createNativeStackNavigator();
 
@@ -369,12 +372,92 @@ function FeedStackNav() {
       }
       }}>
       <>
-        <Stack.Screen name="Feed" component={FeedScreen} />
+        <Stack.Screen name="Jobs" component={FeedScreen} />
         <Stack.Screen name="Farm Profile Add Postings" component={FarmProfileAddPostingsScreen} 
           options={{ 
             title: 'Add Job Posting',
             headerBackTitle: 'Home',
             headerBackTitleStyle: { fontSize: 15 },
+          }}
+        />
+        <Stack.Screen name="Farm Profile Edit Postings" component={FarmProfileEditPostingsScreen} 
+          options={{ 
+            title: 'Edit Job Posting',
+            headerBackTitle: 'Home',
+            headerBackTitleStyle: { fontSize: 15 },
+          }}
+        />
+        <Stack.Screen name="Farm Profile View" component={FarmViewProfileScreen}
+        options={{ 
+          title: 'Farm Profile',
+          headerLeft: () => {
+            return (
+              <TouchableOpacity onPress={() => navigation.navigate('Jobs')}>
+                <MaterialCommunityIcons
+                  name="arrow-left"
+                  size={30}
+                  color="white"
+                  style={{ marginLeft: 10 }}
+                />
+              </TouchableOpacity>
+            );
+          }
+        }}
+         />
+      </>
+    </Stack.Navigator>
+  );
+}
+
+function MarketplaceStackNav() {
+  const navigation = useNavigation();
+  return (
+    <Stack.Navigator screenOptions={{
+      drawerStyle: {
+        backgroundColor: '#4F6F52'
+      },
+      drawerLabelStyle: {  
+        color: 'white'
+      },
+      headerStyle: {
+        backgroundColor: '#4F6F52',
+      },
+      headerTintColor: 'white',
+      style: {
+        backgroundColor: '#4F6F52'
+      },
+      headerLeft: () => {
+        return (
+          <TouchableOpacity onPress={() => navigation.openDrawer()}>
+            <MaterialCommunityIcons
+              name="menu"
+              size={30}
+              color="white"
+              style={{ marginLeft: 10 }}
+            />
+          </TouchableOpacity>
+        );
+      }
+      }}>
+      <>
+        <Stack.Screen name="Marketplace" component={MarketplaceFeedScreen} />
+        <Stack.Screen name="Add Marketplace Posting" component={MarketplaceAddPostingScreen} 
+          options={{ 
+            title: 'Add Marketplace Posting',
+            headerBackTitle: 'Marketplace',
+            headerBackTitleStyle: { fontSize: 15 },
+            headerLeft: () => {
+              return (
+                <TouchableOpacity onPress={() => navigation.navigate('Marketplace')}>
+                  <MaterialCommunityIcons
+                    name="arrow-left"
+                    size={30}
+                    color="white"
+                    style={{ marginLeft: 10 }}
+                  />
+                </TouchableOpacity>
+              );
+            }
           }}
         />
         <Stack.Screen name="Farm Profile Edit Postings" component={FarmProfileEditPostingsScreen} 
@@ -429,6 +512,7 @@ function DrawerNavigator() {
         <Drawer.Screen name="Home Stack" component={HomeStackNav} />
         <Drawer.Screen name="Profile Stack" component={FarmProfileStackNav} />
         <Drawer.Screen name="Feed Stack" component={FeedStackNav} />
+        <Drawer.Screen name="Marketplace Stack" component={MarketplaceStackNav} />
       </Drawer.Navigator>
       : currentUser.role_type === 'employee' ?
       <Drawer.Navigator 
@@ -452,23 +536,35 @@ function DrawerNavigator() {
 
 
 function App() {
-  const { currentUser } = useContext(UserContext);
+  const { currentUser, setDeviceId } = useContext(UserContext);
 
   useEffect(() => {
-    (async () => {
-      // Google AdMob will show any messages here that you just set up on the AdMob Privacy & Messaging page
-      const { status: trackingStatus } = await requestTrackingPermissionsAsync();
-      if (trackingStatus !== 'granted') {
-        // Do something here such as turn off Sentry tracking, store in context/redux to allow for personalized ads, etc.
-      }
+    const initializeAds = async () => {
+      console.log('Starting useEffect');
+  
+      try {
+        // Step 1: Request tracking permissions
+        const { status: trackingStatus } = await requestTrackingPermissionsAsync();
+        console.log('Tracking status:', trackingStatus);
+  
+        if (trackingStatus !== 'granted') {
+          console.log('Tracking permissions not granted');
+        }
+  
+        // Step 2: Initialize mobile ads
+        await mobileAds().initialize();
+        console.log('Ads initialized');
 
-      // Initialize the ads
-      await mobileAds().initialize();
-    })();
+      } catch (error) {
+        console.log('Error in initializing ads:', error);
+      }
+    };
+  
+    initializeAds();
   }, []);
   
   const linking = {
-    prefixes: ['exp://10.0.0.15:8081/'], // Add your production URL here
+    prefixes: ['exp://10.0.0.15:8081/', 'com.farmspheredynamics.farmboard://'],
     config: {
       screens: {
         ResetPassword: '--/password/edit',

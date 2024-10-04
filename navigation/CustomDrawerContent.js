@@ -40,18 +40,20 @@ function CustomDrawerContent(props) {
   const [userData, setUserData] = useState({});
   const [avatarImage, setAvatarImage] = useState('');
   const navigation = useNavigation();
-  const { currentUser, logout, userName, setUserName, userAvatar, setUserAvatar, userFirstName, setUserFirstName, userLastName, setUserLastName } = useContext(UserContext);
+  const { currentUser, logout, userName, setUserName, userAvatar, setUserAvatar, userFirstName, setUserFirstName, userLastName, setUserLastName, deviceId } = useContext(UserContext);
 
   const DrawerList = currentUser.role_type === 'farm' ?
     [
       { icon: 'home-outline', label: 'Home', navigateTo: 'Home Stack' },
-      { icon: 'account-multiple', label: 'Profile', navigateTo: 'Profile Stack' },
-      { icon: 'clipboard-text-multiple-outline', label: 'Feed', navigateTo: 'Feed Stack' }
+      { icon: 'account-outline', label: 'Profile', navigateTo: 'Profile Stack' },
+      { icon: 'clipboard-text-multiple-outline', label: 'Jobs', navigateTo: 'Feed Stack' },
+      { icon: 'cart-outline', label: 'Marketplace', navigateTo: 'Marketplace Stack' }
     ]
     : currentUser.role_type === 'employee' ?
       [
-        { icon: 'account-multiple', label: 'Profile', navigateTo: 'Profile Stack' },
-        { icon: 'clipboard-text-multiple-outline', label: 'Feed', navigateTo: 'Feed Stack' }
+        { icon: 'account-outline', label: 'Profile', navigateTo: 'Profile Stack' },
+        { icon: 'clipboard-text-multiple-outline', label: 'Feed', navigateTo: 'Feed Stack' },
+        { icon: 'cart-outline', label: 'Marketplace', navigateTo: 'Marketplace Stack' }
       ]
       : [];
 
