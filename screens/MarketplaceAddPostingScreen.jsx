@@ -23,21 +23,68 @@ export default function MarketplaceAddPostingScreen() {
     condition: '',
     images: ''
   });
-
   const conditionList = ['New', 'Used: Like New', 'Used: Good', 'Used: Fair', 'Used: Bad'];
   const [galleryImages, setGalleryImages] = useState([]);
   const [marketplacePostingId, setMarketplacePostingId] = useState('');
   const width = Dimensions.get('window').width;
-
   const navigation = useNavigation();
   const route = useRoute();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { currentUser, setRefresh, refresh, setProfileRefresh, profileRefresh } = useContext(UserContext);
+
+  const handleDeletePosting = async () => {
+    if (marketplacePostingId) {
+      try {
+        await axios.delete(`${baseUrl}/api/v1/users/${currentUser.id}/marketplace_postings/${marketplacePostingId}`);
+        console.log('Posting deleted successfully');
+      } catch (error) {
+        console.error('Error deleting posting:', error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    // Listen to `beforeRemove` event
+    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+      if (isSubmitting) {
+        // If form is being submitted, allow the default behavior (i.e., don't show the discard alert)
+        return;
+      }
+  
+      if (marketplacePostingId) {
+        // Prevent default behavior of leaving the screen
+        e.preventDefault();
+  
+        // Ask the user if they want to delete the draft
+        Alert.alert(
+          'Discard Posting?',
+          'Do you want to discard this posting?',
+          [
+            { text: 'Cancel', style: 'cancel', onPress: () => {} },
+            {
+              text: 'Discard',
+              style: 'destructive',
+              onPress: async () => {
+                await handleDeletePosting();
+                // After deletion, navigate back
+                navigation.dispatch(e.data.action);
+              }
+            }
+          ]
+        );
+      }
+    });
+  
+    return unsubscribe; // Cleanup the event listener on unmount
+  }, [navigation, isSubmitting, marketplacePostingId]);
 
   const handleSubmit = async () => {
     if (!data.title || !data.price || !data.description || !data.condition) {
       Alert.alert('Posting Incomplete', 'All fields are required.');
       return;
     }
+  
+    setIsSubmitting(true); // Set form submission state to true
   
     const postData = {
       title: data.title,
@@ -47,7 +94,6 @@ export default function MarketplaceAddPostingScreen() {
     };
   
     try {
-      // Step 3: Update the draft marketplace posting
       let response = await axios.put(`${baseUrl}/api/v1/users/${currentUser.id}/marketplace_postings/${marketplacePostingId}`, { marketplace_posting: postData });
   
       setRefresh(true);
@@ -56,6 +102,9 @@ export default function MarketplaceAddPostingScreen() {
     } catch (error) {
       console.log('Unable to update posting', error);
       Alert.alert('Error', 'An error occurred while creating the posting.');
+    } finally {
+      setIsSubmitting(false); // Reset form submission state after submission
+      navigation.goBack(); // Navigate back after successful submission
     }
   };
 
@@ -145,7 +194,7 @@ export default function MarketplaceAddPostingScreen() {
           text: 'Delete',
           onPress: async () => {
             try {
-              await axios.delete(`${baseUrl}/api/v1/users/${currentUser.id}/farms/delete_gallery_photo/${photoId}`);
+              await axios.delete(`${baseUrl}/api/v1/users/${currentUser.id}/marketplace_postings/${marketplacePostingId}/delete_gallery_photo/${photoId}`);
               console.log('Deleted photo:', photoId);
               setGalleryImages(galleryImages.filter(galleryPhoto => galleryPhoto.id !== photoId));
               setProfileRefresh(true);
@@ -201,11 +250,11 @@ export default function MarketplaceAddPostingScreen() {
       <View style={styles.contentView}>
         <KeyboardAvoidingContainer style={styles.container} behavior="padding">
           <View style={styles.content}>
-            <Animated.View entering={FadeInDown.duration(1000).springify()} style={styles.inputContainer}>
+            <Animated.View entering={FadeInDown.duration(1000).springify()} style={styles.galleryInputContainer}>
               {Object.keys(galleryImages).length !== 0 ?
                 <View style={styles.galleryContainer}>
                   <GalleryEdit
-                    width={width}
+                    width={width / 1.05}
                     galleryImages={galleryImages}
                     handleDeleteImage={handleDeleteGalleryImage}
                     handleGalleryImageUpload={handleGalleryImageUpload}
@@ -217,11 +266,14 @@ export default function MarketplaceAddPostingScreen() {
                   You do not currently have any photos added this posting. Click on the button below to add gallery photos to this posting.
                 </StyledText> 
               </View>}
+              {galleryImages.length != 6 ?
               <View style={styles.addImageContainer}>
-            <TouchableOpacity style={styles.addImageButton} onPress={handleGalleryImageUpload}>
-              <Text style={styles.addImageText}>Upload Image To Posting</Text>
-            </TouchableOpacity>
-            </View>
+                <TouchableOpacity style={styles.addImageButton} onPress={handleGalleryImageUpload}>
+                  <Text style={styles.addImageText}>Upload Image To Posting</Text>
+                </TouchableOpacity>
+              </View>
+              : null
+              }
             </Animated.View>
             <Animated.View entering={FadeInDown.duration(1000).springify()} style={styles.inputContainer}>
               <StyledTextInput
@@ -286,7 +338,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#3A4D39',
   },
   container: {
-    paddingBottom: 25,
     paddingHorizontal: 10,
   },
   content: {
@@ -314,17 +365,17 @@ const styles = StyleSheet.create({
     marginBottom: 3,
     marginTop: 25,
   },
+  galleryInputContainer: {
+    width: '100%',
+    marginBottom: 20,
+    shadowRadius: 20,
+    shadowColor: 'black',
+    shadowOpacity: 0.4,
+    backgroundColor: '#3A4D39',
+  },
   inputContainer: {
     width: '100%',
-    shadowRadius: 20,
-    shadowColor: 'black',
-    shadowOpacity: 0.4,
-  },
-  inputContainerAccommodations: {
-    width: '100%',
-    shadowRadius: 20,
-    shadowColor: 'black',
-    shadowOpacity: 0.4,
+    backgroundColor: '#3A4D39',
   },
   deleteButtonContainer: {
     width: '100%',
@@ -381,16 +432,13 @@ const styles = StyleSheet.create({
   inputContainerPayment: {
     width: '48.5%',
     marginHorizontal: 5,
-    shadowRadius: 20,
-    shadowColor: 'black',
-    shadowOpacity: 0.4,
+    backgroundColor: '#3A4D39',
   },
   galleryPhotosNotFoundContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
-    backgroundColor: '#3A4D39',
     padding: 20,
   },
   galleryPhotosNotFoundText: {
@@ -398,9 +446,7 @@ const styles = StyleSheet.create({
   },
   addImageContainer: {
     width: '100%',
-    backgroundColor: '#3A4D39',
     paddingBottom: 20,
-    marginBottom: 20,
   },
   addImageButton: {
     backgroundColor: 'white',
@@ -418,7 +464,6 @@ const styles = StyleSheet.create({
   galleryContainer: {
     flex: 1,
     justifyContent: 'space-between',
-    maxWidth: '100%',
-    backgroundColor: '#3A4D39',
+    maxWidth: '75%',
   },
 });

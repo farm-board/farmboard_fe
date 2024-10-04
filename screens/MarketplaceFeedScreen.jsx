@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput, Button, Modal, ScrollView, Pressable, ActivityIndicator, Dimensions, Image } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import axios from 'axios';
 import { baseUrl } from '../config';
 
@@ -28,7 +29,6 @@ const MarketplaceFeedScreen = () => {
 
   const fetchPostings = (page) => {
     if (allPagesFetched) return;
-  
     setLoadingNextPage(true)
     axios.get(`${baseUrl}/api/v1/marketplace_feed?page=${page}`)
       .then((response) => {
@@ -134,11 +134,59 @@ const MarketplaceFeedScreen = () => {
     navigation.push('Add Marketplace Posting', {sourceStack: 'Marketplace'});
   }
 
+  const renderPostingItem = ({ item }) => (
+    <View style={styles.postingItem}>
+      <View style={styles.headerContainer}>
+        <View style={styles.companyLogoContainer}>
+        <Image
+          source={item.attributes.images}
+          style={[
+            styles.image,
+            { height: 35, width: 35, borderWidth: 0 },
+          ]}
+        />
+        </View>
+      </View>
+      <View style={styles.titleAndSalaryContainer}>
+        <Text style={styles.postingTitle}>{item.attributes.title}</Text>
+        <Text style={styles.postingSalary}>${item.attributes.price}</Text>
+      </View>
+      <Text style={styles.postingDate}>Posted: {new Date(item.attributes.created_at).toLocaleDateString()}</Text>
+      <View style={styles.locationAndButtonContainer}>
+        <Text style={styles.postingLocation}>{item.attributes.farm_city}, {"\n"}{item.attributes.farm_state}</Text>
+        <TouchableOpacity 
+          style={styles.detailsButton} 
+          onPress={() => { 
+            setSelectedPosting(item);
+            setModalPostingVisible(true);
+            fetchPostingProfileImage(item.attributes.farm_id);
+          }}>
+          <Text style={styles.detailsButtonText}>Details</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.addPostingButton} onPress={handlePostingCreate}>
-        <Text style={styles.addPostingText}>Create New Posting</Text>
+        <Text style={styles.addPostingText}>Create New Marketplace Posting</Text>
       </TouchableOpacity>
+      {searchResults.length === 0 ? (
+        <Text style={styles.noResultsText}>No positions match search parameters</Text>
+      ) : (
+        <View style={styles.postingsContainer}>
+          <FlatList
+            data={searchResults}
+            renderItem={renderPostingItem}
+            keyExtractor={(item) => item.id.toString()}
+            showsVerticalScrollIndicator={false}
+            onEndReached={fetchNextPage}
+            onEndReachedThreshold={0.8}
+            ListFooterComponent={ListEndLoader}
+          />
+        </View>
+      )}
     </View>
   );
 };
@@ -164,6 +212,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#3A4D39',
     textAlign: 'center',
+  },
+  image: {
+    borderRadius: 75,
+    width: 150,
+    height: 150,
+    borderColor: "white",
+    borderWidth: 5,
   },
 })
 
