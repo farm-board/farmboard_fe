@@ -21,31 +21,41 @@ export default function SetupScreen() {
 
   const handleRoleChange = async (role) => {
     try {
-      // Get the token from AsyncStorage
+      // Fetch the token from AsyncStorage
       const token = await AsyncStorage.getItem('token');
+  
+      if (!token) {
+        throw new Error('Token not found');
+      }
+  
       console.log("Token:", token);
-
+  
+      // Make the API request
       const response = await axios.patch(
         `${baseUrl}/current_user/update`,
         {
-          user: {
-            role_type: role
-          }
+          user: { role_type: role }
         },
         {
           headers: {
-            Authorization: `Bearer ${token}` // Ensure token is in the correct format
+            Authorization: `Bearer ${token}` // Ensure token is properly passed
           }
         }
       );
-
-      console.log('User role updated successfully:', response.data);
-      setCurrentUser({
-        ...currentUser,
-        role_type: roleTypes[role]
-      });
+  
+      if (response.status === 200) {
+        console.log('User role updated successfully:', response.data);
+  
+        // Update the user state
+        setCurrentUser({
+          ...currentUser,
+          role_type: roleTypes[role]
+        });
+      } else {
+        console.error('Unexpected response:', response);
+      }
     } catch (error) {
-      console.error('There was an error updating the user role:', error);
+      console.error('Error updating user role:', error.response?.data || error.message);
     }
   };
 
