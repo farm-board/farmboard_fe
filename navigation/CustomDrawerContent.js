@@ -46,13 +46,13 @@ function CustomDrawerContent(props) {
     [
       { icon: 'home-outline', label: 'Home', navigateTo: 'Home Stack' },
       { icon: 'account-outline', label: 'Profile', navigateTo: 'Profile Stack' },
-      { icon: 'clipboard-text-multiple-outline', label: 'Jobs', navigateTo: 'Feed Stack' },
+      { icon: 'clipboard-text-multiple-outline', label: 'Job Postings', navigateTo: 'Feed Stack' },
       { icon: 'cart-outline', label: 'Marketplace', navigateTo: 'Marketplace Stack' }
     ]
     : currentUser.role_type === 'employee' ?
       [
         { icon: 'account-outline', label: 'Profile', navigateTo: 'Profile Stack' },
-        { icon: 'clipboard-text-multiple-outline', label: 'Feed', navigateTo: 'Feed Stack' },
+        { icon: 'clipboard-text-multiple-outline', label: 'Job Postings', navigateTo: 'Feed Stack' },
         { icon: 'cart-outline', label: 'Marketplace', navigateTo: 'Marketplace Stack' }
       ]
       : [];
