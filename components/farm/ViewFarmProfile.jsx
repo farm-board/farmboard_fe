@@ -2,12 +2,9 @@ import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Modal, ScrollView
 import React, { useContext, useState, useEffect } from 'react'
 import { UserContext } from '../../contexts/UserContext'
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios'
-import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated'
+import axios from 'axios';
 import Avatar from '../Profile/Avatar'
 import StyledText from '../Texts/StyledText'
-import { MaterialCommunityIcons } from '@expo/vector-icons'
-import { colors } from '../../config/theme'
 import { useNavigation, useRoute } from '@react-navigation/native'
 import Gallery from '../Profile/Gallery';
 import { baseUrl } from '../../config';
