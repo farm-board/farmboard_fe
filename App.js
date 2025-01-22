@@ -15,6 +15,7 @@ import { UserContext, UserProvider } from './contexts/UserContext';
 import { useContext } from 'react';
 import ProfileEditScreen from './screens/ProfileEditScreen';
 import FarmProfileEditDetailsScreen from './screens/FarmProfileEditDetailsScreen';
+import FarmProfileEditMarketplaceContactInfoScreen from './screens/FarmProfileEditMarketplaceContactInfoScreen';
 import FarmProfileEditAccommodationsScreen from './screens/FarmProfileEditAccommodationsScreen.jsx';
 import FarmProfileAddAccommodationsScreen from './screens/FarmProfileAddAccommodationsScreen.jsx';
 import FarmProfileAddPostingsScreen from './screens/FarmProfileAddPostingsScreen.jsx';
@@ -22,11 +23,15 @@ import FarmProfileEditPostingsScreen from './screens/FarmProfileEditPostingsScre
 import EmployeeProfileEditDetailsScreen from './screens/EmployeeProfileEditDetailsScreen';
 import EmployeeProfileAddExperiencesScreen from './screens/EmployeeProfileAddExperiencesScreen';
 import EmployeeProfileAddReferencesScreen from './screens/EmployeeProfileAddReferencesScreen';
+import EmployeeProfileEditMarketplaceContactInfoScreen from './screens/EmployeeProfileEditMarketplaceContactInfoScreen';
 import FeedScreen from './screens/FeedScreen';
 import MarketplaceFeedScreen from './screens/MarketplaceFeedScreen';
+import MarketplaceManagePostingsScreen from './screens/MarketplaceManagePostingsScreen';
 import MarketplaceAddPostingScreen from './screens/MarketplaceAddPostingScreen.jsx';
+import MarketplaceEditPostingScreen from './screens/MarketplaceEditPostingScreen.jsx';
 import EmployeeViewProfileScreen from './screens/EmployeeViewProfileScreen';
 import FarmViewProfileScreen from './screens/FarmViewProfileScreen';
+import MarketplaceViewProfileScreen from './screens/MarketplaceViewProfileScreen';
 import ForgotPasswordScreen from './screens/ForgotPasswordScreen.jsx';
 import ResetPasswordScreen from './screens/ResetPasswordScreen.jsx';
 import CustomDrawerContent from './navigation/CustomDrawerContent';
@@ -175,6 +180,22 @@ function FarmProfileStackNav() {
               );
             }
           }}/>
+        <Stack.Screen name="Farm Profile Edit Marketplace Contact Info" component={FarmProfileEditMarketplaceContactInfoScreen} 
+          options={{ 
+            title: 'Edit Marketplace Contact Info',
+            headerLeft: () => {
+              return (
+                <TouchableOpacity onPress={() => navigation.navigate('Edit Profile')}>
+                  <MaterialCommunityIcons
+                    name="arrow-left"
+                    size={30}
+                    color="white"
+                    style={{ marginLeft: 10 }}
+                  />
+                </TouchableOpacity>
+              );
+            }
+          }}/>
         <Stack.Screen name="Farm Profile Edit Accommodations" component={FarmProfileEditAccommodationsScreen}
           options={{ 
             title: 'Edit Accommodation Info',
@@ -301,6 +322,22 @@ function EmployeeProfileStackNav() {
             }
           }} 
         />
+        <Stack.Screen name="Employee Profile Edit Marketplace Contact Info" component={EmployeeProfileEditMarketplaceContactInfoScreen} 
+          options={{ 
+            title: 'Edit Marketplace Contact Info',
+            headerLeft: () => {
+              return (
+                <TouchableOpacity onPress={() => navigation.navigate('Edit Profile')}>
+                  <MaterialCommunityIcons
+                    name="arrow-left"
+                    size={30}
+                    color="white"
+                    style={{ marginLeft: 10 }}
+                  />
+                </TouchableOpacity>
+              );
+            }
+          }}/>
         <Stack.Screen name="Employee Profile Add Experiences" component={EmployeeProfileAddExperiencesScreen}
           options={{ 
             title: 'Add Experience',
@@ -441,9 +478,47 @@ function MarketplaceStackNav() {
       }}>
       <>
         <Stack.Screen name="Marketplace" component={MarketplaceFeedScreen} />
+        <Stack.Screen name="Manage Marketplace Postings" component={MarketplaceManagePostingsScreen} 
+          options={{ 
+            title: 'Manage Marketplace Postings',
+            headerBackTitle: 'Marketplace',
+            headerBackTitleStyle: { fontSize: 15 },
+            headerLeft: () => {
+              return (
+                <TouchableOpacity onPress={() => navigation.navigate('Marketplace')}>
+                  <MaterialCommunityIcons
+                    name="arrow-left"
+                    size={30}
+                    color="white"
+                    style={{ marginLeft: 10 }}
+                  />
+                </TouchableOpacity>
+              );
+            }
+          }}
+        />
         <Stack.Screen name="Add Marketplace Posting" component={MarketplaceAddPostingScreen} 
           options={{ 
             title: 'Add Marketplace Posting',
+            headerBackTitle: 'Marketplace',
+            headerBackTitleStyle: { fontSize: 15 },
+            headerLeft: () => {
+              return (
+                <TouchableOpacity onPress={() => navigation.navigate('Marketplace')}>
+                  <MaterialCommunityIcons
+                    name="arrow-left"
+                    size={30}
+                    color="white"
+                    style={{ marginLeft: 10 }}
+                  />
+                </TouchableOpacity>
+              );
+            }
+          }}
+        />
+        <Stack.Screen name="Edit Marketplace Posting" component={MarketplaceEditPostingScreen} 
+          options={{ 
+            title: 'Edit This Marketplace Posting',
             headerBackTitle: 'Marketplace',
             headerBackTitleStyle: { fontSize: 15 },
             headerLeft: () => {
@@ -467,12 +542,12 @@ function MarketplaceStackNav() {
             headerBackTitleStyle: { fontSize: 15 },
           }}
         />
-        <Stack.Screen name="Farm Profile View" component={FarmViewProfileScreen}
+        <Stack.Screen name="Marketplace Profile View" component={MarketplaceViewProfileScreen}
         options={{ 
-          title: 'Farm Profile',
+          title: 'Seller Details',
           headerLeft: () => {
             return (
-              <TouchableOpacity onPress={() => navigation.navigate('Feed')}>
+              <TouchableOpacity onPress={() => navigation.navigate('Marketplace')}>
                 <MaterialCommunityIcons
                   name="arrow-left"
                   size={30}
@@ -525,6 +600,7 @@ function DrawerNavigator() {
       }}>
         <Drawer.Screen name="Feed Stack" component={FeedStackNav} />
         <Drawer.Screen name="Profile Stack" component={EmployeeProfileStackNav} />
+        <Drawer.Screen name="Marketplace Stack" component={MarketplaceStackNav} />
       </Drawer.Navigator>
       : null
     ) :
