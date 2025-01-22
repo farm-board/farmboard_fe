@@ -1,18 +1,11 @@
-import React, { useContext } from 'react'
-import { Text, View, Image, TouchableOpacity, StyleSheet } from 'react-native'
-import { UserContext } from '../contexts/UserContext';
-import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
+import React from 'react'
+import { View, StyleSheet } from 'react-native'
 import { StatusBar } from 'expo-status-bar';
 import { useNavigation } from '@react-navigation/native';
-import StyledText from '../components/Texts/StyledText';
 import KeyboardAvoidingContainer from '../components/Containers/KeyboardAvoidingContainer';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import ViewFarmProfile from '../components/Farm/ViewFarmProfile';
 
 export default function FarmViewProfileScreen() {
-
-
-  const navigation = useNavigation();
 
   return (
     <View style={styles.container}>
