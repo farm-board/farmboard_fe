@@ -21,7 +21,9 @@ export default function MarketplaceAddPostingScreen() {
     price: '',
     description: '',
     condition: '',
-    images: ''
+    images: '',
+    phone: '',
+    email: '',
   });
   const conditionList = ['New', 'Used: Like New', 'Used: Good', 'Used: Fair', 'Used: Bad'];
   const [galleryImages, setGalleryImages] = useState([]);
@@ -31,6 +33,8 @@ export default function MarketplaceAddPostingScreen() {
   const route = useRoute();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { currentUser, setRefresh, refresh, setProfileRefresh, profileRefresh } = useContext(UserContext);
+  const [userData, setUserData] = useState({});
+  const [isLoading, setIsLoading] = useState(true); 
 
   const handleDeletePosting = async () => {
     if (marketplacePostingId) {
@@ -42,6 +46,11 @@ export default function MarketplaceAddPostingScreen() {
       }
     }
   };
+
+  useEffect(() => {
+    fetchUserData();
+    console.log('userData:', userData);
+  }, []);
 
   useEffect(() => {
     // Listen to `beforeRemove` event
@@ -78,9 +87,33 @@ export default function MarketplaceAddPostingScreen() {
     return unsubscribe; // Cleanup the event listener on unmount
   }, [navigation, isSubmitting, marketplacePostingId]);
 
+  const fetchUserData = async () => {
+    try {
+      if (currentUser.role_type === 'employee') {
+        const response = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/employees`);
+        console.log('User data:', response.data.data);
+        setUserData(response.data.data);
+      } else if (currentUser.role_type === 'farm') {
+        const response = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/farms`);
+        console.log('User data:', response.data.data);
+        setUserData(response.data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    } finally {
+      setIsLoading(false); // Ensure loading state is cleared
+    }
+  };
+
   const handleSubmit = async () => {
     if (!data.title || !data.price || !data.description || !data.condition) {
+      console.log("current user:", currentUser)
       Alert.alert('Posting Incomplete', 'All fields are required.');
+      return;
+    }
+
+    if (userData.marketplace_phone === null && !data.phone || userData.marketplace_email === null && !data.email) {
+      Alert.alert('Contact Info Required', 'Please provide a phone number or email address.');
       return;
     }
   
@@ -92,8 +125,20 @@ export default function MarketplaceAddPostingScreen() {
       description: data.description,
       condition: data.condition,
     };
-  
+
+    const contactData = {
+      marketplace_phone: data.phone,
+      marketplace_email: data.email,
+    };
+
     try {
+      if (userData.type === 'employee') {
+        await axios.put(`${baseUrl}/api/v1/users/${currentUser.id}/employees`, { employee: contactData });
+      }
+      if (userData.type === 'farm') {
+        await axios.put(`${baseUrl}/api/v1/users/${currentUser.id}/farms`, { farm: contactData });
+      }
+
       let response = await axios.put(`${baseUrl}/api/v1/users/${currentUser.id}/marketplace_postings/${marketplacePostingId}`, { marketplace_posting: postData });
   
       setRefresh(true);
@@ -238,7 +283,20 @@ export default function MarketplaceAddPostingScreen() {
     }
   }, [refresh]);
 
+  const formatPhoneNumber = (text) => {
+    const cleaned = ('' + text).replace(/\D/g, '');
+    const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+    if (match) {
+      return `(${match[1]}) ${match[2]}-${match[3]}`;
+    }
+    return text;
+  };
+
   const { loading } = useContext(UserContext);
+
+  if (isLoading) {
+    return <Text>Loading...</Text>;
+  }
 
   if (loading) {
     return <Text>Loading...</Text>;
@@ -289,14 +347,14 @@ export default function MarketplaceAddPostingScreen() {
               <Animated.View entering={FadeInDown.delay(200).duration(1000).springify()} style={styles.inputContainerPayment}>
                 <StyledTextInput
                   placeholder="Price"
-                  icon="city-variant-outline"
+                  icon="currency-usd"
                   label="Price:"
                   labelStyle={{ fontSize: 18, color: 'white' }}
                   keyboardType="numeric"
                   onChangeText={(text) => setData({ ...data, price: text })}
                 />
               </Animated.View>
-              <Animated.View entering={FadeInDown.delay(200).duration(1000).springify()} style={styles.inputContainerPayment}>
+              <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.inputContainerPayment}>
                 <StyledSelectDropdown
                   listData={conditionList}
                   fieldPlaceholder="Condition"
@@ -306,7 +364,7 @@ export default function MarketplaceAddPostingScreen() {
                 />
               </Animated.View>
             </View>
-            <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputContainer}>
+            <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.inputContainer}>
               <StyledTextInput
                 placeholder="Description"
                 icon="pencil-outline"
@@ -317,6 +375,37 @@ export default function MarketplaceAddPostingScreen() {
                 onChangeText={(text) => setData({ ...data, description: text })}
               />
             </Animated.View>
+            {userData.attributes.marketplace_phone === null || userData.attributes.marketplace_email === null ?
+              <>
+                <Animated.View
+                  entering={FadeInDown.delay(800).duration(1000).springify()}
+                  style={styles.contactInfoContainer}
+                >
+                  <Text style={styles.contactInfoTitle}>
+                    One of the following contact methods is required to create a posting:
+                  </Text>
+                  <StyledTextInput
+                    placeholder="Phone"
+                    icon="phone"
+                    label="Phone:"
+                    maxLength={14} // Adjust max length for formatted phone number
+                    labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
+                    keyboardType="numeric"
+                    onChangeText={(text) => setData({ ...data, phone: formatPhoneNumber(text) })}
+                  />
+                  <StyledTextInput
+                    placeholder="Email"
+                    icon="email"
+                    label="Email:"
+                    labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
+                    onChangeText={(text) => setData({ ...data, email: text })}
+                  />
+                  <Text style={styles.contactInfoDisclaimer}>
+                    This will only need to be added once, but can be updated at any time in your profile settings.
+                  </Text>
+                </Animated.View>
+              </>
+              : null}
             <Animated.View entering={FadeInDown.delay(1400).duration(1000).springify()} style={styles.submitButtonContainer}>
               <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
                 <Text style={styles.submitButtonText}>Create Posting</Text>
@@ -335,6 +424,7 @@ export default function MarketplaceAddPostingScreen() {
 const styles = StyleSheet.create({
   backgroundContainer: {
     flex: 1,
+    marginBottom: -20,
     backgroundColor: '#3A4D39',
   },
   container: {
@@ -465,5 +555,32 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'space-between',
     maxWidth: '75%',
+  },
+  contactInfoContainer: {
+    letterSpacing: 1,
+    paddingHorizontal: 25,
+    paddingVertical: 10,
+    marginBottom: 10,
+    backgroundColor: '#3A4D39',
+    minWidth: '100%',
+    shadowRadius: 20,
+    shadowColor: 'black',
+    shadowOpacity: 0.6,
+  },
+  contactInfoDisclaimer: {
+    letterSpacing: 1,
+    marginVertical: 5,
+    marginBottom: 10,
+    fontSize: 14,
+    color: '#ECE3CE',
+  },
+  contactInfoTitle: {
+    letterSpacing: 1,
+    marginVertical: 5,
+    marginTop: 15,
+    marginBottom: 15,
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: 'white',
   },
 });
