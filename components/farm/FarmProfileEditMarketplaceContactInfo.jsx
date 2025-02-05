@@ -29,6 +29,12 @@ export default function FarmProfileEditMarketplaceContactInfo() {
       Alert.alert('Contact Info Required', 'Please provide a phone number or email address.');
       return;
     }
+
+    if (!isValidEmail(data.marketplace_email)) {
+      Alert.alert('Invalid Email', 'Please enter a valid email address.');
+      return;
+    }
+
     try { 
       await axios.put(`${baseUrl}/api/v1/users/${currentUser.id}/farms`, { farm: data })
       console.log('Updated farm data');
@@ -78,6 +84,11 @@ export default function FarmProfileEditMarketplaceContactInfo() {
     return text;
   };
 
+  const isValidEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   return (
     <KeyboardAvoidingContainer style={styles.container} behavior="padding">
       <View style={styles.content}>
@@ -100,7 +111,7 @@ export default function FarmProfileEditMarketplaceContactInfo() {
             label="Email:"
             value={data.marketplace_email}
             labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
-            onChangeText={(text) => setData({ ...data, marketplace_email: text })}
+            onChangeText={(text) => {setData({ ...data, marketplace_email: text })}}
           />
         </Animated.View>
         {/* Submit button */}

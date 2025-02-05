@@ -26,6 +26,10 @@ export default function EmployeeProfileEditMarketplaceContactInfo() {
       Alert.alert('Contact Info Required', 'Please provide a phone number or email address.');
       return;
     }
+    if (!isValidEmail(data.marketplace_email)) {
+      Alert.alert('Invalid Email', 'Please enter a valid email address.');
+      return;
+    }
     try { 
       await axios.put(`${baseUrl}/api/v1/users/${currentUser.id}/employees`, { employee: data })
       console.log('Updated employee data');
@@ -75,6 +79,11 @@ export default function EmployeeProfileEditMarketplaceContactInfo() {
     return text;
   };
 
+  const isValidEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   return (
     <KeyboardAvoidingContainer style={styles.container} behavior="padding">
       <View style={styles.content}>
@@ -97,7 +106,7 @@ export default function EmployeeProfileEditMarketplaceContactInfo() {
             label="Email:"
             value={data.marketplace_email}
             labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
-            onChangeText={(text) => setData({ ...data, marketplace_email: text })}
+            onChangeText={(text) => {setData({ ...data, marketplace_email: text })}}
           />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.submitButtonContainer}>
