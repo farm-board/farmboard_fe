@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput, Button, Modal, ScrollView, Pressable, ActivityIndicator, Dimensions, Image } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput, Button, Modal, ScrollView, Pressable, ActivityIndicator, Dimensions, Image, Linking, Alert } from 'react-native';
 import Gallery from '../components/Feed/Gallery';
 import { UserContext } from '../contexts/UserContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -9,6 +9,11 @@ import axios from 'axios';
 import { baseUrl } from '../config';
 import StyledText from '../components/Texts/StyledText'
 import StyledSelectDropdown from '../components/Inputs/StyledSelectDropdown';
+import { AdEventType, BannerAd, BannerAdSize, InterstitialAd, TestIds } from 'react-native-google-mobile-ads';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const iosAdmobBanner = "ca-app-pub-2707002194546287/9827918081";
+const iosAdmobInterstitial = "ca-app-pub-2707002194546287/7809604308";
 
 const MarketplaceFeedScreen = () => {
   const [postings, setPostings] = useState([]);
@@ -272,6 +277,146 @@ const MarketplaceFeedScreen = () => {
     setModalPostingVisible(false);
   }
 
+  const InlineAd = () => {
+    return (
+      <View style={{ height: isAdLoaded ? 'auto' : 0, alignItems: 'center', justifyContent: 'space-evenly', paddingTop: 10 }}>
+      <BannerAd
+        unitId={__DEV__ ? TestIds.BANNER : iosAdmobBanner}
+        size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+        requestOptions={{
+          requestNonPersonalizedAdsOnly: true,
+          keywords: ['Agriculture', 'Farming', 'Crops', 'Livestock', 'Farm Equipment', 'Tractors', 'Irrigation', 'Seeds', 'Harvesting', 'Rural Life', 'Farm Supplies', 'Farm Finance', 'Dairy Farming', 'Poultry Farming'],
+          networkExtras: {
+            collapsible: 'bottom',
+          },
+        }}
+        onAdLoaded={() => {
+          setIsAdLoaded(true);
+        }}
+        
+      />
+    </View>
+    );
+  };
+
+  
+const handlePhoneCall = () => {
+  Alert.alert(
+    "Open Phone App",
+    `You will be taken out of the app to call ${selectedPosting?.attributes.user_phone}. Do you want to continue?`,
+    [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Continue",
+        onPress: () => {
+          Linking.openURL(`tel:${selectedPosting?.attributes.user_phone}`).catch((err) =>
+            console.warn('Failed to open phone app:', err)
+          );
+        },
+      },
+    ]
+  );
+};
+
+const handleEmail = () => {
+  Alert.alert(
+    "Open Email App",
+    `You will be taken out of the app to send an email to ${selectedPosting?.attributes.user_email}. Do you want to continue?`,
+    [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Continue",
+        onPress: () => {
+          Linking.openURL(`mailto:${selectedPosting?.attributes.user_email}`).catch((err) =>
+            console.warn('Failed to open email app:', err)
+          );
+        },
+      },
+    ]
+  );
+};
+
+  const adUnitId = __DEV__ ? TestIds.INTERSTITIAL : iosAdmobInterstitial;
+  const [loaded, setLoaded] = useState(false);
+  const [interstitial, setInterstitial] = useState(null);
+  const [adShown, setAdShown] = useState(false);
+
+  useEffect(() => {
+    const interstitialAd = InterstitialAd.createForAdRequest(adUnitId, {
+      keywords: ['Agriculture', 'Farming', 'Crops', 'Livestock', 'Farm Equipment', 'Tractors', 'Irrigation', 'Seeds', 'Harvesting', 'Rural Life', 'Farm Supplies', 'Farm Finance', 'Dairy Farming', 'Poultry Farming'],
+      requestNonPersonalizedAdsOnly: true,
+    });
+
+    setInterstitial(interstitialAd);
+
+    const unsubscribeLoaded = interstitialAd.addAdEventListener(AdEventType.LOADED, () => {
+      console.log('Interstitial ad loaded');
+      setLoaded(true);
+    });
+
+    const unsubscribeClosed = interstitialAd.addAdEventListener(AdEventType.CLOSED, () => {
+      console.log('Interstitial ad closed');
+      setLoaded(false);
+      interstitialAd.load(); // Load a new ad after the current one is closed
+    });
+
+    interstitialAd.load();
+
+    return () => {
+      unsubscribeLoaded();
+      unsubscribeClosed();
+    };
+  }, [adUnitId]);
+
+  const handleAdShow = async () => {
+    if (interstitial && loaded && !adShown) {
+      try {
+        const lastShown = await AsyncStorage.getItem('lastAdShown');
+        const now = Date.now();
+        if (!lastShown || (now - parseInt(lastShown, 10)) > 15 * 60 * 1000) {
+          interstitial.show().then(() => {
+            console.log('Interstitial ad shown');
+            setAdShown(true); // Mark the ad as shown
+            AsyncStorage.setItem('lastAdShown', now.toString()); // Store the current time
+          }).catch((error) => {
+            console.error('Failed to show interstitial ad', error);
+          });
+        } else {
+          console.log('Ad shown less than 15 minutes ago');
+        }
+      } catch (error) {
+        console.error('Error accessing AsyncStorage', error);
+      }
+    } else {
+      console.log('Interstitial ad not loaded yet or already shown');
+    }
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log('Screen focused, resetting adShown');
+      setAdShown(false); // Reset adShown when the screen is focused
+      // Run handleAdShow immediately when screen is focused
+      handleAdShow();
+    }, [loaded]) // Add loaded to dependencies
+  );
+
+  useEffect(() => {
+    if (!adShown) {
+      const timeoutId = setTimeout(() => {
+        handleAdShow();
+      }, 1000); // Check once after 1 second
+
+      return () => clearTimeout(timeoutId); // Cleanup the timeout on unmount
+    }
+  }, [loaded, adShown]); // Run when `loaded` or `adShown` changes
+
   const renderPostingModal = () => (
     <Modal
       animationType="slide"
@@ -282,24 +427,32 @@ const MarketplaceFeedScreen = () => {
         setPostingProfilePhoto(null);
       }}
     >
-      <TouchableOpacity
-        style={styles.closeButton}
-        onPress={() => setModalPostingVisible(false)}
-      >
-        <MaterialCommunityIcons name="close" size={35} color="white" />
-      </TouchableOpacity>
-      <ScrollView contentContainerStyle={styles.modalContainer} showsVerticalScrollIndicator={false}>
-        <View style={styles.galleryContainer}>
-          <Gallery
-            width={screenWidth}
-            galleryImages={galleryImages}
-          />
+      {/* Top-level container */}
+      <View style={styles.modalWrapper}>
+        {/* Fixed close button bar */}
+        <View style={styles.closeButtonBar}>
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => setModalPostingVisible(false)}
+          >
+            <MaterialCommunityIcons name="close" size={35} color="white" />
+          </TouchableOpacity>
         </View>
-        <View style={styles.modalContentContainer}>
-          <Text style={styles.modalTitle}>{selectedPosting?.attributes.title}</Text>
-          <Text style={styles.modalSubTitle}>${selectedPosting?.attributes.price}</Text>
   
-          <View style={styles.separatorLine} />
+        {/* Scrollable content */}
+        <ScrollView
+          contentContainerStyle={styles.modalContainer}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.galleryContainer}>
+            <Gallery width={screenWidth} galleryImages={galleryImages} />
+          </View>
+          <View style={styles.modalContentContainer}>
+            <Text style={styles.modalTitle}>{selectedPosting?.attributes.title}</Text>
+            <Text style={styles.modalSubTitle}>${selectedPosting?.attributes.price}</Text>
+  
+            <View style={styles.separatorLine} />
+            {/* Seller Info */}
             <View style={styles.sellerInfoSectionContainer}>
               <View style={styles.rowContainer}>
                 <Text style={styles.sectionTitle2}>Seller Information</Text>
@@ -307,53 +460,81 @@ const MarketplaceFeedScreen = () => {
                   <Text style={styles.sellerDetailsText}>Seller Profile</Text>
                 </TouchableOpacity>
               </View>
-                <View style={styles.posterInfoContainer}>
-                  <MarketplacePostingAvatar uri={postingProfilePhoto}/>
-                  <View style={styles.posterInfoTextContainer}>
-                    <Text style={styles.posterInfoTextName}>{selectedPosting?.attributes.user_name}</Text>
-                    <Text style={styles.posterInfoTextLocation}>{selectedPosting?.attributes.user_city}, {selectedPosting?.attributes.user_state}</Text>
-                  </View>
+              <View style={styles.posterInfoContainer}>
+                <MarketplacePostingAvatar uri={postingProfilePhoto} />
+                <View style={styles.posterInfoTextContainer}>
+                  <Text style={styles.posterInfoTextName}>
+                    {selectedPosting?.attributes.user_name}
+                  </Text>
+                  <Text style={styles.posterInfoTextLocation}>
+                    {selectedPosting?.attributes.user_city},{' '}
+                    {selectedPosting?.attributes.user_state}
+                  </Text>
                 </View>
-            </View>
-              <View style={styles.sectionContainerContactInfo}>
-                {selectedPosting?.attributes.user_email ? 
-                  <View style={styles.itemRow}>
-                    <MaterialCommunityIcons name={"email"} size={25} color={"white"} />
-                    <StyledText bold style={styles.contactInfoText}>Email:</StyledText>
-                    <StyledText style={styles.contactInfoText2}>{selectedPosting?.attributes.user_email}</StyledText>
-                  </View>
-                  :null}
-                  {selectedPosting?.attributes.user_phone ? 
-                  <View style={styles.itemRow2}>
-                    <MaterialCommunityIcons name={"phone"} size={25} color={"white"} />
-                    <StyledText bold style={styles.contactInfoText}>Phone:</StyledText>
-                    <StyledText style={styles.contactInfoText2}>{selectedPosting?.attributes.user_phone}</StyledText>
-                  </View>
-                  :null}
               </View>
-          <View style={styles.separatorLine} />
+            </View>
   
+            {/* Contact Info */}
+            <View style={styles.sectionContainerContactInfo}>
+              {selectedPosting?.attributes.user_email && (
+                <TouchableOpacity onPress={handleEmail}>
+                  <View style={styles.itemRow}>
+                    <MaterialCommunityIcons name="email" size={25} color="white" />
+                    <StyledText bold style={styles.contactInfoText}>
+                      Email:
+                    </StyledText>
+                    <StyledText style={styles.contactInfoText2}>
+                      {selectedPosting?.attributes.user_email}
+                    </StyledText>
+                  </View>
+                </TouchableOpacity>
+              )}
+              {selectedPosting?.attributes.user_phone && (
+                <TouchableOpacity onPress={handlePhoneCall}>
+                  <View style={styles.itemRow2}>
+                    <MaterialCommunityIcons name="phone" size={25} color="white" />
+                    <StyledText bold style={styles.contactInfoText}>
+                      Phone:
+                    </StyledText>
+                    <StyledText style={styles.contactInfoText2}>
+                      {selectedPosting?.attributes.user_phone}
+                    </StyledText>
+                  </View>
+                </TouchableOpacity>
+              )}
+            </View>
+  
+            <View style={styles.separatorLine} />
+  
+            {/* Description */}
             <View style={styles.sectionContainer}>
               <Text style={styles.sectionTitle}>Description</Text>
-              <Text style={styles.sectionText}>{selectedPosting?.attributes.description}</Text>
+              <Text style={styles.sectionText}>
+                {selectedPosting?.attributes.description}
+              </Text>
             </View>
-
-          <View style={styles.separatorLine} />
-
-          <View style={styles.sectionContainer}>
-            <Text style={styles.sectionTitle}>Details</Text>
-            <View style={styles.itemRow}>
-              <StyledText style={styles.conditionText}>Condition</StyledText>
-              <StyledText bold style={styles.conditionText}>{selectedPosting?.attributes.condition}</StyledText>
+  
+            <View style={styles.separatorLine} />
+  
+            {/* Details */}
+            <View style={styles.sectionContainer}>
+              <Text style={styles.sectionTitle}>Details</Text>
+              <View style={styles.itemRow}>
+                <StyledText style={styles.conditionText}>Condition</StyledText>
+                <StyledText bold style={styles.conditionText}>
+                  {selectedPosting?.attributes.condition}
+                </StyledText>
+              </View>
             </View>
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </View>
     </Modal>
   );
   
   return (
     <View style={styles.container}>
+      <InlineAd />
       <View style={styles.itemRow3}>
         <TouchableOpacity style={styles.addPostingButton} onPress={handleManagePostingsRedirect}>
           <Text style={styles.addPostingText}>Manage Postings</Text>
@@ -519,19 +700,31 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#000',
   },
+  modalWrapper: {
+    flex: 1,
+    backgroundColor: '#3A4D39', // Modal background
+  },
+  closeButtonBar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 105,
+    backgroundColor: '#3A4D39', // Background for the close button bar
+    justifyContent: 'center',
+    alignItems: 'flex-end',
+    zIndex: 10, // Ensure it stays above the ScrollView
+    paddingHorizontal: 20,
+  },
+  closeButton: {
+    borderRadius: 30,
+    top: 20,
+    zIndex: 1, // Ensure the button is above everything
+  },
   modalContainer: {
     paddingHorizontal: 20,
     backgroundColor: '#3A4D39',
     minHeight: '100%',
-    alignItems: 'flex-start', 
-    justifyContent: 'flex-start',
-  },
-  closeButton: {
-    position: 'absolute',
-    borderRadius: 30,
-    top: 60,
-    right: 20,
-    zIndex: 1,
   },
   modalTitle: {
     fontSize: 24,
