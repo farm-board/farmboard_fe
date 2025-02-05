@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react'
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, FlatList, Modal, ScrollView, Button, Image} from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, FlatList, Modal, ScrollView, Button, Image, Linking, Alert} from 'react-native'
 import { StatusBar } from 'expo-status-bar';
 import KeyboardAvoidingContainer from '../components/Containers/KeyboardAvoidingContainer';
 import { UserContext } from '../contexts/UserContext';
@@ -36,30 +36,51 @@ export default function MarketplaceViewProfileScreen() {
   
     try {
       // Try to get the cached data
-      const cachedData = await AsyncStorage.getItem(`marketplace_profile_info_${currentUser.id}_${marketplacePostingId}`);
+      const cachedData = await AsyncStorage.getItem(
+        `marketplace_profile_info_${currentUser.id}_${marketplacePostingId}`
+      );
       console.log('cachedData:', cachedData);
+  
       if (cachedData !== null) {
         const parsedData = JSON.parse(cachedData);
-        console.log('parsedData:', parsedData.profileInfo);
-        setProfileInfo(parsedData.profileInfo);
-        setMarketplacePostings(parsedData.marketplace_postings);
-        setLoading(false);
-        return;
+  
+        // Check if the cache has expired
+        const currentTime = new Date().getTime(); // Current time in milliseconds
+        if (currentTime - parsedData.timestamp < 15 * 60 * 1000) {
+          console.log('Using cached data:', parsedData.profileInfo);
+          setProfileInfo(parsedData.profileInfo);
+          setMarketplacePostings(parsedData.marketplace_postings);
+          setLoading(false);
+          return;
+        } else {
+          console.log('Cached data has expired. Fetching fresh data...');
+        }
       }
-
-      // If there's no cached data, fetch from the server
-      const response = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/marketplace_postings/${marketplacePostingId}/profile_info`);
-      console.log('marketplace profle response:', response.data);
+  
+      // Fetch fresh data from the server if no cache or cache has expired
+      const response = await axios.get(
+        `${baseUrl}/api/v1/users/${currentUser.id}/marketplace_postings/${marketplacePostingId}/profile_info`
+      );
+      console.log('Fetching fresh profile data...');
+      console.log('Fresh profile response:', response.data);
+  
+      const sortedPostings = response.data.marketplace_postings.sort(
+        (a, b) => new Date(b.created_at) - new Date(a.created_at)
+      );
+  
       setProfileInfo(response.data.attributes);
-      const sortedPostings = response.data.marketplace_postings.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
       setMarketplacePostings(sortedPostings);
   
-      // Cache the data
+      // Cache the data with a timestamp
       const dataToCache = {
         profileInfo: response.data.attributes,
         marketplace_postings: sortedPostings,
+        timestamp: new Date().getTime(), // Current time in milliseconds
       };
-      await AsyncStorage.setItem(`marketplace_profile_info_${currentUser.id}_${marketplacePostingId}`, JSON.stringify(dataToCache));
+      await AsyncStorage.setItem(
+        `marketplace_profile_info_${currentUser.id}_${marketplacePostingId}`,
+        JSON.stringify(dataToCache)
+      );
     } catch (error) {
       console.error('There was an error fetching the profile info:', error);
     } finally {
@@ -69,7 +90,7 @@ export default function MarketplaceViewProfileScreen() {
   
   useEffect(() => {
     fetchProfileData();
-  }, [currentUser.id, marketplacePostingId]);
+  }, [marketplacePostingId]);
   
   const toggleExpanded = (postingId) => {
     setExpandedMap(prevState => ({
@@ -105,6 +126,49 @@ export default function MarketplaceViewProfileScreen() {
         console.error('There was an error fetching the posting profile photo:', error);
       });
   };
+
+  
+const handlePhoneCall = () => {
+  Alert.alert(
+    "Open Phone App",
+    `You will be taken out of the app to call ${profileInfo.marketplace_phone}. Do you want to continue?`,
+    [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Continue",
+        onPress: () => {
+          Linking.openURL(`tel:${profileInfo.marketplace_phone}`).catch((err) =>
+            console.warn('Failed to open phone app:', err)
+          );
+        },
+      },
+    ]
+  );
+};
+
+const handleEmail = () => {
+  Alert.alert(
+    "Open Email App",
+    `You will be taken out of the app to send an email to ${profileInfo.marketplace_email}. Do you want to continue?`,
+    [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Continue",
+        onPress: () => {
+          Linking.openURL(`mailto:${profileInfo.marketplace_email}`).catch((err) =>
+            console.warn('Failed to open email app:', err)
+          );
+        },
+      },
+    ]
+  );
+};
 
   const renderPostingItem = ({ item }) => (
     <TouchableOpacity onPress={() => { 
@@ -143,12 +207,15 @@ export default function MarketplaceViewProfileScreen() {
         setPostingProfilePhoto(null);
       }}
     > 
-      <TouchableOpacity
-        style={styles.closeButton}
-        onPress={() => setModalPostingVisible(false)}
-      >
-        <MaterialCommunityIcons name="close" size={35} color="white" />
-      </TouchableOpacity>
+    <View style={styles.modalWrapper}>
+      <View style={styles.closeButtonBar}>
+        <TouchableOpacity
+          style={styles.closeButton}
+          onPress={() => setModalPostingVisible(false)}
+        >
+          <MaterialCommunityIcons name="close" size={35} color="white" />
+        </TouchableOpacity>
+      </View>
       <ScrollView contentContainerStyle={styles.modalContainer} showsVerticalScrollIndicator={false}>
         <View style={styles.galleryContainer}>
           <Gallery
@@ -181,19 +248,23 @@ export default function MarketplaceViewProfileScreen() {
                   </View>
                 </View>
                 <View style={styles.sectionContainerContactInfo}>
-                {profileInfo.marketplace_email ? 
-                    <View style={styles.itemRow2}>
-                      <MaterialCommunityIcons name={"email"} size={25} color={"white"} />
-                      <StyledText bold style={styles.contactInfoText}>Email:</StyledText>
-                      <StyledText style={styles.contactInfoText2}>{profileInfo.marketplace_email}</StyledText>
-                    </View>
+                {profileInfo.marketplace_email ?
+                    <TouchableOpacity onPress={handleEmail}>
+                      <View style={styles.itemRow2}>
+                        <MaterialCommunityIcons name={"email"} size={25} color={"white"} />
+                        <StyledText bold style={styles.contactInfoText}>Email:</StyledText>
+                        <StyledText style={styles.contactInfoText2}>{profileInfo.marketplace_email}</StyledText>
+                      </View>
+                    </TouchableOpacity>
                     :null}
                     {profileInfo.marketplace_phone ? 
-                    <View style={styles.itemRow2}>
-                      <MaterialCommunityIcons name={"phone"} size={25} color={"white"} />
-                      <StyledText bold style={styles.contactInfoText}>Phone:</StyledText>
-                      <StyledText style={styles.contactInfoText2}>{profileInfo.marketplace_phone}</StyledText>
-                    </View>
+                    <TouchableOpacity onPress={handlePhoneCall}>
+                      <View style={styles.itemRow2}>
+                        <MaterialCommunityIcons name={"phone"} size={25} color={"white"} />
+                        <StyledText bold style={styles.contactInfoText}>Phone:</StyledText>
+                        <StyledText style={styles.contactInfoText2}>{profileInfo.marketplace_phone}</StyledText>
+                      </View>
+                    </TouchableOpacity>
                     :null}
                   </View>
             </View>
@@ -215,82 +286,120 @@ export default function MarketplaceViewProfileScreen() {
           </View>
         </View>
       </ScrollView>
+    </View>
     </Modal>
+  );
+
+  const renderStaticContent = () => (
+    <>
+      {/* Top Section */}
+      <View style={styles.topSectionContainer}>
+        <View style={styles.leftContent}>
+          <View style={[styles.avatarContainer, styles.marginBottom3]}>
+            <Avatar uri={profileInfo.image_url} />
+          </View>
+        </View>
+        <View style={styles.rightContent}>
+          <Text style={styles.farmName}>
+            {profileInfo.role_type === 'farm' ? (
+              <StyledText big bold>
+                {`${profileInfo.name}`}
+              </StyledText>
+            ) : profileInfo.role_type === 'employee' ? (
+              <StyledText big bold>
+                {`${profileInfo.first_name} ${profileInfo.last_name}`}
+              </StyledText>
+            ) : null}
+          </Text>
+          <Text style={styles.farmAddress}>
+            <StyledText>{`${profileInfo.city}, ${profileInfo.state}`}</StyledText>
+          </Text>
+        </View>
+      </View>
+      {/* Contact Info Section */}
+      <View style={styles.farmBioContainer}>
+        <StyledText big style={styles.farmBioTitle}>
+          Contact Information
+        </StyledText>
+        <View style={styles.sectionContainerContactInfo}>
+          {profileInfo.marketplace_email ?
+            <TouchableOpacity onPress={handleEmail}>
+              <View style={styles.itemRow2}>
+                <MaterialCommunityIcons name={"email"} size={25} color={"white"} />
+                <StyledText bold style={styles.contactInfoText}>Email:</StyledText>
+                <StyledText style={styles.contactInfoText2}>{profileInfo.marketplace_email}</StyledText>
+              </View>
+            </TouchableOpacity>
+          :null}
+            {profileInfo.marketplace_phone ?
+            <TouchableOpacity onPress={handlePhoneCall}>
+              <View style={styles.itemRow2}>
+                <MaterialCommunityIcons name={"phone"} size={25} color={"white"} />
+                <StyledText bold style={styles.contactInfoText}>Phone:</StyledText>
+                <StyledText style={styles.contactInfoText2}>{profileInfo.marketplace_phone}</StyledText>
+              </View>
+            </TouchableOpacity>
+          :null}
+        </View>
+      </View>
+
+      {/* Bio Section */}
+      <View style={styles.farmBioContainer}>
+        <StyledText big style={styles.farmBioTitle}>
+          About
+        </StyledText>
+        {profileInfo.bio && profileInfo.bio.length !== 0 ? (
+          <StyledText style={styles.farmBioText}>{`${profileInfo.bio}`}</StyledText>
+        ) : (
+          <StyledText style={styles.farmBioText}>No bio available for this User.</StyledText>
+        )}
+      </View>
+
+      {/* Listing Title and Count */}
+      <View style={styles.farmPostingTitleContatiner}>
+        <StyledText bold style={styles.postingActiveTitle}>
+          {profileInfo.role_type === 'farm'
+            ? `${profileInfo.name}'s listings`
+            : `${profileInfo.first_name} ${profileInfo.last_name}'s listings`}
+        </StyledText>
+        <StyledText bold style={styles.postingAmountText}>
+          {marketplacePostings.length === 1
+            ? `${marketplacePostings.length} active listing`
+            : `${marketplacePostings.length} active listings`}
+        </StyledText>
+      </View>
+    </>
+  );
+
+  const renderEmptyList = () => (
+    <StyledText bold style={styles.postingsNotFoundText}>
+      {profileInfo.role_type === 'farm'
+        ? `${profileInfo.name} has no listings at this time.`
+        : `${profileInfo.first_name} ${profileInfo.last_name} has no listings at this time.`}
+    </StyledText>
+  );
+
+  const renderItem = ({ item }) => (
+    <View style={styles.postingItemsContainer}>{renderPostingItem({ item })}</View>
   );
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
-      <View style={styles.content}>
-        <KeyboardAvoidingContainer>
-            <View style={styles.container2}>
-          <View style={styles.topSectionContainer}>
-            <View style={styles.leftContent}>
-              <View style={[styles.avatarContainer, styles.marginBottom3]}>
-                <Avatar uri={profileInfo.image_url} />
-              </View>
-            </View>
-            <View style={styles.rightContent}>
-              <Text style={styles.farmName}>
-                { profileInfo.role_type === 'farm' ?
-                  <StyledText big bold >
-                    {`${profileInfo.name}`}
-                  </StyledText>
-                : profileInfo.role_type === 'employee' ?
-                  <StyledText big bold >
-                    {`${profileInfo.first_name} ${profileInfo.last_name}`}
-                  </StyledText>
-                : null}
-              </Text>
-              <Text style={styles.farmAddress}>
-                <StyledText>
-                  {`${profileInfo.city}, ${profileInfo.state}`}
-                </StyledText>
-              </Text>
-            </View>
+      <FlatList
+        data={marketplacePostings}
+        keyExtractor={(item) => item.id.toString()} // Ensure unique keys
+        numColumns={2} // Set grid layout with 2 columns
+        columnWrapperStyle={{ justifyContent: 'space-between', backgroundColor: '#3A4D39', }} // Proper spacing for rows
+        renderItem={({ item }) => (
+          <View style={styles.postingItemContainer}>
+            {renderPostingItem({ item })}
           </View>
-          <View style={styles.farmBioContainer}>
-            <StyledText big style={styles.farmBioTitle}>
-              About
-            </StyledText>
-            {profileInfo.bio && profileInfo.bio.length !== 0 ? 
-              <StyledText style={styles.farmBioText}>
-                {`${profileInfo.bio}`}
-              </StyledText>
-              :
-              <StyledText style={styles.farmBioText}>No bio available for this User.</StyledText> 
-            }
-          </View>
-          <View style={styles.postingsContainer}>
-          {marketplacePostings.length === 0 ? (
-            <StyledText bold style={styles.postingsNotFoundText}>
-              {profileInfo.role_type === 'farm'
-                ? `${profileInfo.name} has no listings at this time.`
-                : `${profileInfo.first_name} ${profileInfo.last_name} has no listings at this time.`}
-            </StyledText>
-          ) : (
-            <>
-              <StyledText bold style={styles.postingActiveTitle}>
-                {profileInfo.role_type === 'farm'
-                  ? `${profileInfo.name}'s listings`
-                  : `${profileInfo.first_name} ${profileInfo.last_name}'s listings`}
-              </StyledText>
-              <StyledText bold style={styles.postingAmountText}>
-                {marketplacePostings.length ==+ 1 
-                ? `${marketplacePostings.length} active listing`
-                : `${marketplacePostings.length} active listings`} 
-              </StyledText>
-              {marketplacePostings.map((item) => (
-                <View key={item.id} style={styles.postingItemsContainer}>
-                  {renderPostingItem({ item })}
-                </View>
-              ))}
-            </>
-          )}
-        </View>
-        </View>
-        </KeyboardAvoidingContainer>
-      </View>
+        )}
+        ListHeaderComponent={renderStaticContent} // Static content as header
+        ListEmptyComponent={renderEmptyList} // Empty state
+      />
+      <View style={styles.containerBelowPostingList}></View>
       {renderPostingModal()}
     </View>
   );
@@ -300,7 +409,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#4F6F52',
-    marginBottom: -35,
   },
   container2: {
     alignItems: 'center',
@@ -424,6 +532,7 @@ const styles = StyleSheet.create({
     minWidth: '100%',
   },
   postingItemsContainer: {
+    flexDirection: 'row',
     letterSpacing: 1,
     marginBottom: 10,
     minWidth: '100%',
@@ -545,12 +654,28 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     justifyContent: 'flex-start',
   },
+  modalWrapper: {
+    flex: 1,
+    backgroundColor: '#3A4D39', // Modal background
+  },
   closeButton: {
     position: 'absolute',
     borderRadius: 30,
     top: 60,
     right: 20,
     zIndex: 1,
+  },
+  closeButtonBar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 105,
+    backgroundColor: '#3A4D39', // Background for the close button bar
+    justifyContent: 'center',
+    alignItems: 'flex-end',
+    zIndex: 10, // Ensure it stays above the ScrollView
+    paddingHorizontal: 20,
   },
   galleryContainer: {
     marginTop: 110,
@@ -644,5 +769,19 @@ const styles = StyleSheet.create({
   sectionContainerContactInfo: {
     marginTop: 5,
     width: '100%',
+  },
+  postingItemContainer: {
+    flex: 1, // Ensure items take up equal width
+    marginHorizontal: 10, // Adjust spacing between items
+    backgroundColor: '#3A4D39',
+    marginBottom: 10,
+  },
+  farmPostingTitleContatiner: {
+    paddingHorizontal: 10,
+    backgroundColor: '#3A4D39',
+    shadowRadius: 20,
+    shadowColor: 'black',
+    shadowOpacity: 0.3,
+    minWidth: '100%',
   },
 });
