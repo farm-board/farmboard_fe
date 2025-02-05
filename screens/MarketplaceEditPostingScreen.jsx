@@ -15,172 +15,104 @@ import { baseUrl } from '../config';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function MarketplaceAddPostingScreen() {
+export default function MarketplaceEditPostingScreen({ route }) {
   const [data, setData] = useState({
     title: '',
     price: '',
     description: '',
     condition: '',
     images: '',
-    phone: '',
-    email: '',
   });
+
   const conditionList = ['New', 'Used: Like New', 'Used: Good', 'Used: Fair', 'Used: Bad'];
   const [galleryImages, setGalleryImages] = useState([]);
-  const [marketplacePostingId, setMarketplacePostingId] = useState('');
   const width = Dimensions.get('window').width;
   const navigation = useNavigation();
-  const route = useRoute();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const { currentUser, setRefresh, refresh, setProfileRefresh, profileRefresh } = useContext(UserContext);
   const [userData, setUserData] = useState({});
-  const [isLoading, setIsLoading] = useState(true); 
+  const [isLoading, setIsLoading] = useState(true);
+  const { postingId } = route.params; 
 
-  const handleDeletePosting = async () => {
-    if (marketplacePostingId) {
-      try {
-        await axios.delete(`${baseUrl}/api/v1/users/${currentUser.id}/marketplace_postings/${marketplacePostingId}`);
-        console.log('Posting deleted successfully');
-      } catch (error) {
-        console.error('Error deleting posting:', error);
-      }
-    }
+  const handleDeletePosting = () => {
+    Alert.alert(
+      'Delete Posting', "Are you sure you want to delete this posting?",
+      [
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel'
+        },
+        {
+          text: 'Delete',
+          onPress: () => {
+            axios.delete(`${baseUrl}/api/v1/users/${currentUser.id}/marketplace_postings/${postingId}`)
+            .then(response => {
+              console.log('Posting deleted:', postingId);
+              Alert.alert('Posting deleted');
+              navigation.goBack();
+              setRefresh(true);
+              setProfileRefresh(true);
+            })
+            .catch(error => {
+              console.log('Unable to delete posting', error);
+            });
+          }
+        }
+      ]
+    );
   };
 
-  useEffect(() => {
-    setIsLoading(true);
-    fetchUserData();
-    console.log('userData:', userData);
-  }, []);
 
-  useEffect(() => {
-    // Listen to `beforeRemove` event
-    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
-      if (isSubmitting) {
-        // If form is being submitted, allow the default behavior (i.e., don't show the discard alert)
-        return;
-      }
-  
-      if (marketplacePostingId) {
-        // Prevent default behavior of leaving the screen
-        e.preventDefault();
-  
-        // Ask the user if they want to delete the draft
-        Alert.alert(
-          'Discard Posting?',
-          'Do you want to discard this posting?',
-          [
-            { text: 'Cancel', style: 'cancel', onPress: () => {} },
-            {
-              text: 'Discard',
-              style: 'destructive',
-              onPress: async () => {
-                await handleDeletePosting();
-                // After deletion, navigate back
-                navigation.dispatch(e.data.action);
-              }
-            }
-          ]
-        );
-      }
+  const fetchPosting = (postingId) => {
+    console.log('Posting ID:', postingId );
+    axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/marketplace_postings/${postingId}`)
+    .then((postingsResponse) => {
+      console.log('Posting:', postingsResponse.data.data);
+      setData(postingsResponse.data.data);
+    })
+    .catch(error => {
+      console.error("There was an error fetching the farm's postings:", error);
     });
-  
-    return unsubscribe; // Cleanup the event listener on unmount
-  }, [navigation, isSubmitting, marketplacePostingId]);
-
-  const fetchUserData = async () => {
-    try {
-      if (currentUser.role_type === 'employee') {
-        const response = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/employees`);
-        console.log('User data:', response.data.data);
-        setUserData(response.data.data);
-        setIsLoading(false);
-      } else if (currentUser.role_type === 'farm') {
-        const response = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/farms`);
-        console.log('User data:', response.data.data);
-        setUserData(response.data.data);
-        setIsLoading(false);
-      }
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-    } finally {
-      setIsLoading(false); // Ensure loading state is cleared
-    }
   };
 
   const handleSubmit = async () => {
-    if (!data.title || !data.price || !data.description || !data.condition) {
-      console.log("current user:", currentUser)
+    // Validate fields inside data.attributes
+    if (
+      !data.attributes?.title || 
+      !data.attributes?.price || 
+      !data.attributes?.description || 
+      !data.attributes?.condition
+    ) {
+      console.log("current user:", currentUser);
       Alert.alert('Posting Incomplete', 'All fields are required.');
       return;
     }
-
-    if (
-      (userData.attributes.marketplace_phone === null && !data.phone) && 
-      (userData.attributes.marketplace_email === null && !data.email)
-    ) {
-      Alert.alert('Contact Info Required', 'Please provide a phone number or email address.');
-      return;
-    }
   
-    setIsSubmitting(true); // Set form submission state to true
-
+    const postData = {
+      title: data.attributes.title,
+      price: data.attributes.price,
+      description: data.attributes.description,
+      condition: data.attributes.condition,
+    };
+  
     try {
-      // Update contact data if necessary
-      if (userData.attributes.marketplace_phone === null || userData.attributes.marketplace_email === null) {
-        const contactData = {};
-        
-        if (userData.attributes.marketplace_phone === null && data.phone) {
-          contactData.marketplace_phone = data.phone;
-        }
-        
-        if (userData.attributes.marketplace_email === null && data.email) {
-          contactData.marketplace_email = data.email;
-        }
-        
-        if (Object.keys(contactData).length > 0) {
-          console.log('Updating contact info with:', contactData);
-    
-          if (userData.type === 'employee') {
-            await axios.put(`${baseUrl}/api/v1/users/${currentUser.id}/employees`, { employee: contactData });
-          }
-          if (userData.type === 'farm') {
-            await axios.put(`${baseUrl}/api/v1/users/${currentUser.id}/farms`, { farm: contactData });
-          }
-        }
-      }
-    
-      // Prepare postData and update posting
-      const postData = {
-        title: data.title,
-        price: data.price,
-        description: data.description,
-        condition: data.condition,
-      };
-    
-      console.log('Updating posting with:', postData);
-    
-      let response = await axios.put(
-        `${baseUrl}/api/v1/users/${currentUser.id}/marketplace_postings/${marketplacePostingId}`,
-        { marketplace_posting: postData }
-      );
-    
+      let response = await axios.put(`${baseUrl}/api/v1/users/${currentUser.id}/marketplace_postings/${postingId}`, { marketplace_posting: postData });
+  
       setRefresh(true);
       setProfileRefresh(true);
-      Alert.alert('Success', 'Posting created successfully!');
+      Alert.alert('Success', 'Posting updated successfully!');
     } catch (error) {
-      console.log('Unable to update posting:', error.response ? error.response.data : error.message);
-      Alert.alert('Error', 'An error occurred while creating the posting.');
+      console.log('Unable to update posting', error);
+      Alert.alert('Error', 'An error occurred while updating the posting.');
     } finally {
-      setIsSubmitting(false);
-      navigation.goBack();
+      navigation.goBack(); // Navigate back after successful submission
     }
   };
 
   const uploadGalleryImage = async (uri) => {
     try {
-      if (!marketplacePostingId) {
-        console.log('MarketPlacePostingId is undefined');
+      if (!postingId) {
+        console.log('postingId is undefined');
         return;
       }
   
@@ -188,11 +120,11 @@ export default function MarketplaceAddPostingScreen() {
       formData.append('gallery_photo', {
         uri,
         type: 'image/jpeg',
-        name: `posting_${marketplacePostingId}.jpg`,
+        name: `posting_${postingId}.jpg`,
       });
   
-      // Upload image to Amazon S3 using marketplacePostingId
-      let response = await axios.post(`${baseUrl}/api/v1/users/${currentUser.id}/marketplace_postings/${marketplacePostingId}/upload_gallery_photo`, formData, {
+      // Upload image to Amazon S3 using postingId
+      let response = await axios.post(`${baseUrl}/api/v1/users/${currentUser.id}/marketplace_postings/${postingId}/upload_gallery_photo`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -215,7 +147,7 @@ export default function MarketplaceAddPostingScreen() {
         return;
       } else {
 
-      const galleryResponse = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/marketplace_postings/${marketplacePostingId}/gallery_photos`);
+      const galleryResponse = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/marketplace_postings/${postingId}/gallery_photos`);
       console.log('Fetched gallery images from API:', galleryResponse.data.gallery_photos);
       setGalleryImages(galleryResponse.data.gallery_photos);
       await AsyncStorage.setItem('posting_gallery_images', JSON.stringify(galleryResponse.data.gallery_photos));
@@ -263,7 +195,7 @@ export default function MarketplaceAddPostingScreen() {
           text: 'Delete',
           onPress: async () => {
             try {
-              await axios.delete(`${baseUrl}/api/v1/users/${currentUser.id}/marketplace_postings/${marketplacePostingId}/delete_gallery_photo/${photoId}`);
+              await axios.delete(`${baseUrl}/api/v1/users/${currentUser.id}/marketplace_postings/${postingId}/delete_gallery_photo/${photoId}`);
               console.log('Deleted photo:', photoId);
               setGalleryImages(galleryImages.filter(galleryPhoto => galleryPhoto.id !== photoId));
               setProfileRefresh(true);
@@ -277,44 +209,16 @@ export default function MarketplaceAddPostingScreen() {
   };
 
   useEffect(() => {
-    const createDraftPosting = async () => {
-      const postData = {
-        title: data.title,
-        price: data.price,
-        description: data.description,
-        condition: data.condition,
-      };
-      try {
-        let response = await axios.post(`${baseUrl}/api/v1/users/${currentUser.id}/marketplace_postings/${marketplacePostingId}`, { marketplace_posting: postData });
-        setMarketplacePostingId(response.data.data.id); // Save the marketplacePostingId
-        console.log("marketplace posting ID:", response.data.data.id)
-      } catch (error) {
-        console.log('Error creating draft posting:', error);
-      }
-    };
-  
-    createDraftPosting();
-  }, []);
-
-  useEffect(() => {
-    if (refresh || profileRefresh) {
-      // Check the sourceStack parameter and navigate accordingly
-      if (route.params.sourceStack === 'Profile') {
-        navigation.navigate('Profile');
-      } else if (route.params.sourceStack === 'Home') {
-        navigation.navigate('Home');
-      }
+    if (postingId) {
+      console.log('Fetching Posting for ID:', postingId);
+      fetchPosting(postingId);
+      fetchGalleryImages(true);
+      setIsLoading(false);
+    } else {
+      console.error('postingId is undefined.');
+      setIsLoading(false);
     }
-  }, [refresh]);
-
-  const formatPhoneNumber = (text) => {
-    const cleaned = ('' + text).replace(/\D/g, '');
-    const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
-    if (match) {
-      return `(${match[1]}) ${match[2]}-${match[3]}`;
-    }
-    return text;
-  };
+  }, [postingId]);
 
   const { loading } = useContext(UserContext);
 
@@ -362,9 +266,10 @@ export default function MarketplaceAddPostingScreen() {
                 placeholder="Posting Title"
                 icon="clipboard-edit-outline"
                 label="Posting Title:"
+                value={data.attributes?.title} // Fallback to an empty string if undefined
                 maxLength={45}
                 labelStyle={{ fontSize: 18, color: 'white' }}
-                onChangeText={(text) => setData({ ...data, title: text })}
+                onChangeText={(text) => setData({ ...data, attributes: { ...data.attributes, title: text } })}
               />
             </Animated.View>
             <View style={styles.paymentInfo}>
@@ -373,9 +278,10 @@ export default function MarketplaceAddPostingScreen() {
                   placeholder="Price"
                   icon="currency-usd"
                   label="Price:"
+                  value={data.attributes?.price}
                   labelStyle={{ fontSize: 18, color: 'white' }}
                   keyboardType="numeric"
-                  onChangeText={(text) => setData({ ...data, price: text })}
+                  onChangeText={(text) => setData({ ...data, attributes: { ...data.attributes, price: text } })}
                 />
               </Animated.View>
               <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.inputContainerPayment}>
@@ -383,8 +289,9 @@ export default function MarketplaceAddPostingScreen() {
                   listData={conditionList}
                   fieldPlaceholder="Condition"
                   label="Condition:"
+                  value={data.attributes?.condition}
                   labelStyle={{ fontSize: 18, color: 'white' }}
-                  onSelect={(selectedItem) => setData({ ...data, condition: selectedItem })}
+                  onSelect={(selectedItem) => setData({ ...data, attributes: { ...data.attributes, condition: selectedItem } })}
                 />
               </Animated.View>
             </View>
@@ -395,47 +302,24 @@ export default function MarketplaceAddPostingScreen() {
                 multiline={true}
                 maxLength={3000}
                 label="Description:"
+                value={data.attributes?.description}
                 labelStyle={{ fontSize: 18, color: 'white' }}
-                onChangeText={(text) => setData({ ...data, description: text })}
+                onChangeText={(text) => setData({ ...data, attributes: { ...data.attributes, description: text } })}
               />
             </Animated.View>
-            {userData.attributes.marketplace_phone === null && userData.attributes.marketplace_email === null ?
-              <>
-                <Animated.View
-                  entering={FadeInDown.delay(800).duration(1000).springify()}
-                  style={styles.contactInfoContainer}
-                >
-                  <Text style={styles.contactInfoTitle}>
-                    One of the following contact methods is required to create a posting:
-                  </Text>
-                  <StyledTextInput
-                    placeholder="Phone"
-                    icon="phone"
-                    label="Phone:"
-                    maxLength={14} // Adjust max length for formatted phone number
-                    labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
-                    keyboardType="numeric"
-                    value={data.phone}
-                    onChangeText={(text) => setData({ ...data, phone: formatPhoneNumber(text) })}
-                  />
-                  <StyledTextInput
-                    placeholder="Email"
-                    icon="email"
-                    label="Email:"
-                    labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
-                    onChangeText={(text) => setData({ ...data, email: text })}
-                  />
-                  <Text style={styles.contactInfoDisclaimer}>
-                    This will only need to be added once, but can be updated at any time in your profile settings.
-                  </Text>
-                </Animated.View>
-              </>
-              : null}
             <Animated.View entering={FadeInDown.delay(1400).duration(1000).springify()} style={styles.submitButtonContainer}>
               <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-                <Text style={styles.submitButtonText}>Create Posting</Text>
+                <Text style={styles.submitButtonText}>Update Posting</Text>
                 <View style={styles.submitArrow}>
                   <MaterialCommunityIcons name="arrow-right" size={24} color="white" />
+                </View>
+              </TouchableOpacity>
+            </Animated.View>
+            <Animated.View entering={FadeInDown.delay(1600).duration(1000).springify()} style={styles.deleteButtonContainer}>
+              <TouchableOpacity style={styles.deleteButton} onPress={handleDeletePosting}>
+                <Text style={styles.deleteButtonText}>Remove Posting</Text>
+                <View style={styles.deleteIcon}>
+                  <MaterialCommunityIcons name="trash-can-outline" size={24} color="white" />
                 </View>
               </TouchableOpacity>
             </Animated.View>

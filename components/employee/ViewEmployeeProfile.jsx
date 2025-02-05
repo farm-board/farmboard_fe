@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Modal, Linking } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Modal, Linking, Alert } from 'react-native';
 import { UserContext } from '../../contexts/UserContext';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import axios from 'axios';
@@ -73,7 +73,45 @@ export default function ViewEmployeeProfile() {
   }
 
   const handlePhoneCall = () => {
-    Linking.openURL(`tel:${employee.phone}`);
+    Alert.alert(
+      "Open Phone App",
+      `You will be taken out of the app to call: ${employee.phone}. Do you want to continue?`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Continue",
+          onPress: () => {
+            Linking.openURL(`tel:${employee.phone}`).catch((err) =>
+              console.warn('Failed to open phone app:', err)
+            );
+          },
+        },
+      ]
+    );
+  };
+
+  const handleEmail = () => {
+    Alert.alert(
+      "Open Email App",
+      `You will be taken out of the app to send an email to: ${employee.email}. Do you want to continue?`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Continue",
+          onPress: () => {
+            Linking.openURL(`mailto:${employee.email}`).catch((err) =>
+              console.warn('Failed to open email app:', err)
+            );
+          },
+        },
+      ]
+    );
   };
 
   const renderContactModal = () => (
@@ -90,8 +128,10 @@ export default function ViewEmployeeProfile() {
             <Text style={styles.contactInfo}>{`Phone: `}</Text>
             <Text style={styles.contactInfo}>{employee.phone}</Text>
           </TouchableOpacity>
-          <Text style={styles.contactInfo}>{`Email: `}</Text>
-          <Text style={styles.contactInfo}>{employee.email}</Text>
+          <TouchableOpacity onPress={handleEmail}>
+            <Text style={styles.contactInfo}>{`Email: `}</Text>
+            <Text style={styles.contactInfo}>{employee.email}</Text>
+          </TouchableOpacity>
           <TouchableOpacity style={styles.closeButton} onPress={toggleContactModal}>
             <Text style={styles.closeButtonText}>Close</Text>
           </TouchableOpacity>

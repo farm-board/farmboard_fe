@@ -36,13 +36,30 @@ export default function FarmProfileEditDetails() {
     "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota",
     "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington",
     "West Virginia", "Wisconsin", "Wyoming"
-]
+  ]
 
   const navigation = useNavigation();
   const { currentUser, setUserName, setProfileRefresh, setEditProfileRefresh, editProfileRefresh, profileRefresh } = useContext(UserContext);
 
 
   const handleSubmit = async () => {
+    if (!data.name) {
+      Alert.alert('Incomplete Farm Info', 'A name for the farm is required.');
+      return;
+    }
+    if (!data.city) {
+
+      Alert.alert('Incomplete Farm Info', 'A City for the farm is required.');
+      return;
+    }
+    if (!data.state) {
+      Alert.alert('Incomplete Farm Info', 'A state for the farm is required.');
+      return;
+    }
+    if (!data.zip_code) {
+      Alert.alert('Incomplete Farm Info', 'A Zip Code for the farm is required.');
+      return;
+    }
     try {
       await axios.put(`${baseUrl}/api/v1/users/${currentUser.id}/farms`, { farm: data})
       console.log('Updated farm data');
@@ -61,7 +78,7 @@ export default function FarmProfileEditDetails() {
     Promise.all([
       axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/farms`),
     ])
-    .then(([farmResponse, imageResponse]) => {
+    .then(([farmResponse]) => {
       setData({
         ...data,
         name: farmResponse.data.data.attributes.name,

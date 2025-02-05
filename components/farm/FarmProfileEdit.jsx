@@ -30,7 +30,9 @@ export default function FarmProfileEdit() {
     city: '',
     zip_code: '',
     bio: '',
-    image: null
+    image: null,
+    marketplace_phone: '',
+    marketplace_email: ''
   })
 
   const width = Dimensions.get('window').width;
@@ -189,7 +191,7 @@ export default function FarmProfileEdit() {
       if (!refresh) {
         const cachedFarm = await AsyncStorage.getItem('farm');
         if (cachedFarm !== null) {
-          console.log('Loaded farm data from cache');
+          console.log('Loaded farm data from cache', JSON.parse(cachedFarm));
           setData(prevData => ({
             ...prevData,
             name: JSON.parse(cachedFarm).name,
@@ -197,6 +199,8 @@ export default function FarmProfileEdit() {
             city: JSON.parse(cachedFarm).city,
             zip_code: JSON.parse(cachedFarm).zip_code,
             bio: JSON.parse(cachedFarm).bio,
+            marketplace_phone: JSON.parse(cachedFarm).marketplace_phone,
+            marketplace_email: JSON.parse(cachedFarm).marketplace_email
           }));
         } else {
           const farmResponse = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/farms`);
@@ -208,6 +212,8 @@ export default function FarmProfileEdit() {
             city: farmResponse.data.data.attributes.city,
             zip_code: farmResponse.data.data.attributes.zip_code,
             bio: farmResponse.data.data.attributes.bio,
+            marketplace_phone: farmResponse.data.data.attributes.marketplace_phone,
+            marketplace_email: farmResponse.data.data.attributes.marketplace_email
           }));
           await AsyncStorage.setItem('farm', JSON.stringify(farmResponse.data.data.attributes));
         }
@@ -221,6 +227,8 @@ export default function FarmProfileEdit() {
           city: farmResponse.data.data.attributes.city,
           zip_code: farmResponse.data.data.attributes.zip_code,
           bio: farmResponse.data.data.attributes.bio,
+          marketplace_phone: farmResponse.data.data.attributes.marketplace_phone,
+          marketplace_email: farmResponse.data.data.attributes.marketplace_email
         }));
         await AsyncStorage.setItem('farm', JSON.stringify(farmResponse.data.data.attributes));
       }
@@ -404,8 +412,35 @@ export default function FarmProfileEdit() {
               </StyledText>
             </ProfileInfo>
             </Animated.View>
-            {/* Submit button */}
           </View>
+            { data.marketplace_phone || data.marketplace_email ?
+              <View style={styles.inputContainer}>
+                  <View>
+                    <SectionHeader
+                      option="Edit"
+                      onPress={() =>
+                        navigation.navigate("Farm Profile Edit Marketplace Contact Info")
+                      }
+                      >
+                      Marketplace Contact Info
+                    </SectionHeader>
+                    { data.marketplace_phone ?
+                    <Animated.View entering={FadeInDown.delay(1000).duration(1000).springify()} style={styles.inputItem}>
+                      <ProfileInfo label="Phone Number" icon="phone">
+                        <StyledText style={styles.existingData}>{data.marketplace_phone}</StyledText>
+                      </ProfileInfo>
+                    </Animated.View>
+                    : null }
+                    { data.marketplace_email ?
+                    <Animated.View entering={FadeInDown.delay(1200).duration(1000).springify()} style={styles.inputItem}>
+                      <ProfileInfo label="Email" icon="email">
+                        <StyledText style={styles.existingData}>{data.marketplace_email.length > 15 ? `${data.marketplace_email.substring(0, 15)}...` : data.marketplace_email}</StyledText>
+                      </ProfileInfo>
+                    </Animated.View>
+                    : null }
+                  </View>
+              </View>
+             : null}
           <View style={styles.inputContainer}>
             { Object.keys(accommodations).length === 0 ?
               <View>
@@ -428,17 +463,17 @@ export default function FarmProfileEdit() {
                   >
                   Accommodation Info
                 </SectionHeader>
-                <Animated.View entering={FadeInDown.delay(1000).duration(1000).springify()} style={styles.inputItem}>
+                <Animated.View entering={FadeInDown.delay(1400).duration(1000).springify()} style={styles.inputItem}>
                   <ProfileInfo label="Offers Housing" icon="home-outline">
                     <StyledText style={styles.existingData}>{accommodations.housing === true ? "Yes" : "No"}</StyledText>
                   </ProfileInfo>
                 </Animated.View>
-                <Animated.View entering={FadeInDown.delay(1200).duration(1000).springify()} style={styles.inputItem}>
+                <Animated.View entering={FadeInDown.delay(1600).duration(1000).springify()} style={styles.inputItem}>
                   <ProfileInfo label="Offers Meals" icon="food-apple-outline">
                     <StyledText style={styles.existingData}>{accommodations.meals === true ? "Yes" : "No"}</StyledText>
                   </ProfileInfo>
                 </Animated.View>
-                <Animated.View entering={FadeInDown.delay(1400).duration(1000).springify()} style={styles.inputItem}>
+                <Animated.View entering={FadeInDown.delay(1800).duration(1000).springify()} style={styles.inputItem}>
                   <ProfileInfo label="Offers Transportation" icon="car-outline">
                     <StyledText style={styles.existingData}>{accommodations.transportation === true ? "Yes" : "No"}</StyledText>
                   </ProfileInfo>
@@ -493,7 +528,8 @@ const styles = StyleSheet.create({
   inputContainer: { 
     backgroundColor: '#3A4D39',
     width: '100%',
-    padding: 20,
+    paddingBottom: 40,
+    paddingHorizontal: 20,
   },
   inputItem: {
     minWidth: '100%',
@@ -542,7 +578,7 @@ const styles = StyleSheet.create({
   addImageContainer: {
     width: '100%',
     backgroundColor: '#3A4D39',
-    paddingBottom: 20,
+    paddingBottom: 40,
   },
   addImageButton: {
     backgroundColor: 'white',

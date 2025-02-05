@@ -26,8 +26,11 @@ export default function EmployeeProfileEdit() {
     skills: [],
     bio: '',
     age: '',
-    image: null
+    image: null,
+    marketplace_phone: '',
+    marketplace_email: ''
   });
+
   const [experiences, setExperiences] = useState([]);
   const [references, setReferences] = useState([]);
 
@@ -137,7 +140,9 @@ export default function EmployeeProfileEdit() {
         skills: employeeResponse.data.data.attributes.skills,
         bio: employeeResponse.data.data.attributes.bio,
         age: employeeResponse.data.data.attributes.age,
-        image: imageResponse.data.image_url || prevData.image,  // Maintain previous image if not updated
+        image: imageResponse.data.image_url || prevData.image,
+        marketplace_phone: employeeResponse.data.data.attributes.marketplace_phone,
+        marketplace_email: employeeResponse.data.data.attributes.marketplace_email
       }));
     } catch (error) {
       console.error('There was an error fetching the employee:', error);
@@ -351,6 +356,34 @@ export default function EmployeeProfileEdit() {
             </TouchableOpacity>
           )}
         </View>
+        { data.marketplace_phone || data.marketplace_email ?
+          <View style={styles.inputContainerContactInfo}>
+              <View>
+                <SectionHeader
+                  option="Edit"
+                  onPress={() =>
+                    navigation.navigate("Employee Profile Edit Marketplace Contact Info")
+                  }
+                  >
+                  Marketplace Contact Info
+                </SectionHeader>
+                { data.marketplace_phone ?
+                <Animated.View entering={FadeInDown.delay(1000).duration(1000).springify()} style={styles.inputItem}>
+                  <ProfileInfo label="Phone Number" icon="phone">
+                    <StyledText style={styles.existingData}>{data.marketplace_phone}</StyledText>
+                  </ProfileInfo>
+                </Animated.View>
+                : null }
+                { data.marketplace_email ?
+                <Animated.View entering={FadeInDown.delay(1200).duration(1000).springify()} style={styles.inputItem}>
+                  <ProfileInfo label="Email" icon="email">
+                    <StyledText style={styles.existingData}>{data.marketplace_email.length > 15 ? `${data.marketplace_email.substring(0, 15)}...` : data.marketplace_email}</StyledText>
+                  </ProfileInfo>
+                </Animated.View>
+                : null }
+              </View>
+          </View>
+          : null}
         {/* UploadModal component */}
         <UploadModal
           modalVisible={modalVisible}
@@ -391,8 +424,11 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     marginBottom: 25,
   },
-  inputContainer: {
+  inputContainerContactInfo: {
+    backgroundColor: '#3A4D39',
     width: '100%',
+    padding: 20,
+    paddingBottom: 40,
   },
   existingData: {
     color: 'black',

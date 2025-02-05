@@ -285,7 +285,6 @@ export default function EmployeeForm() {
 
 const styles = StyleSheet.create({
   container: {
-    paddingBottom: 25,
     paddingHorizontal: 10,
   },
   content: {
@@ -312,7 +311,6 @@ const styles = StyleSheet.create({
   submitButtonContainer: {
     width: '100%',
     alignItems: 'center',
-    marginBottom: 20,
     paddingTop: 15,
   },
   submitButton: {
