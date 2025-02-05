@@ -48,6 +48,7 @@ export default function MarketplaceAddPostingScreen() {
   };
 
   useEffect(() => {
+    setIsLoading(true);
     fetchUserData();
     console.log('userData:', userData);
   }, []);
@@ -93,10 +94,12 @@ export default function MarketplaceAddPostingScreen() {
         const response = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/employees`);
         console.log('User data:', response.data.data);
         setUserData(response.data.data);
+        setIsLoading(false);
       } else if (currentUser.role_type === 'farm') {
         const response = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/farms`);
         console.log('User data:', response.data.data);
         setUserData(response.data.data);
+        setIsLoading(false);
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -112,44 +115,65 @@ export default function MarketplaceAddPostingScreen() {
       return;
     }
 
-    if (userData.marketplace_phone === null && !data.phone || userData.marketplace_email === null && !data.email) {
+    if (
+      (userData.attributes.marketplace_phone === null && !data.phone) && 
+      (userData.attributes.marketplace_email === null && !data.email)
+    ) {
       Alert.alert('Contact Info Required', 'Please provide a phone number or email address.');
       return;
     }
   
     setIsSubmitting(true); // Set form submission state to true
-  
-    const postData = {
-      title: data.title,
-      price: data.price,
-      description: data.description,
-      condition: data.condition,
-    };
-
-    const contactData = {
-      marketplace_phone: data.phone,
-      marketplace_email: data.email,
-    };
 
     try {
-      if (userData.type === 'employee') {
-        await axios.put(`${baseUrl}/api/v1/users/${currentUser.id}/employees`, { employee: contactData });
+      // Update contact data if necessary
+      if (userData.attributes.marketplace_phone === null || userData.attributes.marketplace_email === null) {
+        const contactData = {};
+        
+        if (userData.attributes.marketplace_phone === null && data.phone) {
+          contactData.marketplace_phone = data.phone;
+        }
+        
+        if (userData.attributes.marketplace_email === null && data.email) {
+          contactData.marketplace_email = data.email;
+        }
+        
+        if (Object.keys(contactData).length > 0) {
+          console.log('Updating contact info with:', contactData);
+    
+          if (userData.type === 'employee') {
+            await axios.put(`${baseUrl}/api/v1/users/${currentUser.id}/employees`, { employee: contactData });
+          }
+          if (userData.type === 'farm') {
+            await axios.put(`${baseUrl}/api/v1/users/${currentUser.id}/farms`, { farm: contactData });
+          }
+        }
       }
-      if (userData.type === 'farm') {
-        await axios.put(`${baseUrl}/api/v1/users/${currentUser.id}/farms`, { farm: contactData });
-      }
-
-      let response = await axios.put(`${baseUrl}/api/v1/users/${currentUser.id}/marketplace_postings/${marketplacePostingId}`, { marketplace_posting: postData });
-  
+    
+      // Prepare postData and update posting
+      const postData = {
+        title: data.title,
+        price: data.price,
+        description: data.description,
+        condition: data.condition,
+      };
+    
+      console.log('Updating posting with:', postData);
+    
+      let response = await axios.put(
+        `${baseUrl}/api/v1/users/${currentUser.id}/marketplace_postings/${marketplacePostingId}`,
+        { marketplace_posting: postData }
+      );
+    
       setRefresh(true);
       setProfileRefresh(true);
       Alert.alert('Success', 'Posting created successfully!');
     } catch (error) {
-      console.log('Unable to update posting', error);
+      console.log('Unable to update posting:', error.response ? error.response.data : error.message);
       Alert.alert('Error', 'An error occurred while creating the posting.');
     } finally {
-      setIsSubmitting(false); // Reset form submission state after submission
-      navigation.goBack(); // Navigate back after successful submission
+      setIsSubmitting(false);
+      navigation.goBack();
     }
   };
 
@@ -336,7 +360,7 @@ export default function MarketplaceAddPostingScreen() {
             <Animated.View entering={FadeInDown.duration(1000).springify()} style={styles.inputContainer}>
               <StyledTextInput
                 placeholder="Posting Title"
-                icon="account-outline"
+                icon="clipboard-edit-outline"
                 label="Posting Title:"
                 maxLength={45}
                 labelStyle={{ fontSize: 18, color: 'white' }}
@@ -375,7 +399,7 @@ export default function MarketplaceAddPostingScreen() {
                 onChangeText={(text) => setData({ ...data, description: text })}
               />
             </Animated.View>
-            {userData.attributes.marketplace_phone === null || userData.attributes.marketplace_email === null ?
+            {userData.attributes.marketplace_phone === null && userData.attributes.marketplace_email === null ?
               <>
                 <Animated.View
                   entering={FadeInDown.delay(800).duration(1000).springify()}
@@ -391,6 +415,7 @@ export default function MarketplaceAddPostingScreen() {
                     maxLength={14} // Adjust max length for formatted phone number
                     labelStyle={{ fontSize: 18, color: 'white' }} // Custom label style
                     keyboardType="numeric"
+                    value={data.phone}
                     onChangeText={(text) => setData({ ...data, phone: formatPhoneNumber(text) })}
                   />
                   <StyledTextInput

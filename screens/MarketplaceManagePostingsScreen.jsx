@@ -151,47 +151,51 @@ export default function MarketplaceManagePostingsScreen() {
         setPostingProfilePhoto(null);
       }}
     >
-      <TouchableOpacity
-        style={styles.closeButton}
-        onPress={() => setModalPostingVisible(false)}
-      >
-        <MaterialCommunityIcons name="arrow-left" size={35} color="white" />
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.editButton}
-        onPress={() => handleEditPosting(selectedPosting.id)}
-      >
-        <StyledText style={styles.editText}>edit</StyledText>
-      </TouchableOpacity>
-      <ScrollView contentContainerStyle={styles.modalContainer} showsVerticalScrollIndicator={false}>
-        <View style={styles.galleryContainer}>
-          <Gallery
-            width={screenWidth}
-            galleryImages={galleryImages}
-          />
+      <View style={styles.modalWrapper}>
+        <View style={styles.editButtonBar}>
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => setModalPostingVisible(false)}
+          >
+            <MaterialCommunityIcons name="arrow-left" size={35} color="white" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.editButton}
+            onPress={() => handleEditPosting(selectedPosting.id)}
+          >
+            <StyledText style={styles.editText}>edit</StyledText>
+          </TouchableOpacity>
         </View>
-        <View style={styles.modalContentContainer}>
-          <Text style={styles.modalTitle}>{selectedPosting?.attributes.title}</Text>
-          <Text style={styles.modalSubTitle}>${selectedPosting?.attributes.price}</Text>
-  
-          <View style={styles.separatorLine} />
-  
+        <ScrollView contentContainerStyle={styles.modalContainer} showsVerticalScrollIndicator={false}>
+          <View style={styles.galleryContainer}>
+            <Gallery
+              width={screenWidth}
+              galleryImages={galleryImages}
+            />
+          </View>
+          <View style={styles.modalContentContainer}>
+            <Text style={styles.modalTitle}>{selectedPosting?.attributes.title}</Text>
+            <Text style={styles.modalSubTitle}>${selectedPosting?.attributes.price}</Text>
+    
+            <View style={styles.separatorLine} />
+    
+              <View style={styles.sectionContainer}>
+                <Text style={styles.sectionTitle}>Description</Text>
+                <Text style={styles.sectionText}>{selectedPosting?.attributes.description}</Text>
+              </View>
+
+            <View style={styles.separatorLine} />
+
             <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Description</Text>
-              <Text style={styles.sectionText}>{selectedPosting?.attributes.description}</Text>
-            </View>
-
-          <View style={styles.separatorLine} />
-
-          <View style={styles.sectionContainer}>
-            <Text style={styles.sectionTitle}>Details</Text>
-            <View style={styles.itemRow}>
-              <StyledText style={styles.conditionText}>Condition</StyledText>
-              <StyledText bold style={styles.conditionText}>{selectedPosting?.attributes.condition}</StyledText>
+              <Text style={styles.sectionTitle}>Details</Text>
+              <View style={styles.itemRow}>
+                <StyledText style={styles.conditionText}>Condition</StyledText>
+                <StyledText bold style={styles.conditionText}>{selectedPosting?.attributes.condition}</StyledText>
+              </View>
             </View>
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </View>
     </Modal>
   );
   
@@ -203,17 +207,20 @@ export default function MarketplaceManagePostingsScreen() {
       {searchResults.length === 0 ? (
         <Text style={styles.noResultsText}>You do not currently have any active postings. Click the button above to create a new posting.</Text>
       ) : (
-        <FlatList
-          data={searchResults}
-          renderItem={renderPostingItem}
-          keyExtractor={(item) => item.id.toString()}
-          numColumns={2}
-          columnWrapperStyle={{ justifyContent: 'space-between' }}
-          showsVerticalScrollIndicator={false}
-          onEndReached={fetchNextPage}
-          onEndReachedThreshold={0.8}
-          ListFooterComponent={ListEndLoader}
-        />
+        <View>
+          <Text style={styles.noResultsText}>{searchResults.length} Active Postings</Text>
+          <FlatList
+            data={searchResults}
+            renderItem={renderPostingItem}
+            keyExtractor={(item) => item.id.toString()}
+            numColumns={2}
+            columnWrapperStyle={{ justifyContent: 'space-between' }}
+            showsVerticalScrollIndicator={false}
+            onEndReached={fetchNextPage}
+            onEndReachedThreshold={0.8}
+            ListFooterComponent={ListEndLoader}
+          />
+        </View>
       )}
       {renderPostingModal()}
     </View>
@@ -225,6 +232,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#3A4D39',
     paddingHorizontal: 15, // Adjust for padding between items
+    paddingBottom: 140,
   },
   TopHeading: {
     fontSize: 24,
@@ -287,12 +295,28 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start', 
     justifyContent: 'flex-start',
   },
+  modalWrapper: {
+    flex: 1,
+    backgroundColor: '#3A4D39', // Modal background
+  },
   closeButton: {
     position: 'absolute',
     borderRadius: 30,
     top: 60,
     left: 20,
     zIndex: 1,
+  },
+  editButtonBar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 105,
+    backgroundColor: '#3A4D39', // Background for the close button bar
+    justifyContent: 'center',
+    alignItems: 'flex-end',
+    zIndex: 10, // Ensure it stays above the ScrollView
+    paddingHorizontal: 20,
   },
   editButton: {
     position: 'absolute',
