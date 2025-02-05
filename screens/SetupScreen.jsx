@@ -16,48 +16,66 @@ export default function SetupScreen() {
   const { setCurrentUser, currentUser, logout, loading } = useContext(UserContext);
 
   if (loading) {
-    return <Text>Loading...</Text>;
+    return (
+      <View style={styles.container}>
+        <StatusBar barStyle="light-content" />
+        <View style={styles.contentContainer}>
+          <Text>Loading...</Text>
+        </View>
+      </View>
+    );
+  }
+
+  if (!currentUser) {
+    return (
+      <View style={styles.container}>
+        <StatusBar barStyle="light-content" />
+        <View style={styles.contentContainer}>
+          <Text>No current user found</Text>
+        </View>
+      </View>
+    );
   }
 
   const handleRoleChange = async (role) => {
-    try {
-      // Fetch the token from AsyncStorage
-      const token = await AsyncStorage.getItem('token');
-  
-      if (!token) {
-        throw new Error('Token not found');
-      }
-  
-      console.log("Token:", token);
-  
-      // Make the API request
-      const response = await axios.patch(
-        `${baseUrl}/current_user/update`,
-        {
-          user: { role_type: role }
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}` // Ensure token is properly passed
-          }
-        }
-      );
-  
-      if (response.status === 200) {
-        console.log('User role updated successfully:', response.data);
-  
-        // Update the user state
-        setCurrentUser({
-          ...currentUser,
-          role_type: roleTypes[role]
-        });
-      } else {
-        console.error('Unexpected response:', response);
-      }
-    } catch (error) {
-      console.error('Error updating user role:', error.response?.data || error.message);
+  try {
+    // Fetch the token from AsyncStorage
+    const token = await AsyncStorage.getItem('token');
+
+    if (!token) {
+      throw new Error('Token not found');
     }
-  };
+
+    console.log("Token:", token);
+
+    // Make the API request
+    const response = await axios.patch(
+      `${baseUrl}/current_user/update`,
+      {
+        user: { role_type: role }
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}` // Ensure token is properly passed
+        }
+      }
+    );
+
+    if (response.status === 200) {
+      console.log('User role updated successfully:', response.data);
+
+      // Update the user state
+      setCurrentUser({
+        ...currentUser,
+        role_type: roleTypes[role]
+      });
+    } else {
+      console.error('Unexpected response:', response);
+    }
+  } catch (error) {
+    console.error('Error updating user role:', error.response?.data || error.message);
+  }
+};
 
   return (
     <View style={styles.container}>

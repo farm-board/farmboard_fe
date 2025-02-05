@@ -575,7 +575,7 @@ function DrawerNavigator() {
 
     return (
       setupComplete ? (
-        currentUser.role_type === 'farm' ?
+        currentUser.role_type === 'farm' ? (
       <Drawer.Navigator 
       drawerContent={props => <CustomDrawerContent {...props} />}
       screenOptions={{
@@ -589,7 +589,7 @@ function DrawerNavigator() {
         <Drawer.Screen name="Feed Stack" component={FeedStackNav} />
         <Drawer.Screen name="Marketplace Stack" component={MarketplaceStackNav} />
       </Drawer.Navigator>
-      : currentUser.role_type === 'employee' ?
+      ) : currentUser.role_type === 'employee' ? (
       <Drawer.Navigator 
       drawerContent={props => <CustomDrawerContent {...props} />}
       screenOptions={{
@@ -602,12 +602,19 @@ function DrawerNavigator() {
         <Drawer.Screen name="Profile Stack" component={EmployeeProfileStackNav} />
         <Drawer.Screen name="Marketplace Stack" component={MarketplaceStackNav} />
       </Drawer.Navigator>
-      : null
-    ) :
+      ) : (
+        // Fallback UI instead of null:
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="Setup" component={SetupScreen} />
+        </Stack.Navigator>
+      )
+    ) : (
+      // Setup screen if not complete
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Setup" component={SetupScreen} />
       </Stack.Navigator>
-    );
+    )
+  );
 };
 
 
