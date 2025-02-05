@@ -212,6 +212,7 @@ export default function MarketplaceEditPostingScreen({ route }) {
     if (postingId) {
       console.log('Fetching Posting for ID:', postingId);
       fetchPosting(postingId);
+      fetchGalleryImages(true);
       setIsLoading(false);
     } else {
       console.error('postingId is undefined.');
@@ -263,7 +264,7 @@ export default function MarketplaceEditPostingScreen({ route }) {
             <Animated.View entering={FadeInDown.duration(1000).springify()} style={styles.inputContainer}>
               <StyledTextInput
                 placeholder="Posting Title"
-                icon="account-outline"
+                icon="clipboard-edit-outline"
                 label="Posting Title:"
                 value={data.attributes?.title} // Fallback to an empty string if undefined
                 maxLength={45}
@@ -275,7 +276,7 @@ export default function MarketplaceEditPostingScreen({ route }) {
               <Animated.View entering={FadeInDown.delay(200).duration(1000).springify()} style={styles.inputContainerPayment}>
                 <StyledTextInput
                   placeholder="Price"
-                  icon="city-variant-outline"
+                  icon="currency-usd"
                   label="Price:"
                   value={data.attributes?.price}
                   labelStyle={{ fontSize: 18, color: 'white' }}
