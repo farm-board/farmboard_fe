@@ -18,11 +18,11 @@ export default function ResetPasswordScreen() {
     const route = useRoute();
 
   useEffect(() => {
-    if (route.params?.reset_password_token) {
-      setPasswordResetToken(route.params.reset_password_token);
-      console.log('reset_password_token:', route.params.reset_password_token);
+    if (route.params?.token) {
+      setPasswordResetToken(route.params.token);
+      console.log('token:', route.params.token);
     }
-  }, [route.params?.reset_password_token]);
+  }, [route.params?.token]);
     
     const handleSubmit = () => {
       // Call your API to request password reset

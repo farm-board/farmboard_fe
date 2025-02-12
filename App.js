@@ -647,7 +647,7 @@ function App() {
   }, []);
   
   const linking = {
-    prefixes: ['exp://10.0.0.15:8081/', 'com.farmspheredynamics.farmboard://'],
+    prefixes: ['farmboard://'],
     config: {
       screens: {
         ResetPassword: '--/password/edit',
