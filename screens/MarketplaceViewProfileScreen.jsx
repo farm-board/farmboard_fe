@@ -103,9 +103,9 @@ export default function MarketplaceViewProfileScreen() {
     return <Text>Loading...</Text>;
   }
 
-  const fetchGalleryImages = (postingId) => {
+  const fetchGalleryImages = (postingId, userId) => {
     console.log('Fetching gallery images for posting:', postingId);
-    axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/marketplace_postings/${postingId}/gallery_photos`)
+    axios.get(`${baseUrl}/api/v1/users/${userId}/marketplace_postings/${postingId}/gallery_photos`)
       .then((response) => {
         console.log('Gallery Images:', response.data.gallery_photos);
         setGalleryImages(response.data.gallery_photos);
@@ -175,7 +175,7 @@ const handleEmail = () => {
       console.log('Selected Posting:', item);
       setSelectedPosting(item);
       setModalPostingVisible(true);
-      fetchGalleryImages(item.id);
+      fetchGalleryImages(item.id, item.user_id);
       fetchPostingProfileImage(item.id);
     }}>
       <View style={[styles.marketplacePostingItem, { width: (screenWidth / 2) - 20 }]}>

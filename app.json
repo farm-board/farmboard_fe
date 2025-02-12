@@ -19,7 +19,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "farmboard",
+      "bundleIdentifier": "com.farmspheredynamics.farmboard",
       "buildNumber": "1.1.1",
       "infoPlist": {
         "NSUserTrackingUsageDescription": "Allow this app to collect app-related data that can be used for tracking you or your device and deliver personalized ads to you.",
