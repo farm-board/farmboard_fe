@@ -10,9 +10,6 @@ import { baseUrl } from '../config';
 import { AdEventType, BannerAd, BannerAdSize, InterstitialAd, TestIds } from 'react-native-google-mobile-ads';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const iosAdmobBanner = "ca-app-pub-2707002194546287/9827918081";
-const iosAdmobInterstitial = "ca-app-pub-2707002194546287/7809604308";
-
 const FeedScreen = () => {
   const [postings, setPostings] = useState([]);
   const [page, setPage] = useState(1);
@@ -224,6 +221,9 @@ const FeedScreen = () => {
         console.error('There was an error fetching the posting profile photo:', error);
       });
   };
+
+  const iosAdmobBanner = "ca-app-pub-2707002194546287/9827918081";
+  const iosAdmobInterstitial = "ca-app-pub-2707002194546287/7809604308";
 
   const InlineAd = () => {
     return (

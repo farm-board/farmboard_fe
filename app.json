@@ -3,7 +3,7 @@
     "name": "FarmBoard",
     "slug": "farmboard",
     "scheme": "farmboard",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -20,7 +20,8 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.farmspheredynamics.farmboard",
-      "buildNumber": "1.1.1",
+      "associatedDomains": ["applinks:farmboard.farmspheredynamics.com"],
+      "buildNumber": "1.1.2",
       "infoPlist": {
         "NSUserTrackingUsageDescription": "Allow this app to collect app-related data that can be used for tracking you or your device and deliver personalized ads to you.",
         "SKAdNetworkItems": [

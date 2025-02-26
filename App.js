@@ -647,7 +647,10 @@ function App() {
   }, []);
   
   const linking = {
-    prefixes: ['farmboard://'],
+    prefixes: [
+      'farmboard://', 
+      'https://farmboard.farmspheredynamics.com'
+    ],
     config: {
       screens: {
         ResetPassword: '--/password/edit',
