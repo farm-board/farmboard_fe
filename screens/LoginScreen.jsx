@@ -106,6 +106,17 @@ export default function LoginScreen() {
                   </Animated.View>
                 </View>
               </View>
+              <Animated.View entering={FadeInDown.delay(1000).duration(1000).springify()}>
+                <TouchableOpacity
+                    style={styles.backButton}
+                    onPress={() => navigation.navigate('PublicDrawer', {
+                      screen: 'Feed Stack',
+                    })}>
+                    <Text style={styles.buttonText}>
+                    Back To Browsing
+                    </Text>
+                </TouchableOpacity>
+              </Animated.View>
             </View>
         </TouchableWithoutFeedback>
       );
@@ -168,6 +179,14 @@ export default function LoginScreen() {
         marginBottom: 10,
         marginTop: 10,
       },
+      backButton: {
+        backgroundColor: '#4F6F52',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 20,
+        width: '100%',
+        marginBottom: 40,
+      },
       buttonText: {
         fontSize: 20,
         fontWeight: 'bold',
@@ -176,6 +195,11 @@ export default function LoginScreen() {
       },
       signUpTextContainer: {
         marginTop: 10,
+        flexDirection: 'row',
+        justifyContent: 'center',
+      },
+      signUpTextContainerBottom: {
+        marginTop: 40,
         flexDirection: 'row',
         justifyContent: 'center',
       },

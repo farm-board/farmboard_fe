@@ -212,7 +212,7 @@ export default function FarmHome() {
       <View style={styles.postingsContainer}>
         {postings.length === 0 ?
         <StyledText bold style={styles.postingsNotFoundText}>
-          You do not currently have any active postings. Click on the button below to add a new job posting to your farm.
+          You do not currently have any active job postings. Click on the button below to add a new job posting to your farm.
         </StyledText> 
         : null }
         <TouchableOpacity style={styles.addPostingButton} onPress={handlePostingCreate}>

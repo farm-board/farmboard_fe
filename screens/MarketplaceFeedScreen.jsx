@@ -26,6 +26,8 @@ const MarketplaceFeedScreen = () => {
   const [postingProfilePhoto, setPostingProfilePhoto] = useState(null);
   const [modalPostingVisible, setModalPostingVisible] = useState(false);
   const [modalFilterVisible, setModalFilterVisible] = useState(false);
+  const [modalNoUserVisible, setModalNoUserVisible] = useState(false);
+  const [hasShownNoUserModal, setHasShownNoUserModal] = useState(false);
   const [selectedPosting, setSelectedPosting] = useState(null);
   const [loadingNextPage, setLoadingNextPage] = useState(false);
   const [selectedConditionTypes, setSelectedConditionTypes] = useState([]);
@@ -99,9 +101,9 @@ const MarketplaceFeedScreen = () => {
       });
   };
 
-  const fetchGalleryImages = (postingId) => {
+  const fetchGalleryImages = (postingId, userId) => {
     console.log('Fetching gallery images for posting:', postingId);
-    axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/marketplace_postings/${postingId}/gallery_photos`)
+    axios.get(`${baseUrl}/api/v1/marketplace_postings/${postingId}/gallery_photos`)
       .then((response) => {
         console.log('Gallery Images:', response.data.gallery_photos);
         setGalleryImages(response.data.gallery_photos);
@@ -210,7 +212,7 @@ const MarketplaceFeedScreen = () => {
 
   const fetchPostingProfileImage = (postingId) => {
     console.log('Fetching posting profile photo for posting:', postingId);
-    axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/marketplace_postings/${postingId}/user_image`)
+    axios.get(`${baseUrl}/api/v1/marketplace_postings/${postingId}/user_image`)
       .then((response) => {
         console.log('Posting profile photo:', response.data.image_url);
         setPostingProfilePhoto(response.data.image_url);
@@ -250,7 +252,7 @@ const MarketplaceFeedScreen = () => {
       console.log('Selected Posting:', item);
       setSelectedPosting(item);
       setModalPostingVisible(true);
-      fetchGalleryImages(item.id);
+      fetchGalleryImages(item.id, item.attributes.user_id);
       fetchPostingProfileImage(item.id);
     }}>
       <View style={[styles.postingItem, { width: (screenWidth / 2) - 20 }]}>
@@ -417,6 +419,37 @@ const handleEmail = () => {
     }
   }, [loaded, adShown]); // Run when `loaded` or `adShown` changes
 
+  useEffect(() => {
+    if (!currentUser && !hasShownNoUserModal) {
+      setModalNoUserVisible(true);
+      setHasShownNoUserModal(true);
+    }
+  }, [currentUser, hasShownNoUserModal]);
+
+  const renderNoUserModal = () => (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={modalNoUserVisible}
+      onRequestClose={() => {
+        setModalNoUserVisible(false);
+      }}
+    >
+      <View style={styles.noUserModalContainer}>
+        <View style={styles.noUserModalView}>
+          <Text style={styles.noUserModalTitle}>Login or sign up to access all features.</Text>
+          <Text style={styles.modalDescription}>Please login or create an account to unlock full access to the application. As a guest, you can browse existing job and marketplace postings, but you won’t be able to create or apply to listings, manage marketplace items, or view detailed contact information.  </Text>
+          <TouchableOpacity style={styles.noUserModalLoginButton} onPress={() => {navigation.navigate('Login'); setModalNoUserVisible(false)}}>
+            <Text style={styles.noUserModalLoginButtonText}>Login</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.noUserModalButton} onPress={() => setModalNoUserVisible(false)}>
+            <Text style={styles.noUserModalButtonText}>Continue Browsing</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+
   const renderPostingModal = () => (
     <Modal
       animationType="slide"
@@ -456,9 +489,15 @@ const handleEmail = () => {
             <View style={styles.sellerInfoSectionContainer}>
               <View style={styles.rowContainer}>
                 <Text style={styles.sectionTitle2}>Seller Information</Text>
+                {currentUser ?
                 <TouchableOpacity onPress={() => handleProfileRedirect(selectedPosting?.id)}>
                   <Text style={styles.sellerDetailsText}>Seller Profile</Text>
                 </TouchableOpacity>
+                : 
+                <TouchableOpacity onPress={() => {setModalNoUserVisible(true); setModalPostingVisible(false)}}>
+                  <Text style={styles.sellerDetailsText}>Seller Profile</Text>
+                </TouchableOpacity>
+                }
               </View>
               <View style={styles.posterInfoContainer}>
                 <MarketplacePostingAvatar uri={postingProfilePhoto} />
@@ -475,6 +514,7 @@ const handleEmail = () => {
             </View>
   
             {/* Contact Info */}
+            {currentUser ? 
             <View style={styles.sectionContainerContactInfo}>
               {selectedPosting?.attributes.user_email && (
                 <TouchableOpacity onPress={handleEmail}>
@@ -503,7 +543,7 @@ const handleEmail = () => {
                 </TouchableOpacity>
               )}
             </View>
-  
+            : null }
             <View style={styles.separatorLine} />
   
             {/* Description */}
@@ -536,12 +576,24 @@ const handleEmail = () => {
     <View style={styles.container}>
       <InlineAd />
       <View style={styles.itemRow3}>
+        {currentUser ?
         <TouchableOpacity style={styles.addPostingButton} onPress={handleManagePostingsRedirect}>
           <Text style={styles.addPostingText}>Manage Postings</Text>
         </TouchableOpacity>
+        :
+        <TouchableOpacity style={styles.addPostingButton} onPress={() => setModalNoUserVisible(true)}>
+          <Text style={styles.addPostingText}>Manage Postings</Text>
+        </TouchableOpacity>
+        }
+        {currentUser ?
         <TouchableOpacity style={styles.deleteAllPostingsButton} onPress={handlePostingCreate}>
           <Text style={styles.deleteAllPostingsText}>Sell Item</Text>
         </TouchableOpacity>
+        :
+        <TouchableOpacity style={styles.deleteAllPostingsButton} onPress={() => setModalNoUserVisible(true)}>
+          <Text style={styles.deleteAllPostingsText}>Sell Item</Text>
+        </TouchableOpacity>
+        }
       </View>
       <View style={styles.searchContainer}>
         <TextInput
@@ -642,6 +694,7 @@ const handleEmail = () => {
         />
       )}
       {renderPostingModal()}
+      {renderNoUserModal()}
     </View>
   );
 };
@@ -732,6 +785,20 @@ const styles = StyleSheet.create({
     color: 'white',
     marginBottom: 5, // Ensure there's no unnecessary large margin here
     marginTop: -60,     // Ensure marginTop is not pushing the title down
+  },
+  noUserModalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'white',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  modalDescription: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: 'white',
+    textAlign: 'center',
+    marginBottom: 10,
   },
   modalContentContainer: {
     width: '100%',
@@ -968,6 +1035,64 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#3A4D39',
     textAlign: 'center',
+  },
+  noUserModalContainer: {
+    flex: 1,
+    padding: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+  },
+  noUserModalView: {
+    borderRadius: 15,
+    padding: 20,
+    paddingBottom: 30,
+    backgroundColor: '#3A4D39',
+    alignItems: "center",
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    width: "100%",
+  },
+  noUserModalLoginButton: {
+    backgroundColor: '#ffb900',
+    alignSelf: 'center',
+    paddingVertical: 15,
+    paddingHorizontal: 50,
+    margin: 10,
+    borderRadius: 50,
+    width: '90%',
+  },
+  noUserModalLoginButtonText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#3A4D39',
+    textAlign: 'center',
+  },
+  noUserModalButton: {
+    backgroundColor: 'white',
+    alignSelf: 'center',
+    paddingVertical: 15,
+    paddingHorizontal: 50,
+    margin: 10,
+    borderRadius: 50,
+    width: '90%',
+  },
+  noUserModalButtonText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#3A4D39',
+    textAlign: 'center',
+  },
+  noUserModalButtonArrow: {
+    backgroundColor: "#333",
+    borderRadius: 30,
+    padding: 15,
+    position: "absolute",
+    right: 10,
+    top: 6,
   },
 });
 

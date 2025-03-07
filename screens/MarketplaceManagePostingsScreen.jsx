@@ -208,7 +208,7 @@ export default function MarketplaceManagePostingsScreen() {
         <Text style={styles.noResultsText}>You do not currently have any active postings. Click the button above to create a new posting.</Text>
       ) : (
         <View>
-          <Text style={styles.noResultsText}>{searchResults.length} Active Postings</Text>
+          <Text style={styles.noResultsText}>{searchResults.length} Active Marketplace Postings</Text>
           <FlatList
             data={searchResults}
             renderItem={renderPostingItem}

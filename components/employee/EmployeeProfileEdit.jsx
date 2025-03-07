@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
-import { Text, View, TouchableOpacity, StyleSheet } from 'react-native';
+import { Text, View, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { UserContext } from '../../contexts/UserContext';
 import axios from 'axios';
@@ -47,7 +47,7 @@ export default function EmployeeProfileEdit() {
   }
 
   const navigation = useNavigation();
-  const { currentUser, setUserAvatar, editProfileRefresh, setEditProfileRefresh, profileRefresh, setProfileRefresh } = useContext(UserContext);
+  const { currentUser, setUserAvatar, editProfileRefresh, setEditProfileRefresh, profileRefresh, setProfileRefresh, logout } = useContext(UserContext);
 
   useEffect(() => {
     fetchProfileData(editProfileRefresh);
@@ -237,6 +237,43 @@ export default function EmployeeProfileEdit() {
     }
   };
 
+  const handleAccountDelete = async () => {
+    Alert.alert(
+      "Delete Account",
+      "Are you sure you want to delete your account? All Existing data will be lost. This includes your profile and any active marketplace listings.",
+      [
+        {
+          text: "Cancel",
+          onPress: () => console.log("Cancel Pressed"),
+          style: "cancel"
+        },
+        {
+          text: "Delete",
+          style: "destructive", // This will show a red "Delete" on iOS
+          onPress: async () => {
+            try {
+              await axios.delete(`${baseUrl}/`);
+              console.log("Account deleted");
+  
+              // Show a success alert
+              Alert.alert(
+                "Account Deleted",
+                "Your account has been successfully deleted."
+              );
+  
+              // Clear local data and log out
+              setUserAvatar("");
+              logout(navigation);
+              AsyncStorage.clear();
+            } catch (error) {
+              console.log("Error deleting account:", error);
+            }
+          }
+        }
+      ]
+    );
+  };
+
   return (
     <KeyboardAvoidingContainer style={styles.container} behavior="padding">
       <View style={styles.content}>
@@ -384,6 +421,11 @@ export default function EmployeeProfileEdit() {
               </View>
           </View>
           : null}
+          <View style={styles.deleteAccountButtonContainer}>
+            <TouchableOpacity style={styles.deleteAccountButton} onPress={handleAccountDelete}>
+              <Text style={styles.deleteAccountText}>Delete Your Account</Text>
+            </TouchableOpacity>
+          </View>
         {/* UploadModal component */}
         <UploadModal
           modalVisible={modalVisible}
@@ -427,8 +469,9 @@ const styles = StyleSheet.create({
   inputContainerContactInfo: {
     backgroundColor: '#3A4D39',
     width: '100%',
-    padding: 20,
+    paddingHorizontal: 20,
     paddingBottom: 40,
+    paddingTop: 10,
   },
   existingData: {
     color: 'black',
@@ -436,7 +479,8 @@ const styles = StyleSheet.create({
   inputContainer: { 
     backgroundColor: '#3A4D39',
     width: '100%',
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
   },
   inputItem: {
     minWidth: '100%',
@@ -462,6 +506,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingVertical: 10,
     paddingHorizontal: 100,
+    marginBottom: 25,
   },
   addButtonText: {
     fontSize: 16,
@@ -476,5 +521,23 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 15,
     top: 5,
+  },
+  deleteAccountButtonContainer: {
+    width: '100%',
+    backgroundColor: '#3A4D39',
+    paddingBottom: 40,
+  },
+  deleteAccountButton: {
+    backgroundColor: '#FF3F3F',
+    alignSelf: 'center',
+    padding: 10,
+    borderRadius: 8,
+    width: '90%',
+  },
+  deleteAccountText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+    textAlign: 'center',
   },
 });

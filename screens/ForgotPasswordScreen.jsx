@@ -1,11 +1,10 @@
-import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet } from 'react-native'
+import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native'
 import React, { useState, useContext } from 'react'
 import { StatusBar } from 'expo-status-bar';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import { UserContext } from '../contexts/UserContext';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { baseUrl } from '../config';
 
 export default function ForgotPasswordScreen() {
@@ -16,18 +15,23 @@ export default function ForgotPasswordScreen() {
     const { setCurrentUser } = useContext(UserContext);
 
     const handleSubmit = () => {
-        // Call your API to request password reset
-        axios.post(`${baseUrl}/password`, { user: { email: email } })
-          .then(response => {
-            // Handle success
-            console.log('Password reset link sent');
-            alert('The password reset link has been sent. Please check your email for further instructions.')
-          })
-          .catch(error => {
-            // Handle error
-            console.error('Error requesting password reset:', error);
-            alert('Error requesting password reset. Please try again later.')
-          });
+      // Call your API to request password reset
+      axios.post(`${baseUrl}/password`, { user: { email: email } })
+        .then(response => {
+          console.log('Password reset link sent');
+          Alert.alert(
+            "Email Sent!",   // <-- Alert title
+            "Please check your email for further instructions."  // <-- Alert message
+          );
+        })
+        .catch(error => {
+          // Handle error
+          console.error('Error requesting password reset:', error);
+          Alert.alert(
+            "Error",
+            "Error requesting password reset. Please try again later."
+          );
+        });
       };
 
     return (
