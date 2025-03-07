@@ -61,6 +61,7 @@ function HomeStackNav() {
       <>
         <Stack.Screen name="Home" component={HomeScreen} 
         options={{
+          title: 'Manage Postings',
           headerLeft: () => {
             return (
               <TouchableOpacity onPress={() => navigation.openDrawer()}>
@@ -93,28 +94,26 @@ function HomeStackNav() {
         <Stack.Screen name="Farm Profile Add Postings" component={FarmProfileAddPostingsScreen} 
            options={{ 
             title: 'Add Job Posting',
-            headerBackTitle: 'Home',
-            headerBackTitleStyle: { fontSize: 15 },
+            headerBackTitleVisible: false,
           }}
         />
         <Stack.Screen name="Farm Profile Edit Postings" component={FarmProfileEditPostingsScreen} 
            options={{ 
             title: 'Edit Job Posting',
-            headerBackTitle: 'Home',
-            headerBackTitleStyle: { fontSize: 15 },
+            headerBackTitleVisible: false,
           }}
         />
         <Stack.Screen name="Employee Profile View" component={EmployeeViewProfileScreen} 
           options={{ 
             title: 'Applicant Profile',
-            headerBackTitle: 'Home',
-            headerBackTitleStyle: { fontSize: 15 },
+            headerBackTitleVisible: false,
           }}
         />
       </>
     </Stack.Navigator>
   );
-}
+};
+
 function FarmProfileStackNav() {
   const navigation = useNavigation();
   return (
@@ -247,14 +246,13 @@ function FarmProfileStackNav() {
         <Stack.Screen name="Employee Profile View" component={EmployeeViewProfileScreen} 
           options={{ 
             title: 'Applicant Profile',
-            headerBackTitle: '',
-            headerBackTitleStyle: { fontSize: 15 },
+            headerBackTitleVisible: false,
           }}
         />
       </>
     </Stack.Navigator>
   );
-}
+};
 
 function EmployeeProfileStackNav() {
   const navigation = useNavigation();
@@ -376,7 +374,7 @@ function EmployeeProfileStackNav() {
       </>
     </Stack.Navigator>
   );
-}
+};
 
 function FeedStackNav() {
   const navigation = useNavigation();
@@ -413,15 +411,13 @@ function FeedStackNav() {
         <Stack.Screen name="Farm Profile Add Postings" component={FarmProfileAddPostingsScreen} 
           options={{ 
             title: 'Add Job Posting',
-            headerBackTitle: 'Home',
-            headerBackTitleStyle: { fontSize: 15 },
+            headerBackTitleVisible: false,
           }}
         />
         <Stack.Screen name="Farm Profile Edit Postings" component={FarmProfileEditPostingsScreen} 
           options={{ 
             title: 'Edit Job Posting',
-            headerBackTitle: 'Home',
-            headerBackTitleStyle: { fontSize: 15 },
+            headerBackTitleVisible: false,
           }}
         />
         <Stack.Screen name="Farm Profile View" component={FarmViewProfileScreen}
@@ -444,7 +440,7 @@ function FeedStackNav() {
       </>
     </Stack.Navigator>
   );
-}
+};
 
 function MarketplaceStackNav() {
   const navigation = useNavigation();
@@ -538,8 +534,7 @@ function MarketplaceStackNav() {
         <Stack.Screen name="Farm Profile Edit Postings" component={FarmProfileEditPostingsScreen} 
           options={{ 
             title: 'Edit Job Posting',
-            headerBackTitle: 'Home',
-            headerBackTitleStyle: { fontSize: 15 },
+            headerBackTitleVisible: false,
           }}
         />
         <Stack.Screen name="Marketplace Profile View" component={MarketplaceViewProfileScreen}
@@ -562,8 +557,46 @@ function MarketplaceStackNav() {
       </>
     </Stack.Navigator>
   );
-}
+};
 
+const PublicDrawer = createDrawerNavigator();
+
+function PublicDrawerNavigator() {
+  return (
+    <PublicDrawer.Navigator
+      // Reuse the same custom drawer content
+      drawerContent={(props) => <CustomDrawerContent {...props} />}
+      screenOptions={{
+        headerShown: false,
+        drawerStyle: {
+          backgroundColor: '#333', // same background as your logged-in drawers
+        },
+      }}
+    >
+      <PublicDrawer.Screen name="Feed Stack" component={FeedStackNav} />
+      <PublicDrawer.Screen name="Marketplace Stack" component={MarketplaceStackNav} />
+    </PublicDrawer.Navigator>
+  );
+};
+
+function UnauthenticatedNavigator() {
+  return (
+    <Stack.Navigator
+      initialRouteName="PublicDrawer"
+      screenOptions={{ headerShown: false }}
+    >
+      {/* This is the initial route for users who aren't logged in */}
+      <Stack.Screen name="PublicDrawer" component={PublicDrawerNavigator} />
+
+      {/* Your existing login-related screens */}
+      <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen name="SignUp" component={SignupScreen} />
+      <Stack.Screen name="Setup" component={SetupScreen} />
+      <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+      <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
+    </Stack.Navigator>
+  );
+};
 
 function DrawerNavigator() {
   const { currentUser, setupComplete, loading } = useContext(UserContext);
@@ -660,19 +693,13 @@ function App() {
 
 
   return (
-    <NavigationContainer linking={linking}>
+    <NavigationContainer>
       {currentUser ? (
+        // Logged-in users get the main drawer that has "Home" or "Manage Postings" etc.
         <DrawerNavigator />
       ) : (
-        <Stack.Navigator initialRouteName='Login' screenOptions={{ headerShown: false }}>
-          <>
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="SignUp" component={SignupScreen} />
-            <Stack.Screen name="Setup" component={SetupScreen} />
-            <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-            <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
-          </>
-        </Stack.Navigator>
+        // Not logged in? Go to UnauthenticatedNavigator
+        <UnauthenticatedNavigator />
       )}
     </NavigationContainer>
   );
