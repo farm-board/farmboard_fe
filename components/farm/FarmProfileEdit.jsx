@@ -38,7 +38,7 @@ export default function FarmProfileEdit() {
   const width = Dimensions.get('window').width;
 
   const navigation = useNavigation();
-  const { currentUser, setUserAvatar, setProfileRefresh, profileRefresh, editProfileRefresh, setEditProfileRefresh } = useContext(UserContext);
+  const { currentUser, setUserAvatar, setProfileRefresh, profileRefresh, editProfileRefresh, setEditProfileRefresh, logout } = useContext(UserContext);
 
   const pickImage = async (mode) => {
     try {
@@ -323,6 +323,43 @@ export default function FarmProfileEdit() {
   const handleAddAccommodation = () => {
     navigation.navigate('Farm Profile Add Accommodations');
   }
+
+  const handleAccountDelete = async () => {
+    Alert.alert(
+      "Delete Account",
+      "Are you sure you want to delete your account? All Existing data will be lost. This includes your profile and any active listings.",
+      [
+        {
+          text: "Cancel",
+          onPress: () => console.log("Cancel Pressed"),
+          style: "cancel"
+        },
+        {
+          text: "Delete",
+          style: "destructive", // This will show a red "Delete" on iOS
+          onPress: async () => {
+            try {
+              await axios.delete(`${baseUrl}/`);
+              console.log("Account deleted");
+  
+              // Show a success alert
+              Alert.alert(
+                "Account Deleted",
+                "Your account has been successfully deleted."
+              );
+  
+              // Clear local data and log out
+              setUserAvatar("");
+              logout(navigation);
+              AsyncStorage.clear();
+            } catch (error) {
+              console.log("Error deleting account:", error);
+            }
+          }
+        }
+      ]
+    );
+  };
   
   // This useEffect runs when editProfileRefresh chang
   useEffect(() => {
@@ -441,7 +478,7 @@ export default function FarmProfileEdit() {
                   </View>
               </View>
              : null}
-          <View style={styles.inputContainer}>
+          <View style={styles.accommodationsInputContainer}>
             { Object.keys(accommodations).length === 0 ?
               <View>
                 <StyledText bold style={styles.galleryPhotosNotFoundText}>
@@ -481,6 +518,11 @@ export default function FarmProfileEdit() {
               </View>
             }
           </View>
+        </View>
+        <View style={styles.deleteAccountButtonContainer}>
+          <TouchableOpacity style={styles.deleteAccountButton} onPress={handleAccountDelete}>
+            <Text style={styles.deleteAccountText}>Delete Your Account</Text>
+          </TouchableOpacity>
         </View>
         {/* UploadModal component */}
         <UploadModal
@@ -529,6 +571,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#3A4D39',
     width: '100%',
     paddingBottom: 40,
+    paddingHorizontal: 20,
+  },
+  accommodationsInputContainer: { 
+    backgroundColor: '#3A4D39',
+    width: '100%',
     paddingHorizontal: 20,
   },
   inputItem: {
@@ -586,6 +633,24 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 8,
     width: '90%',
+  },
+  deleteAccountButtonContainer: {
+    width: '100%',
+    backgroundColor: '#3A4D39',
+    paddingBottom: 40,
+  },
+  deleteAccountButton: {
+    backgroundColor: '#FF3F3F',
+    alignSelf: 'center',
+    padding: 10,
+    borderRadius: 8,
+    width: '90%',
+  },
+  deleteAccountText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+    textAlign: 'center',
   },
   addImageText: {
     fontSize: 20,
