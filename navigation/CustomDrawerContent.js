@@ -42,20 +42,28 @@ function CustomDrawerContent(props) {
   const navigation = useNavigation();
   const { currentUser, logout, userName, setUserName, userAvatar, setUserAvatar, userFirstName, setUserFirstName, userLastName, setUserLastName, deviceId } = useContext(UserContext);
 
-  const DrawerList = currentUser.role_type === 'farm' ?
-    [
-      { icon: 'home-outline', label: 'Home', navigateTo: 'Home Stack' },
+  let DrawerList = [];
+
+  if (!currentUser) {
+    // Not logged in – only show public drawers
+    DrawerList = [
+      { icon: 'clipboard-text-multiple-outline', label: 'Job Postings', navigateTo: 'Feed Stack' },
+      { icon: 'cart-outline', label: 'Marketplace', navigateTo: 'Marketplace Stack' }
+    ];
+  } else if (currentUser.role_type === 'farm') {
+    DrawerList = [
+      { icon: 'account-outline', label: 'Profile', navigateTo: 'Profile Stack' },
+      { icon: 'home-outline', label: 'Manage Postings', navigateTo: 'Home Stack' },
+      { icon: 'clipboard-text-multiple-outline', label: 'Job Postings', navigateTo: 'Feed Stack' },
+      { icon: 'cart-outline', label: 'Marketplace', navigateTo: 'Marketplace Stack' },
+    ];
+  } else if (currentUser.role_type === 'employee') {
+    DrawerList = [
       { icon: 'account-outline', label: 'Profile', navigateTo: 'Profile Stack' },
       { icon: 'clipboard-text-multiple-outline', label: 'Job Postings', navigateTo: 'Feed Stack' },
       { icon: 'cart-outline', label: 'Marketplace', navigateTo: 'Marketplace Stack' }
-    ]
-    : currentUser.role_type === 'employee' ?
-      [
-        { icon: 'account-outline', label: 'Profile', navigateTo: 'Profile Stack' },
-        { icon: 'clipboard-text-multiple-outline', label: 'Job Postings', navigateTo: 'Feed Stack' },
-        { icon: 'cart-outline', label: 'Marketplace', navigateTo: 'Marketplace Stack' }
-      ]
-      : [];
+    ];
+  }
 
   const handleLogout = () => {
     Alert.alert(
@@ -125,6 +133,11 @@ function CustomDrawerContent(props) {
   );
 
   const getUserDisplayName = () => {
+    if (!currentUser) {
+      // No user is logged in
+      return '';
+    }
+    // Logged-in user – check role_type
     if (currentUser.role_type === 'farm') {
       return `${userName}`;
     } else if (currentUser.role_type === 'employee') {
@@ -137,29 +150,32 @@ function CustomDrawerContent(props) {
     <View style={{ flex: 1 }}>
       <DrawerContentScrollView {...props}>
         <View style={styles.drawerContent}>
-          <TouchableOpacity activeOpacity={0.8}>
-            <View style={styles.userInfoSection}>
-              <View style={{flexDirection: 'row', marginTop: 15}}>
-              <Avatar.Image
-                  source={userAvatar ? { uri: userAvatar } : require('../assets/images/FarmProfilePlaceholder.png')}
-                  size={60}
-                  style={{ justifyContent: 'center', alignSelf: 'center'}}
-                />
-                <View style={{ marginLeft: 10, flexDirection: 'column' }}>
-                  <Title style={styles.title}>{getUserDisplayName()}</Title>
-                  <Text style={styles.caption} numberOfLines={1}>
-                    {currentUser.email}
-                  </Text>
+          { currentUser ?
+            <TouchableOpacity activeOpacity={0.8}>
+              <View style={styles.userInfoSection}>
+                <View style={{flexDirection: 'row', marginTop: 15}}>
+                <Avatar.Image
+                    source={userAvatar ? { uri: userAvatar } : require('../assets/images/FarmProfilePlaceholder.png')}
+                    size={60}
+                    style={{ justifyContent: 'center', alignSelf: 'center'}}
+                  />
+                  <View style={{ marginLeft: 10, flexDirection: 'column' }}>
+                    <Title style={styles.title}>{getUserDisplayName()}</Title>
+                    <Text style={styles.caption} numberOfLines={1}>
+                      {currentUser.email}
+                    </Text>
+                  </View>
                 </View>
               </View>
-            </View>
-          </TouchableOpacity>
+            </TouchableOpacity>
+          : null } 
           <View style={styles.drawerSection}>
             <DrawerItems drawerList={DrawerList} />
           </View>
         </View>
       </DrawerContentScrollView>
       <View style={styles.bottomDrawerSection}>
+      { currentUser ?
         <DrawerItem
           icon={({color, size}) => (
             <Icon name="exit-to-app" color="white" size={size} />
@@ -168,6 +184,16 @@ function CustomDrawerContent(props) {
           label="Sign Out"
           onPress={handleLogout}
         />
+      : 
+      <DrawerItem
+          icon={({color, size}) => (
+            <Icon name="account-outline" color="white" size={size} />
+          )}
+          labelStyle={{ color: "white", fontSize: 18}}
+          label="Login / Sign Up"
+          onPress={() => navigation.navigate('Login')}
+        />
+        }
       </View>
     </View>
   );
@@ -187,6 +213,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#3A4D39',
     borderTopColor: '#dedede',
     borderTopWidth: 1,
+  },
+  userInfoSectionNotLoggedIn: {
+    paddingLeft: 20,
+    backgroundColor: '#3A4D39',
+    borderTopColor: '#dedede',
+    borderTopWidth: 1,
+    paddingTop: 20,
   },
   title: {
     fontSize: 18,
@@ -216,7 +249,6 @@ const styles = StyleSheet.create({
     marginRight: 3,
   },
   drawerSection: {
-    marginTop: 15,
     borderBottomWidth: 0,
     borderBottomColor: '#dedede',
     borderTopColor: '#dedede',

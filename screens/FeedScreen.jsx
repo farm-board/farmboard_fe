@@ -19,6 +19,8 @@ const FeedScreen = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [postingProfilePhoto, setPostingProfilePhoto] = useState(null);
   const [modalPostingVisible, setModalPostingVisible] = useState(false);
+  const [modalNoUserVisible, setModalNoUserVisible] = useState(false);
+  const [hasShownNoUserModal, setHasShownNoUserModal] = useState(false);
   const [modalFilterVisible, setModalFilterVisible] = useState(false);
   const [selectedCompensationTypes, setSelectedCompensationTypes] = useState([]);
   const [selectedStateTypes, setSelectedStateTypes] = useState([]);
@@ -196,7 +198,7 @@ const FeedScreen = () => {
 
   const fetchPostingProfileImage = (farmId) => {
     console.log('Fetching posting profile photo for farm:', farmId);
-    axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/farms/${farmId}/profile_info`)
+    axios.get(`${baseUrl}/api/v1/farms/${farmId}/profile_info`)
       .then((response) => {
         console.log('Posting profile photo:', response.data.attributes.image_url);
         setPostingProfilePhoto(response.data.attributes.image_url);
@@ -322,6 +324,36 @@ const FeedScreen = () => {
     }
   }, [loaded, adShown]); // Run when `loaded` or `adShown` changes
 
+  useEffect(() => {
+    if (!currentUser && !hasShownNoUserModal) {
+      setModalNoUserVisible(true);
+      setHasShownNoUserModal(true);
+    }
+  }, [currentUser, hasShownNoUserModal]);
+
+  const renderNoUserModal = () => (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={modalNoUserVisible}
+      onRequestClose={() => {
+        setModalNoUserVisible(false);
+      }}
+    >
+      <View style={styles.noUserModalContainer}>
+        <View style={styles.noUserModalView}>
+          <Text style={styles.modalTitle}>Login or sign up to access all features.</Text>
+          <Text style={styles.modalDescription}>Please login or create an account to unlock full access to the application. As a guest, you can browse existing job and marketplace postings, but you won’t be able to create or apply to listings, manage marketplace items, or view detailed contact information.  </Text>
+          <TouchableOpacity style={styles.noUserModalLoginButton} onPress={() => {navigation.navigate('Login'); setModalNoUserVisible(false)}}>
+            <Text style={styles.noUserModalLoginButtonText}>Login</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.noUserModalButton} onPress={() => setModalNoUserVisible(false)}>
+            <Text style={styles.noUserModalButtonText}>Continue Browsing</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
 
   const renderPostingItem = ({ item }) => (
   <View style={styles.postingItem}>
@@ -375,12 +407,21 @@ const FeedScreen = () => {
         >
           <MaterialCommunityIcons name="close" size={25} color="white" />
         </TouchableOpacity>
+        {currentUser?
         <TouchableOpacity onPress={() => handleProfileRedirect(selectedPosting?.attributes.farm_id)}>
           <View style={styles.logoContainer}>
             <Avatar uri={postingProfilePhoto}/>
           </View>
           <Text style={styles.modalSubTitle}>{selectedPosting?.attributes.farm_name}</Text>
         </TouchableOpacity>
+        :
+        <TouchableOpacity onPress={() => {setModalNoUserVisible(true); setModalPostingVisible(false)}}>
+          <View style={styles.logoContainer}>
+            <Avatar uri={postingProfilePhoto}/>
+          </View>
+          <Text style={styles.modalSubTitle}>{selectedPosting?.attributes.farm_name}</Text>
+        </TouchableOpacity>
+        }
         <Text style={styles.modalTitle}>{selectedPosting?.attributes.title}</Text>
   
         <View style={styles.tagsContainer}>
@@ -476,16 +517,35 @@ const FeedScreen = () => {
           </View>
         )}
   
-        {currentUser.role_type !== 'farm' && (
-          <View style={styles.applyButtonContainer}>
-            <TouchableOpacity style={styles.applyButton} onPress={applyToPosting}>
-              <Text style={styles.applyButtonText}>Apply Now</Text>
-              <View style={styles.applyArrow}>
-                <MaterialCommunityIcons name="arrow-right" size={24} color="white" />
-              </View>
-            </TouchableOpacity>
-          </View>
-        )}
+        {currentUser && currentUser.role_type !== 'farm' ? (
+        // Logged-in non-farm user (i.e., employee) => Show the real "Apply Now" button
+        <View style={styles.applyButtonContainer}>
+          <TouchableOpacity style={styles.applyButton} onPress={applyToPosting}>
+            <Text style={styles.applyButtonText}>Apply Now</Text>
+            <View style={styles.applyArrow}>
+              <MaterialCommunityIcons name="arrow-right" size={24} color="white" />
+            </View>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        // Otherwise (not logged in OR farm user) => show a button that triggers the noUser modal
+        <View style={styles.applyButtonContainer}>
+          <TouchableOpacity
+            style={styles.applyButton}
+            onPress={() => {
+              // 1) close the "posting" modal
+              setModalPostingVisible(false);
+              // 2) open the "no user" modal
+              setModalNoUserVisible(true);
+            }}
+          >
+            <Text style={styles.applyButtonText}>Apply Now</Text>
+            <View style={styles.applyArrow}>
+              <MaterialCommunityIcons name="arrow-right" size={24} color="white" />
+            </View>
+          </TouchableOpacity>
+        </View>
+      )}
       </ScrollView>
     </Modal>
   );
@@ -584,6 +644,7 @@ const FeedScreen = () => {
         </View>
       )}
       {renderPostingModal()}
+      {renderNoUserModal()}
     </View>
   );
 };
@@ -600,6 +661,26 @@ const styles = StyleSheet.create({
     backgroundColor: '#3A4D39',
     minHeight: '100%',
     alignItems: 'center',
+  },
+  noUserModalContainer: {
+    flex: 1,
+    padding: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+  },
+  noUserModalView: {
+    borderRadius: 15,
+    padding: 20,
+    paddingBottom: 30,
+    backgroundColor: '#3A4D39',
+    alignItems: "center",
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    width: "100%",
   },
   filterModalContainer: {
     backgroundColor: '#3A4D39',
@@ -650,6 +731,13 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 24,
+    fontWeight: 'bold',
+    color: 'white',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  modalDescription: {
+    fontSize: 12,
     fontWeight: 'bold',
     color: 'white',
     textAlign: 'center',
@@ -899,6 +987,44 @@ const styles = StyleSheet.create({
   detailsButtonText: {
     fontSize: 14,
     color: '#FFF',
+  },
+  noUserModalLoginButton: {
+    backgroundColor: '#ffb900',
+    alignSelf: 'center',
+    paddingVertical: 15,
+    paddingHorizontal: 50,
+    margin: 10,
+    borderRadius: 50,
+    width: '90%',
+  },
+  noUserModalLoginButtonText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#3A4D39',
+    textAlign: 'center',
+  },
+  noUserModalButton: {
+    backgroundColor: 'white',
+    alignSelf: 'center',
+    paddingVertical: 15,
+    paddingHorizontal: 50,
+    margin: 10,
+    borderRadius: 50,
+    width: '90%',
+  },
+  noUserModalButtonText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#3A4D39',
+    textAlign: 'center',
+  },
+  noUserModalButtonArrow: {
+    backgroundColor: "#333",
+    borderRadius: 30,
+    padding: 15,
+    position: "absolute",
+    right: 10,
+    top: 6,
   },
   divider: {
     borderBottomWidth: 1,
