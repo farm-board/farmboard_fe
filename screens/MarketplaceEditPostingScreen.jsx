@@ -1,5 +1,5 @@
 import { Text, View, TextInput, TouchableOpacity, StyleSheet, Dimensions, Alert } from 'react-native'
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useRef } from 'react';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
 import { StatusBar } from 'expo-status-bar';
 import { UserContext } from '../contexts/UserContext';
@@ -10,7 +10,7 @@ import StyledTextInput from '../components/Inputs/StyledTextInput';
 import StyledText from '../components/Texts/StyledText';
 import StyledSelectDropdown from '../components/Inputs/StyledSelectDropdown';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import GalleryEdit from '../components/Profile/GalleryEdit';
+import GalleryEdit from '../components/Feed/GalleryEdit';
 import { baseUrl } from '../config';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -31,7 +31,8 @@ export default function MarketplaceEditPostingScreen({ route }) {
   const { currentUser, setRefresh, refresh, setProfileRefresh, profileRefresh } = useContext(UserContext);
   const [userData, setUserData] = useState({});
   const [isLoading, setIsLoading] = useState(true);
-  const { postingId } = route.params; 
+  const { postingId } = route.params;
+  const galleryEditRef = useRef(null);
 
   const handleDeletePosting = () => {
     Alert.alert(
@@ -129,9 +130,19 @@ export default function MarketplaceEditPostingScreen({ route }) {
           'Content-Type': 'multipart/form-data',
         },
       });
+
+      const newImage = response.data; // e.g. the server returns the new image object
+      setGalleryImages([...galleryImages, newImage]);
   
       console.log('Image uploaded:', response.data);
       fetchGalleryImages(true); // Optional: Refresh gallery images if needed
+      setTimeout(() => {
+        // Scroll to the newly added item (the last index)
+        galleryEditRef.current?.scrollTo({
+          index: galleryImages.length,
+          animated: true,
+        });
+      }, 0);
     } catch (error) {
       console.log('Unable to upload image', error);
     }
@@ -240,7 +251,9 @@ export default function MarketplaceEditPostingScreen({ route }) {
               {Object.keys(galleryImages).length !== 0 ?
                 <View style={styles.galleryContainer}>
                   <GalleryEdit
-                    width={width / 1.05}
+                    width={width}
+                    ref={galleryEditRef}
+                    key={galleryImages.length}
                     galleryImages={galleryImages}
                     handleDeleteImage={handleDeleteGalleryImage}
                     handleGalleryImageUpload={handleGalleryImageUpload}
@@ -340,7 +353,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   content: {
-    marginTop: 25,
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
@@ -366,7 +378,6 @@ const styles = StyleSheet.create({
   },
   galleryInputContainer: {
     width: '100%',
-    marginBottom: 20,
     shadowRadius: 20,
     shadowColor: 'black',
     shadowOpacity: 0.4,
@@ -451,6 +462,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     alignSelf: 'center',
     padding: 10,
+    marginTop: -50,
     borderRadius: 8,
     width: '90%',
   },
@@ -461,9 +473,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   galleryContainer: {
-    flex: 1,
-    justifyContent: 'space-between',
-    maxWidth: '75%',
+    width: '95%',
+    alignSelf: 'center',
+    marginTop: 20,
   },
   contactInfoContainer: {
     letterSpacing: 1,
