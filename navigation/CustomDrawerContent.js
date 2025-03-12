@@ -67,7 +67,7 @@ function CustomDrawerContent(props) {
 
   const handleLogout = () => {
     Alert.alert(
-      'Log Out', "Are you sure you want to Log out?",
+      'Sign Out', "Are you sure you want to Sign out?",
       [
         {
           text: 'Cancel',
@@ -75,7 +75,7 @@ function CustomDrawerContent(props) {
           style: 'cancel'
         },
         {
-          text: 'Log Out',
+          text: 'Sign Out',
           onPress: () => {
           setUserAvatar('');
           logout(navigation);
@@ -153,13 +153,13 @@ function CustomDrawerContent(props) {
           { currentUser ?
             <TouchableOpacity activeOpacity={0.8}>
               <View style={styles.userInfoSection}>
-                <View style={{flexDirection: 'row', marginTop: 15}}>
+                <View style={{flexDirection: 'row', marginTop: 15, marginBottom : 15}}>
                 <Avatar.Image
                     source={userAvatar ? { uri: userAvatar } : require('../assets/images/FarmProfilePlaceholder.png')}
                     size={60}
-                    style={{ justifyContent: 'center', alignSelf: 'center'}}
+                    style={{ justifyContent: 'center', alignSelf: 'center' }}
                   />
-                  <View style={{ marginLeft: 10, flexDirection: 'column' }}>
+                  <View style={{ marginLeft: 10, flexDirection: 'column', marginTop: 5 }}>  
                     <Title style={styles.title}>{getUserDisplayName()}</Title>
                     <Text style={styles.caption} numberOfLines={1}>
                       {currentUser.email}

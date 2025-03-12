@@ -208,9 +208,12 @@ export default function MarketplaceManagePostingsScreen() {
         <Text style={styles.noResultsText}>You do not currently have any active postings. Click the button above to create a new posting.</Text>
       ) : (
         <View>
-          <Text style={styles.noResultsText}>{searchResults.length} Active Marketplace Postings</Text>
+          <View style={styles.separatorLine} />
+            <Text style={styles.noResultsText}>{searchResults.length} Active Marketplace Posting(s)</Text>
+          <View style={styles.separatorLine} />
           <FlatList
             data={searchResults}
+            style={{ width: '100%', marginTop: 20, }}
             renderItem={renderPostingItem}
             keyExtractor={(item) => item.id.toString()}
             numColumns={2}
@@ -220,6 +223,7 @@ export default function MarketplaceManagePostingsScreen() {
             onEndReachedThreshold={0.8}
             ListFooterComponent={ListEndLoader}
           />
+          
         </View>
       )}
       {renderPostingModal()}
@@ -248,12 +252,12 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   addPostingButton: {
-    backgroundColor: 'white',
+    backgroundColor: '#ffb900',
     alignSelf: 'center',
     padding: 10,
-    borderRadius: 8,
+    borderRadius: 20,
     marginTop: 20,
-    marginBottom: 20,
+    marginBottom: 10,
     minWidth: '100%',
   },
   deleteAllPostingsButton: {
@@ -383,9 +387,8 @@ const styles = StyleSheet.create({
     maxWidth: '100%',
   },
   separatorLine: {
-    height: 1,
     backgroundColor: 'white',
-    marginTop: 10,
+    paddingBottom: 50,
     width: '100%',
   },
   itemRow: {
@@ -469,6 +472,12 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
     fontSize: 20,
-    marginBottom: 20,
+    margin: 10,
+  },
+  separatorLine: {
+    height: 1,
+    backgroundColor: 'white',
+    marginTop: 10,
+    width: '100%',
   },
 });
