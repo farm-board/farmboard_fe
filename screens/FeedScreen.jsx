@@ -527,7 +527,7 @@ const FeedScreen = () => {
             </View>
           </TouchableOpacity>
         </View>
-      ) : (
+      ) : !currentUser ? (
         // Otherwise (not logged in OR farm user) => show a button that triggers the noUser modal
         <View style={styles.applyButtonContainer}>
           <TouchableOpacity
@@ -545,7 +545,7 @@ const FeedScreen = () => {
             </View>
           </TouchableOpacity>
         </View>
-      )}
+      ) : null }
       </ScrollView>
     </Modal>
   );

@@ -103,7 +103,7 @@ const MarketplaceFeedScreen = () => {
 
   const fetchGalleryImages = (postingId, userId) => {
     console.log('Fetching gallery images for posting:', postingId);
-    axios.get(`${baseUrl}/api/v1/marketplace_postings/${postingId}/gallery_photos`)
+    axios.get(`${baseUrl}/api/v1/users/${userId}/marketplace_postings/${postingId}/gallery_photos`)
       .then((response) => {
         console.log('Gallery Images:', response.data.gallery_photos);
         setGalleryImages(response.data.gallery_photos);
@@ -253,7 +253,7 @@ const MarketplaceFeedScreen = () => {
       setSelectedPosting(item);
       setModalPostingVisible(true);
       fetchGalleryImages(item.id, item.attributes.user_id);
-      fetchPostingProfileImage(item.id);
+      fetchPostingProfileImage(item.id, item.attributes.user_id);
     }}>
       <View style={[styles.postingItem, { width: (screenWidth / 2) - 20 }]}>
         <Image

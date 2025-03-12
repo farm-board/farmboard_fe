@@ -210,14 +210,14 @@ export default function FarmHome() {
   return (
     <View style={styles.container}>
       <View style={styles.postingsContainer}>
-        {postings.length === 0 ?
-        <StyledText bold style={styles.postingsNotFoundText}>
-          You do not currently have any active job postings. Click on the button below to add a new job posting to your farm.
-        </StyledText> 
-        : null }
         <TouchableOpacity style={styles.addPostingButton} onPress={handlePostingCreate}>
           <Text style={styles.addPostingText}>Create New Posting</Text>
         </TouchableOpacity>
+        {postings.length === 0 ?
+        <StyledText bold style={styles.postingsNotFoundText}>
+          You do not currently have any active job postings. Click on the button above to add a new job posting to your farm.
+        </StyledText> 
+        : null }
         {postings.length > 0 ?
         <>
           <StyledText bold big style={styles.postingActiveTitle}>
@@ -387,13 +387,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 18,
     marginBottom: 20,
-    marginTop: 20,
   },
   addPostingButton: {
-    backgroundColor: 'white',
-    alignSelf: 'center',
+    backgroundColor: '#ffb900',
+    alignSelf: 'end',
     padding: 10,
-    borderRadius: 8,
+    borderRadius: 20,
     marginTop: 10,
     marginBottom: 20,
     minWidth: '100%',
