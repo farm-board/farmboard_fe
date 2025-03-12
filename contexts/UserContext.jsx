@@ -63,23 +63,37 @@ export const UserProvider = ({ children }) => {
   }, [currentUser]);
 
   const logout = async (navigation) => {
+    const token = await AsyncStorage.getItem('token');
+    console.log('Bearer Token:', token);
+  
     setLoading(true);
     try {
-      // Clear user data from context
       setCurrentUser(null);
-      // Clear user data from AsyncStorage
-      await AsyncStorage.removeItem('user');
-      await AsyncStorage.removeItem('token');
-      await AsyncStorage.clear();
-
-      // Make a request to the backend to invalidate the token
-      await axios.delete(`${baseUrl}/logout`);
-      // Navigate to the login screen
-      navigation.navigate("Login");
+      await axios.delete(`${baseUrl}/logout`, {
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          Authorization: token,
+        },
+      });
+      // If success, optionally do something...
     } catch (error) {
-      console.error(error);
+      console.log('Logout error:', error.response?.data || error.message);
     } finally {
+      // In any case, clear local storage so we don't keep a stale token
+      await AsyncStorage.removeItem('token');
+      const stillHasToken = await AsyncStorage.getItem('token');
+      console.log('Token after removal:', stillHasToken); // should be null or undefined
+
+      await AsyncStorage.removeItem('user');
+      const stillHasUser = await AsyncStorage.getItem('user');
+      console.log('User after removal:', stillHasUser); // should be null
+
+      await AsyncStorage.clear();
+      const keys = await AsyncStorage.getAllKeys();
+      console.log('AsyncStorage keys after clear:', keys); // should be []
       setLoading(false);
+      navigation.navigate("Feed Stack", { screen: "Feed" });
     }
   };
 

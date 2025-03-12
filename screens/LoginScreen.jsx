@@ -33,6 +33,7 @@ export default function LoginScreen() {
         .then(response => {
           setCurrentUser(response.data.data);
           AsyncStorage.setItem('token', response.headers.authorization);
+          console.log('Login Bearer Token:', response.headers.authorization);
         })
         .catch(error => {
           console.log(error);
