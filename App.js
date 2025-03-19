@@ -22,7 +22,9 @@ import FarmProfileAddPostingsScreen from './screens/FarmProfileAddPostingsScreen
 import FarmProfileEditPostingsScreen from './screens/FarmProfileEditPostingsScreen.jsx';
 import EmployeeProfileEditDetailsScreen from './screens/EmployeeProfileEditDetailsScreen';
 import EmployeeProfileAddExperiencesScreen from './screens/EmployeeProfileAddExperiencesScreen';
+import EmployeeProfileEditExperiencesScreen from './screens/EmployeeProfileEditExperiencesScreen';
 import EmployeeProfileAddReferencesScreen from './screens/EmployeeProfileAddReferencesScreen';
+import EmployeeProfileEditReferencesScreen from './screens/EmployeeProfileEditReferencesScreen';
 import EmployeeProfileEditMarketplaceContactInfoScreen from './screens/EmployeeProfileEditMarketplaceContactInfoScreen';
 import FeedScreen from './screens/FeedScreen';
 import MarketplaceFeedScreen from './screens/MarketplaceFeedScreen';
@@ -143,6 +145,18 @@ function FarmProfileStackNav() {
                   size={30}
                   color="white"
                   style={{ marginLeft: 10 }}
+                />
+              </TouchableOpacity>
+            );
+          },
+          headerRight: () => {
+            return (
+              <TouchableOpacity onPress={() => navigation.navigate('Edit Profile')}>
+                <MaterialCommunityIcons
+                  name="pencil"
+                  size={30}
+                  color="white"
+                  style={{ marginRight: 6, marginBottom: 2 }}
                 />
               </TouchableOpacity>
             );
@@ -286,6 +300,18 @@ function EmployeeProfileStackNav() {
                 />
               </TouchableOpacity>
             );
+          },
+          headerRight: () => {
+            return (
+              <TouchableOpacity onPress={() => navigation.navigate('Edit Profile')}>
+                <MaterialCommunityIcons
+                  name="pencil"
+                  size={30}
+                  color="white"
+                  style={{ marginRight: 6, marginBottom: 2 }}
+                />
+              </TouchableOpacity>
+            );
           }
         }}/>
         <Stack.Screen name="Edit Profile" component={ProfileEditScreen} 
@@ -353,9 +379,43 @@ function EmployeeProfileStackNav() {
             }
           }} 
          />
+        <Stack.Screen name="Employee Profile Edit Experiences" component={EmployeeProfileEditExperiencesScreen}
+          options={{ 
+            title: 'Edit Experience',
+            headerLeft: () => {
+              return (
+                <TouchableOpacity onPress={() => navigation.navigate('Edit Profile')}>
+                  <MaterialCommunityIcons
+                    name="arrow-left"
+                    size={30}
+                    color="white"
+                    style={{ marginLeft: 10 }}
+                  />
+                </TouchableOpacity>
+              );
+            }
+          }} 
+         />
         <Stack.Screen name="Employee Profile Add References" component={EmployeeProfileAddReferencesScreen}
           options={{ 
             title: 'Add Reference',
+            headerLeft: () => {
+              return (
+                <TouchableOpacity onPress={() => navigation.navigate('Edit Profile')}>
+                  <MaterialCommunityIcons
+                    name="arrow-left"
+                    size={30}
+                    color="white"
+                    style={{ marginLeft: 10 }}
+                  />
+                </TouchableOpacity>
+              );
+            }
+          }} 
+       />
+        <Stack.Screen name="Employee Profile Edit References" component={EmployeeProfileEditReferencesScreen}
+          options={{ 
+            title: 'Edit Reference',
             headerLeft: () => {
               return (
                 <TouchableOpacity onPress={() => navigation.navigate('Edit Profile')}>
