@@ -298,13 +298,6 @@ export default function FarmProfile() {
   return (
     <View style={styles.container}>
       <View style={styles.topSectionContainer}>
-          <TouchableOpacity style={styles.editButton} onPress={onEditButtonPress}>
-            <MaterialCommunityIcons
-              name="pencil-outline"
-              size={25}
-              color="white"
-            />
-          </TouchableOpacity>
         <View style={styles.leftContent}>
           <View style={[styles.avatarContainer, styles.marginBottom3]}>
             <Avatar uri={profilePhoto} />
@@ -326,7 +319,7 @@ export default function FarmProfile() {
       { accommodations === null && Object.keys(galleryImages).length === 0 ?
       <View style={styles.infoMessage}>
         <StyledText bold style={styles.infoMessageTitle}>Complete Your Profile for Better Visibility!</StyledText>
-        <StyledText style={styles.infoMessageText}>Add your farm's accommodations and gallery images to attract more applicants and showcase what makes your farm unique. Tap on the pencil icon above your farm's name to get started.</StyledText>
+        <StyledText style={styles.infoMessageText}>Add your farm's accommodations and gallery images to attract more applicants and showcase what makes your farm unique. Tap on the pencil icon on the top right of your screen to get started.</StyledText>
       </View>
       : accommodations === null ? 
       <View style={styles.infoMessage}>
@@ -626,10 +619,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   addPostingButton: {
-    backgroundColor: 'white',
+    backgroundColor: '#ffb900',
     alignSelf: 'center',
     padding: 10,
-    borderRadius: 8,
+    borderRadius: 20,
     marginTop: 30,
     marginBottom: 20,
     minWidth: '100%',
