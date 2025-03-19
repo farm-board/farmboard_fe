@@ -1,4 +1,4 @@
-import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet, Alert, TouchableWithoutFeedback, Keyboard } from 'react-native'
+import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet, Alert, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, Platform, ScrollView} from 'react-native'
 import React, { useState, useContext } from 'react'
 import { StatusBar } from 'expo-status-bar';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
@@ -29,7 +29,12 @@ export default function LoginScreen() {
             }
           };
 
-        axios.post(`${baseUrl}/login`, user)
+        axios.post(`${baseUrl}/login`, user, {
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
+        })
         .then(response => {
           setCurrentUser(response.data.data);
           AsyncStorage.setItem('token', response.headers.authorization);
@@ -50,6 +55,11 @@ export default function LoginScreen() {
     };
 
     return (
+      <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+      <ScrollView>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={styles.container}>
               <StatusBar style="light" />
@@ -119,6 +129,8 @@ export default function LoginScreen() {
               </Animated.View>
             </View>
         </TouchableWithoutFeedback>
+      </ScrollView>
+      </KeyboardAvoidingView>
       );
     };
 
@@ -133,28 +145,28 @@ export default function LoginScreen() {
         width: '100%',
       },
       titleAndForm: {
-        paddingTop: 30,
+        flex: 1,
         paddingHorizontal: 20,
         paddingBottom: 60,
       },
       logoContainer: {
         alignItems: 'center',
         justifyContent: 'normal',
-        paddingBottom: 15,
+        marginBottom: 80,
+        marginTop: 20,
       },
       logoImageTop: {
-        height: '45%',
-        maxWidth: '90%',
+        height: 210,
+        width: 300,
       },
       logoImageBottom: {
-        height: '21.5%',
-        maxWidth: '95%',
-        aspectRatio: 3/1,
+        height: 100,
+        width: 300,
         marginTop: 2.5,
       },
       formContainer: {
         alignItems: 'center',
-        marginTop: -80,
+        marginBottom: -10,
       },
       inputContainer: {
         backgroundColor: 'rgba(0, 0, 0, 0.1)',
@@ -184,8 +196,8 @@ export default function LoginScreen() {
         alignItems: 'center',
         justifyContent: 'center',
         padding: 20,
+        marginTop: 50,
         width: '100%',
-        marginBottom: 40,
       },
       buttonText: {
         fontSize: 20,

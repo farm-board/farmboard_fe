@@ -88,6 +88,11 @@ export default function MarketplaceEditPostingScreen({ route }) {
       Alert.alert('Posting Incomplete', 'All fields are required.');
       return;
     }
+
+    if (galleryImages.length === 0) {
+      Alert.alert('Photo Required', 'Please upload at least one photo to create this posting.');
+      return;
+    }
   
     const postData = {
       title: data.attributes.title,
@@ -453,6 +458,7 @@ const styles = StyleSheet.create({
   },
   galleryPhotosNotFoundText: {
     textAlign: 'center',
+    marginBottom: 60,
   },
   addImageContainer: {
     width: '100%',

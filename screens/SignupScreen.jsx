@@ -150,95 +150,98 @@ export default function SignupScreen() {
   }
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <KeyboardAvoidingView
-        style={styles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={-180} 
-      >
-        <StatusBar style="light" />
-        <Image style={styles.background} source={require('../assets/images/backgroundUpdatedColors.png')} />
-        {/* Title and Form */}
-        <View style={styles.titleAndForm}>
-        {/* Title */}
-        <View style={styles.logoContainer}>
-            <Animated.Image entering={FadeInUp.delay(1000).duration(1000).springify()} style={styles.logoImageTop} source={require('../assets/images/logowithbarn-transformed-top.png')} />
-            <Animated.Image entering={FadeInUp.delay(400).duration(1000).springify()} style={styles.logoImageBottom} source={require('../assets/images/logowithbarn-transformed-bottom-fix.png')} />
-        </View>
-
-        {/* Form */}
-        <View style={styles.formContainer}>
-            <Animated.View entering={FadeInDown.delay(200).duration(1000).springify()}style={styles.inputContainer}>
-            <TextInput
-                style={styles.input}
-                placeholder='Email'
-                placeholderTextColor='gray'
-                onChangeText={text => setData({ ...data, email: text })}
-            />
-            </Animated.View>
-            <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.inputContainer}>
-            <TextInput
-                style={styles.input}
-                placeholder='Password'
-                placeholderTextColor='gray'
-                secureTextEntry={!showPassword}
-                onChangeText={text => setData({ ...data, password: text })}
-            />
-             <TouchableOpacity onPress={togglePasswordVisibility}>
-                    <Icon name={showPassword ? "eye-off" : "eye"} size={24} color="gray" />
+    <KeyboardAvoidingView
+    style={{ flex: 1 }}
+    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+    <ScrollView>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.container}>
+          <StatusBar style="light" />
+          <Image style={styles.background} source={require('../assets/images/backgroundUpdatedColors.png')} />
+          {/* Title and Form */}
+          <View style={styles.titleAndForm}>
+          {/* Title */}
+          <View style={styles.logoContainer}>
+              <Animated.Image entering={FadeInUp.delay(1000).duration(1000).springify()} style={styles.logoImageTop} source={require('../assets/images/logowithbarn-transformed-top.png')} />
+              <Animated.Image entering={FadeInUp.delay(400).duration(1000).springify()} style={styles.logoImageBottom} source={require('../assets/images/logowithbarn-transformed-bottom-fix.png')} />
+          </View>
+                                                                                                                               
+          {/* Form */}
+          <View style={styles.formContainer}>
+              <Animated.View entering={FadeInDown.delay(200).duration(1000).springify()}style={styles.inputContainer}>
+              <TextInput
+                  style={styles.input}
+                  placeholder='Email'
+                  placeholderTextColor='gray'
+                  onChangeText={text => setData({ ...data, email: text })}
+              />
+              </Animated.View>
+              <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.inputContainer}>
+              <TextInput
+                  style={styles.input}
+                  placeholder='Password'
+                  placeholderTextColor='gray'
+                  secureTextEntry={!showPassword}
+                  onChangeText={text => setData({ ...data, password: text })}
+              />
+              <TouchableOpacity onPress={togglePasswordVisibility}>
+                      <Icon name={showPassword ? "eye-off" : "eye"} size={24} color="gray" />
+                </TouchableOpacity>
+              </Animated.View>
+              <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.inputContainer}>
+              <TextInput
+                  style={styles.input}
+                  placeholder='Password Confirmation'
+                  placeholderTextColor='gray'
+                  secureTextEntry={!showPasswordTwo}
+                  onChangeText={text => setData({ ...data, password_confirmation: text })}
+              />
+                <TouchableOpacity onPress={togglePasswordVisibilityTwo}>
+                      <Icon name={showPasswordTwo ? "eye-off" : "eye"} size={24} color="gray" />
+                </TouchableOpacity>
+              </Animated.View>
+              <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.checkboxContainer}>
+              <Checkbox
+                style={styles.checkbox}
+                value={termsCheckbox}
+                onValueChange={setTermsCheckbox}
+                color={'#4F6F52'}
+              />
+              <StyledText bold style={styles.checkboxText}>By checking this I agree to The FarmBoard</StyledText>
+              </Animated.View>
+              <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.termsContainer}>
+              <TouchableOpacity onPress={() => setTermsModalVisible(true)}>
+                  <StyledText style={styles.termsText}>Terms of Use</StyledText>
               </TouchableOpacity>
-            </Animated.View>
-            <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.inputContainer}>
-            <TextInput
-                style={styles.input}
-                placeholder='Password Confirmation'
-                placeholderTextColor='gray'
-                secureTextEntry={!showPasswordTwo}
-                onChangeText={text => setData({ ...data, password_confirmation: text })}
-            />
-              <TouchableOpacity onPress={togglePasswordVisibilityTwo}>
-                    <Icon name={showPasswordTwo ? "eye-off" : "eye"} size={24} color="gray" />
+              <StyledText bold style={styles.termsAndText}>and</StyledText>
+              <TouchableOpacity onPress={() => setPrivacyPolicyModalVisible(true)}>
+                  <StyledText style={styles.termsText}>Privacy Policy</StyledText>
               </TouchableOpacity>
-            </Animated.View>
-            <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.checkboxContainer}>
-            <Checkbox
-              style={styles.checkbox}
-              value={termsCheckbox}
-              onValueChange={setTermsCheckbox}
-              color={'#4F6F52'}
-            />
-            <StyledText bold style={styles.checkboxText}>By checking this I agree to The FarmBoard</StyledText>
-            </Animated.View>
-            <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.termsContainer}>
-            <TouchableOpacity onPress={() => setTermsModalVisible(true)}>
-                <StyledText style={styles.termsText}>Terms of Use</StyledText>
-            </TouchableOpacity>
-            <StyledText bold style={styles.termsAndText}>and</StyledText>
-            <TouchableOpacity onPress={() => setPrivacyPolicyModalVisible(true)}>
-                <StyledText style={styles.termsText}>Privacy Policy</StyledText>
-            </TouchableOpacity>
-            </Animated.View>
-            <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()}>
-            <TouchableOpacity
-                style={styles.button}
-                onPress={handleSubmit}>
-                <Text style={styles.buttonText}>
-                Sign Up
-                </Text>
-            </TouchableOpacity>
-            </Animated.View>
-            <Animated.View entering={FadeInDown.delay(1000).duration(1000).springify()} style={styles.signUpTextContainer}>
-            <Text>Already have an account?</Text>
-            <TouchableOpacity onPress={() => navigation.push('Login')}>
-                <Text style={styles.signUpText}>Login</Text>
-            </TouchableOpacity>
-            </Animated.View>
-        </View>
-        </View>
-        {termsAndConditionsModal()}
-        {privacyPolicyModal()}
+              </Animated.View>
+              <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()}>
+              <TouchableOpacity
+                  style={styles.button}
+                  onPress={handleSubmit}>
+                  <Text style={styles.buttonText}>
+                  Sign Up
+                  </Text>
+              </TouchableOpacity>
+              </Animated.View>
+              <Animated.View entering={FadeInDown.delay(1000).duration(1000).springify()} style={styles.signUpTextContainer}>
+              <Text>Already have an account?</Text>
+              <TouchableOpacity onPress={() => navigation.push('Login')}>
+                  <Text style={styles.signUpText}>Login</Text>
+              </TouchableOpacity>
+              </Animated.View>
+          </View>
+          </View>
+          {termsAndConditionsModal()}
+          {privacyPolicyModal()}
+      </View>
+      </TouchableWithoutFeedback>
+    </ScrollView>
     </KeyboardAvoidingView>
-    </TouchableWithoutFeedback>
     );
   };
 
@@ -255,27 +258,25 @@ const styles = StyleSheet.create({
     titleAndForm: {
       flex: 1,
       paddingHorizontal: 20,
-      paddingBottom: 90,
+      paddingBottom: 60,
     },
     logoContainer: {
       alignItems: 'center',
       justifyContent: 'normal',
       marginBottom: 80,
-      marginTop: 40,
+      marginTop: 20,
     },
     logoImageTop: {
-      height: '45%',
-      maxWidth: '90%',
+      height: 210,
+      width: 300,
     },
     logoImageBottom: {
-      height: '23%',
-      maxWidth: '95%',
-      aspectRatio: 3/1,
+      height: 100,
+      width: 300,
       marginTop: 2.5,
     },
     formContainer: {
       alignItems: 'center',
-      marginTop: -140,
     },
     inputContainer: {
       backgroundColor: 'rgba(0, 0, 0, 0.1)',

@@ -96,18 +96,6 @@ export default function MarketplaceManagePostingsScreen() {
     navigation.push('Add Marketplace Posting', {sourceStack: 'Marketplace'});
   };
 
-  const fetchPostingProfileImage = (postingId) => {
-    console.log('Fetching posting profile photo for posting:', postingId);
-    axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/marketplace_postings/${postingId}/user_image`)
-      .then((response) => {
-        console.log('Posting profile photo:', response.data.image_url);
-        setPostingProfilePhoto(response.data.image_url);
-      })
-      .catch(error => {
-        console.error('There was an error fetching the posting profile photo:', error);
-      });
-  };
-
   const handleEditPosting = (postingId) => {
     setModalPostingVisible(false);
     console.log('Editing Posting:', postingId);
@@ -120,7 +108,6 @@ export default function MarketplaceManagePostingsScreen() {
       setSelectedPosting(item);
       setModalPostingVisible(true);
       fetchGalleryImages(item.id);
-      fetchPostingProfileImage(item.id);
     }}>
       <View style={[styles.postingItem, { width: (screenWidth / 2) - 20 }]}>
         <Image

@@ -1,14 +1,13 @@
+import React, { useContext, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import React, { useContext } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { UserContext } from '../contexts/UserContext';
-import FarmProfileEditPostings from '../components/Farm/FarmProfileEditPostings';
+import ExperienceEditForm from '../components/Experience/ExperienceEditForm';
 
+export default function EmployeeProfileEditExperiencesScreen({ route }) {
+  const {loading } = useContext(UserContext);
+  const { experienceId } = route.params;
 
-
-export default function FarmProfileEditPostingsScreen({ route }) {
-  const { loading } = useContext(UserContext);
-  const { postingId } = route.params;
 
   if (loading) {
     return <Text>Loading...</Text>;
@@ -18,29 +17,22 @@ export default function FarmProfileEditPostingsScreen({ route }) {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
       <View style={styles.content}>
-        <FarmProfileEditPostings postingId={postingId} />
+        <ExperienceEditForm experienceId={experienceId}/>
       </View>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#3A4D39',
-    marginBottom: -30,
-  },
-  backgroundImage: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    bottom: 0,
-    right: 0,
-    resizeMode: 'cover',
+    marginBottom: -35,
   },
   content: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 10,
   },
 });

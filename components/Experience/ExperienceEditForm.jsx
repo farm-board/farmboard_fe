@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { Text, View, TouchableOpacity, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import axios from 'axios';
 import KeyboardAvoidingContainer from "../Containers/KeyboardAvoidingContainer";
 import StyledTextInput from "../Inputs/StyledTextInput";
@@ -11,7 +11,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { baseUrl } from '../../config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function ExperienceForm({ setExperiences }) {
+export default function ExperienceEditForm() {
   const [data, setData] = useState({
     company_name: '',
     started_at: '',
@@ -22,20 +22,55 @@ export default function ExperienceForm({ setExperiences }) {
   const navigation = useNavigation();
   const { currentUser, setProfileRefresh, setEditProfileRefresh, editProfileRefresh, profileRefresh } = useContext(UserContext);
 
-  const handleSubmit = async () => {
+  const route = useRoute();
+  const { experienceId } = route.params;
+
+  const handleDeleteExperience = async () => {
     try {
-      const response = await axios.post(`${baseUrl}/api/v1/users/${currentUser.id}/employees/experiences`, { experience: data });
-      setExperiences(prevExperiences => [...prevExperiences, response.data.data]);
+      const response = await axios.delete(`${baseUrl}/api/v1/users/${currentUser.id}/employees/experiences/${experienceId}`);
       // Clear the cache and wait for it to complete
       await AsyncStorage.removeItem('experiences');
       console.log('Cleared experiences data from cache');
       setProfileRefresh(true);
       setEditProfileRefresh(true);
     } catch (error) {
-      console.error('There was an error creating the experience:', error);
+      console.error('There was an error deleting the experience:', error);
     }
   }
 
+  const handleSubmit = async () => {
+    try {
+      const response = await axios.put(`${baseUrl}/api/v1/users/${currentUser.id}/employees/experiences/${experienceId}`, { experience: data });
+      // Clear the cache and wait for it to complete
+      await AsyncStorage.removeItem('experiences');
+      console.log('Cleared experiences data from cache');
+      setProfileRefresh(true);
+      setEditProfileRefresh(true); 
+    } catch (error) {
+      console.error('There was an error updating the experience:', error);
+    }
+  }
+
+  const fetchExperienceData = async () => {
+    try {
+      const response = await axios.get(`${baseUrl}/api/v1/users/${currentUser.id}/employees/experiences/${experienceId}`);
+      console.log('Experience data:', response.data.data);
+      setData({
+        company_name: response.data.data.attributes.company_name,
+        started_at: response.data.data.attributes.started_at,
+        ended_at: response.data.data.attributes.ended_at,
+        description: response.data.data.attributes.description
+      })
+    } catch (error) {
+      console.error('There was an error fetching the experiences:', error);
+    }
+  }
+
+  useEffect(() => {
+    console.log('experienceId:', experienceId);
+    fetchExperienceData();
+  }
+  , []);
 
   useEffect(() => {
     if (profileRefresh || editProfileRefresh) {
@@ -63,22 +98,23 @@ export default function ExperienceForm({ setExperiences }) {
       <View style={styles.content}>
         <View style={styles.mb3}>
           <Animated.Text >
-            <StyledText entering={FadeInUp.duration(1000).springify()} big style={[styles.text, styles.pb10]}>
+            <StyledText entering={FadeInUp.delay(200).duration(1000).springify()} big style={[styles.text, styles.pb10]}>
               Fill in Previous Experience Details:
             </StyledText>
           </Animated.Text>
         </View>
-        <Animated.View entering={FadeInDown.duration(1000).springify()} style={styles.inputTopContainer}>
+        <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.inputTopContainer}>
           <StyledTextInput
             placeholder="Company Name"
             icon="account-outline"
             label="Company Name:"
+            value={data.company_name}
             maxLength={35}
             labelStyle={{ fontSize: 18, color: 'white' }} 
             onChangeText={(text) => setData({ ...data, company_name: text })}
           />
         </Animated.View>
-        <Animated.View entering={FadeInDown.duration(1000).springify()} style={styles.inputContainer}>
+        <Animated.View entering={FadeInDown.delay(600).duration(1000).springify()} style={styles.inputContainer}>
           <StyledTextInput
             placeholder="MM-DD-YYYY"
             icon="calendar"
@@ -90,7 +126,7 @@ export default function ExperienceForm({ setExperiences }) {
             onChangeText={(text) => setData({ ...data, started_at: formatDate(text) })}
           />
         </Animated.View>
-        <Animated.View entering={FadeInDown.duration(1000).springify()} style={styles.inputContainer}>
+        <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputContainer}>
           <StyledTextInput
             placeholder="MM-DD-YYYY"
             icon="calendar"
@@ -102,24 +138,33 @@ export default function ExperienceForm({ setExperiences }) {
             onChangeText={(text) => setData({ ...data, ended_at: formatDate(text) })}
           />
         </Animated.View>
-        <Animated.View entering={FadeInDown.delay(800).duration(1000).springify()} style={styles.inputContainer}>
+        <Animated.View entering={FadeInDown.delay(1000).duration(1000).springify()} style={styles.inputContainer}>
           <StyledTextInput
             placeholder="Describe what you did here..."
             icon="star-box-outline"
             multiline={true}
             label="Description:"
             maxLength={255}
+            value={data.description}
             labelStyle={{ fontSize: 18, color: 'white' }}
             onChangeText={(text) => setData({ ...data, description: text })}
           />
         </Animated.View>
-        <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.submitButtonContainer}>
+        <Animated.View entering={FadeInDown.delay(1200).duration(1000).springify()} style={styles.submitButtonContainer}>
           <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
             <Text style={styles.submitButtonText}>
-              Add Experience
+              Save Changes
             </Text>
             <View style={styles.submitArrow}>
               <MaterialCommunityIcons name="arrow-right" size={24} color="white" />
+            </View>
+          </TouchableOpacity>
+        </Animated.View>
+        <Animated.View entering={FadeInDown.delay(1600).duration(1000).springify()} style={styles.deleteButtonContainer}>
+          <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteExperience}>
+            <Text style={styles.deleteButtonText}>Remove</Text>
+            <View style={styles.deleteIcon}>
+              <MaterialCommunityIcons name="trash-can-outline" size={24} color="white" />
             </View>
           </TouchableOpacity>
         </Animated.View>
@@ -167,9 +212,6 @@ const styles = StyleSheet.create({
   },
   submitButtonContainer: {
     width: '100%',
-    alignItems: 'center',
-    marginBottom: 20,
-    paddingTop: 15,
   },
   submitButton: {
     backgroundColor: '#ffb900',
@@ -184,6 +226,30 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   submitArrow: {
+    backgroundColor: "#333",
+    borderRadius: 30,
+    padding: 15,
+    position: "absolute",
+    right: 15,
+    top: 13,
+  },
+  deleteButtonContainer: {
+    width: '100%',
+    marginTop: 20,
+  },
+  deleteButton: {
+    backgroundColor: '#FF3F3F',
+    borderRadius: 50,
+    paddingVertical: 30,
+    paddingHorizontal: 100,
+  },
+  deleteButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#333',
+  },
+  deleteIcon: {
     backgroundColor: "#333",
     borderRadius: 30,
     padding: 15,

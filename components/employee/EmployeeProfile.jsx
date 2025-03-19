@@ -193,9 +193,6 @@ export default function EmployeeProfile() {
   return (
     <View style={styles.container}>
       <View style={styles.topSectionContainer}>
-        <TouchableOpacity style={styles.editButton} onPress={onEditButtonPress}>
-          <MaterialCommunityIcons name="pencil-outline" size={25} color="white" />
-        </TouchableOpacity>
         <View style={styles.leftContent}>
           <View style={[styles.avatarContainer, styles.marginBottom3]}>
             <Avatar uri={profilePhoto} />

@@ -116,6 +116,11 @@ export default function MarketplaceAddPostingScreen() {
       return;
     }
 
+    if (galleryImages.length === 0) {
+      Alert.alert('Photo Required', 'Please upload at least one photo to create this posting.');
+      return;
+    }
+
     if (
       (userData.attributes.marketplace_phone === null && !data.phone) && 
       (userData.attributes.marketplace_email === null && !data.email)

@@ -338,8 +338,15 @@ export default function FarmProfileEdit() {
           text: "Delete",
           style: "destructive", // This will show a red "Delete" on iOS
           onPress: async () => {
+            const token = await AsyncStorage.getItem('token');
             try {
-              await axios.delete(`${baseUrl}/`);
+              await axios.delete(`${baseUrl}/`, {
+                headers: {
+                  Accept: 'application/json',
+                  'Content-Type': 'application/json',
+                  Authorization: token,
+                },
+              });
               console.log("Account deleted");
   
               // Show a success alert

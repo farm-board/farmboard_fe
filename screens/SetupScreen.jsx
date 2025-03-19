@@ -98,11 +98,11 @@ export default function SetupScreen() {
             </TouchableOpacity>
           </View>
         ) : currentUser.role_type === "farm" ? (
-          <View>
+          <View style={{ marginBottom: -30 }}>
             <FarmForm />
           </View>
         ) : currentUser.role_type === "employee" ? (
-          <View>
+          <View style={{ marginBottom: -30 }}>
             <EmployeeForm />
           </View>
         ) : null}
@@ -129,8 +129,8 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   introContainer: {
     alignItems: 'center',

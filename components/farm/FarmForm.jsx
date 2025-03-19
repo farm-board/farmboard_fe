@@ -238,13 +238,7 @@ export default function FarmForm() {
 
 const styles = StyleSheet.create({
   container: {
-    paddingBottom: 25,
     paddingHorizontal: 10,
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   text: {
     textAlign: 'center',
@@ -271,6 +265,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     paddingVertical: 30,
     paddingHorizontal: 100,
+    marginBottom: 20,
   },
   submitButtonText: {
     fontSize: 16,

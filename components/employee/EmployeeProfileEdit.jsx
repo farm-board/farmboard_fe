@@ -228,6 +228,15 @@ export default function EmployeeProfileEdit() {
     }
   };
 
+  const handleExperienceRedirect = (experienceId) => {
+    navigation.navigate('Employee Profile Edit Experiences', { experienceId: experienceId });
+  };
+  
+  const handleReferenceRedirect = (referenceId) => {
+    navigation.navigate('Employee Profile Edit References', { referenceId: referenceId });
+  };
+
+
   const deleteReference = async (referenceId) => {
     try {
       await axios.delete(`${baseUrl}/api/v1/users/${currentUser.id}/employees/references/${referenceId}`);
@@ -240,7 +249,7 @@ export default function EmployeeProfileEdit() {
   const handleAccountDelete = async () => {
     Alert.alert(
       "Delete Account",
-      "Are you sure you want to delete your account? All Existing data will be lost. This includes your profile and any active marketplace listings.",
+      "Are you sure you want to delete your account? All Existing data will be lost. This includes your profile and any active listings.",
       [
         {
           text: "Cancel",
@@ -251,8 +260,15 @@ export default function EmployeeProfileEdit() {
           text: "Delete",
           style: "destructive", // This will show a red "Delete" on iOS
           onPress: async () => {
+            const token = await AsyncStorage.getItem('token');
             try {
-              await axios.delete(`${baseUrl}/`);
+              await axios.delete(`${baseUrl}/`, {
+                headers: {
+                  Accept: 'application/json',
+                  'Content-Type': 'application/json',
+                  Authorization: token,
+                },
+              });
               console.log("Account deleted");
   
               // Show a success alert
@@ -297,7 +313,9 @@ export default function EmployeeProfileEdit() {
           </Animated.View>
           <Animated.View entering={FadeInDown.delay(200).duration(1000).springify()} style={styles.inputItem}>
             <ProfileInfo label="Last Name" icon="account-outline">
-              <StyledText style={styles.existingData}>{data.last_name}</StyledText>
+              <StyledText style={styles.existingData}>
+              {data.last_name.length > 15 ? `${data.last_name.substring(0, 15)}...` : data.last_name}
+              </StyledText>
             </ProfileInfo>
           </Animated.View>
           <Animated.View entering={FadeInDown.delay(400).duration(1000).springify()} style={styles.inputItem}>
@@ -323,32 +341,30 @@ export default function EmployeeProfileEdit() {
             </ProfileInfo>
           </Animated.View>
         </View>
-        <View style={styles.inputContainer}>
+        <View style={styles.inputContainer2}>
           <SectionHeader
-            option={experienceEditMode ? 'Done' : 'Edit'}
-            onPress={() => setExperienceEditMode(!experienceEditMode)}
           >
             Experience Info
           </SectionHeader>
+          <View style={{marginBottom: 20}}>
           {experiences.map((experience, index) => (
             <Animated.View key={index} entering={FadeInDown.duration(1000).springify()} style={styles.inputItemTwo}>
               <ProfileInfo label="Company Name" icon="briefcase-outline">
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                   <StyledText style={styles.existingData}>
-                    {experience.attributes.company_name}
+                  {experience.attributes.company_name.length > 10 ? `${experience.attributes.company_name.substring(0, 10)}...` : experience.attributes.company_name}
                   </StyledText>
-                  {experienceEditMode && (
-                    <TouchableOpacity onPress={() => deleteExperience(experience.id)}>
-                      <MaterialCommunityIcons name="delete" size={24} color="red" />
+                    <TouchableOpacity onPress={() => handleExperienceRedirect(experience.id)} style={{backgroundColor: '#3A4D39', marginRight: -18, marginLeft: 10, padding: 10, borderRadius: 15}}>
+                      <MaterialCommunityIcons name="pencil" size={26} color="#ffb900" style={{}}/>
                     </TouchableOpacity>
-                  )}
                 </View>
               </ProfileInfo>
             </Animated.View>
           ))}
-          {experienceEditMode && experiences.length < 3 && (
+          </View>
+          {experiences.length < 3 && (
             <TouchableOpacity
-              style={[styles.addButton, styles.bottomButton]}
+              style={[styles.addButton]}
               onPress={() => navigation.navigate("Employee Profile Add Experiences")}
             >
               <Text style={styles.addButtonText}>Add Experience</Text>
@@ -358,32 +374,29 @@ export default function EmployeeProfileEdit() {
             </TouchableOpacity>
           )}
         </View>
-        <View style={styles.inputContainer}>
-          <SectionHeader
-            option={referenceEditMode ? 'Done' : 'Edit'}
-            onPress={() => setReferenceEditMode(!referenceEditMode)}
-          >
+        <View style={styles.inputContainer2}>
+          <SectionHeader>
             Reference Info
           </SectionHeader>
+          <View style={{marginBottom: 20}}>
           {references.map((reference, index) => (
             <Animated.View key={index} entering={FadeInDown.duration(1000).springify()} style={styles.inputItemTwo}>
               <ProfileInfo label="Reference Name" icon="account-outline">
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                   <StyledText style={styles.existingData}>
-                    {reference.attributes.first_name}
+                    {reference.attributes.first_name.length > 10 ? `${reference.attributes.first_name.substring(0, 10)}...` : reference.attributes.first_name}
                   </StyledText>
-                  {referenceEditMode && (
-                    <TouchableOpacity onPress={() => deleteReference(reference.id)}>
-                      <MaterialCommunityIcons name="delete" size={24} color="red" />
+                  <TouchableOpacity onPress={() => handleReferenceRedirect(reference.id)} style={{backgroundColor: '#3A4D39', marginRight: -18, marginLeft: 10, padding: 10, borderRadius: 15}}>
+                      <MaterialCommunityIcons name="pencil" size={26} color="#ffb900" style={{}}/>
                     </TouchableOpacity>
-                  )}
                 </View>
               </ProfileInfo>
             </Animated.View>
           ))}
-          {referenceEditMode && references.length < 3 && (
+          </View>
+          {references.length < 3 && (
             <TouchableOpacity
-              style={[styles.addButton, styles.bottomButton]}
+              style={[styles.bottomButton]}
               onPress={() => navigation.navigate("Employee Profile Add References")}
             >
               <Text style={styles.addButtonText}>Add Reference</Text>
@@ -481,13 +494,19 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingHorizontal: 20,
     paddingVertical: 10,
+    paddingTop: 25,
+  },
+  inputContainer2: { 
+    backgroundColor: '#3A4D39',
+    width: '100%',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
   },
   inputItem: {
     minWidth: '100%',
   },
   inputItemTwo: {
     minWidth: '100%',
-    marginBottom: 20,
   },
   header: {
     flexDirection: 'row',
@@ -506,7 +525,13 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingVertical: 10,
     paddingHorizontal: 100,
-    marginBottom: 25,
+  },
+  bottomButton: {
+    backgroundColor: '#ffb900',
+    borderRadius: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 100,
+    marginBottom: 20,
   },
   addButtonText: {
     fontSize: 16,
@@ -533,6 +558,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 8,
     width: '90%',
+    marginTop: 20,
   },
   deleteAccountText: {
     fontSize: 20,
