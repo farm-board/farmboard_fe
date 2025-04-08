@@ -166,7 +166,7 @@ export default function SignupScreen() {
               <Animated.Image entering={FadeInUp.delay(1000).duration(1000).springify()} style={styles.logoImageTop} source={require('../assets/images/logowithbarn-transformed-top.png')} />
               <Animated.Image entering={FadeInUp.delay(400).duration(1000).springify()} style={styles.logoImageBottom} source={require('../assets/images/logowithbarn-transformed-bottom-fix.png')} />
           </View>
-
+                                                                                                                               
           {/* Form */}
           <View style={styles.formContainer}>
               <Animated.View entering={FadeInDown.delay(200).duration(1000).springify()}style={styles.inputContainer}>
