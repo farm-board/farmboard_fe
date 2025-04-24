@@ -107,11 +107,26 @@ export default function MarketplaceEditPostingScreen({ route }) {
       setRefresh(true);
       setProfileRefresh(true);
       Alert.alert('Success', 'Posting updated successfully!');
+      navigation.goBack();
     } catch (error) {
-      console.log('Unable to update posting', error);
-      Alert.alert('Error', 'An error occurred while updating the posting.');
-    } finally {
-      navigation.goBack(); // Navigate back after successful submission
+      if (
+        error.response &&
+        error.response.status === 422 &&
+        Array.isArray(error.response.data?.errors)
+      ) {
+        const messages = error.response.data.errors;
+        const containsProfanity = messages.some(m =>
+          m.toLowerCase().includes('prohibited word')
+        );
+  
+        Alert.alert(
+          containsProfanity ? 'Prohibited Language' : 'Validation Error',
+          messages[0]           
+        );
+      } else {
+        console.error('There was an error updating the marketplace posting:', error);
+        Alert.alert('Error', 'Unable to update marketplace posting. Please try again.');
+      }
     }
   };
 

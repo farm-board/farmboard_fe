@@ -48,7 +48,24 @@ export default function ReferenceForm({ setReferences }) {
       setProfileRefresh(true);
       setEditProfileRefresh(true);
     } catch (error) {
-      console.error('There was an error creating the reference:', error);
+      if (
+        error.response &&
+        error.response.status === 422 &&
+        Array.isArray(error.response.data?.errors)
+      ) {
+        const messages = error.response.data.errors;
+        const containsProfanity = messages.some(m =>
+          m.toLowerCase().includes('prohibited word')
+        );
+  
+        Alert.alert(
+          containsProfanity ? 'Prohibited Language' : 'Validation Error',
+          messages[0]           
+        );
+      } else {
+        console.error('There was an error creating the reference:', error);
+        Alert.alert('Error', 'Unable to add reference. Please try again.');
+      }
     }
   };
 

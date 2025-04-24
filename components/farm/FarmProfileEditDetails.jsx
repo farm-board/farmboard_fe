@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react'
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
-import { Text, View, TextInput, TouchableOpacity, StyleSheet } from 'react-native'
+import { Text, View, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native'
 import { useNavigation } from '@react-navigation/native';
 import { UserContext } from '../../contexts/UserContext';
 import axios from 'axios';
@@ -70,7 +70,24 @@ export default function FarmProfileEditDetails() {
       setEditProfileRefresh(true);
       setUserName(data.name);
     } catch (error) {
-      console.log('Unable to register user', error);
+      if (
+        error.response &&
+        error.response.status === 422 &&
+        Array.isArray(error.response.data?.errors)
+      ) {
+        const messages = error.response.data.errors;
+        const containsProfanity = messages.some(m =>
+          m.toLowerCase().includes('prohibited word')
+        );
+  
+        Alert.alert(
+          containsProfanity ? 'Prohibited Language' : 'Validation Error',
+          messages[0]           
+        );
+      } else {
+        console.error('There was an error updating the profle:', error);
+        Alert.alert('Error', 'Unable to update profile. Please try again.');
+      }
     }
   }
 

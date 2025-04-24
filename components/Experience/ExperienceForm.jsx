@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { Text, View, TouchableOpacity, StyleSheet } from 'react-native';
+import { Text, View, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import KeyboardAvoidingContainer from "../Containers/KeyboardAvoidingContainer";
@@ -24,17 +24,38 @@ export default function ExperienceForm({ setExperiences }) {
 
   const handleSubmit = async () => {
     try {
-      const response = await axios.post(`${baseUrl}/api/v1/users/${currentUser.id}/employees/experiences`, { experience: data });
-      setExperiences(prevExperiences => [...prevExperiences, response.data.data]);
-      // Clear the cache and wait for it to complete
+      const response = await axios.post(
+        `${baseUrl}/api/v1/users/${currentUser.id}/employees/experiences`,
+        { experience: data } 
+      );
+
+      setExperiences(prev => [...prev, response.data.data]);
       await AsyncStorage.removeItem('experiences');
       console.log('Cleared experiences data from cache');
       setProfileRefresh(true);
       setEditProfileRefresh(true);
+  
     } catch (error) {
-      console.error('There was an error creating the experience:', error);
+      if (
+        error.response &&
+        error.response.status === 422 &&
+        Array.isArray(error.response.data?.errors)
+      ) {
+        const messages = error.response.data.errors;
+        const containsProfanity = messages.some(m =>
+          m.toLowerCase().includes('prohibited word')
+        );
+  
+        Alert.alert(
+          containsProfanity ? 'Prohibited Language' : 'Validation Error',
+          messages[0]           
+        );
+      } else {
+        console.error('There was an error creating the experience:', error);
+        Alert.alert('Error', 'Unable to add experience. Please try again.');
+      }
     }
-  }
+  };
 
 
   useEffect(() => {

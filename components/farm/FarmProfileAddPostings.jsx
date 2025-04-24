@@ -56,6 +56,7 @@ export default function FarmProfileAddPostings() {
   };
 
   const handleSubmit = () => {
+    // ----- client‑side completeness checks -----
     if (!data.title) {
       Alert.alert('Posting Incomplete', 'A Job Title is required for this Posting.');
       return;
@@ -80,27 +81,49 @@ export default function FarmProfileAddPostings() {
       Alert.alert('Posting Incomplete', 'A Description is required for this Posting.');
       return;
     }
-
+  
+    // ----- build the payload -----
     const postData = {
-      title: data.title,
-      salary: data.salary,
-      payment_type: data.payment_type,
-      duration: data.duration,
-      age_requirement: data.age_requirement,
-      offers_lodging: data.offers_lodging,
-      skill_requirements: data.skill_requirements,
-      description: data.description,
+      title:             data.title,
+      salary:            data.salary,
+      payment_type:      data.payment_type,
+      duration:          data.duration,
+      age_requirement:   data.age_requirement,
+      offers_lodging:    data.offers_lodging,
+      skill_requirements:data.skill_requirements,
+      description:       data.description,
     };
-    axios.post(`${baseUrl}/api/v1/users/${currentUser.id}/farms/postings`, { posting: postData })
-    .then(response => {
-      console.log(response.data);
-      setRefresh(true);
-      setProfileRefresh(true);
-    })
-    .catch(error => {
-      console.log('Unable to add posting', error);
-    })
-  }
+  
+    // ----- send it -----
+    axios
+      .post(`${baseUrl}/api/v1/users/${currentUser.id}/farms/postings`, { posting: postData })
+      .then(response => {
+        console.log(response.data);
+        setRefresh(true);
+        setProfileRefresh(true);
+        // you might want to navigate away or clear the form here
+      })
+      .catch(error => {
+        if (
+          error.response &&
+          error.response.status === 422 &&
+          Array.isArray(error.response.data?.errors)
+        ) {
+          const messages = error.response.data.errors;
+          const containsProfanity = messages.some(m =>
+            m.toLowerCase().includes('prohibited word')
+          );
+  
+          Alert.alert(
+            containsProfanity ? 'Prohibited Language' : 'Validation Error',
+            messages[0],            // or messages.join('\n') for all
+          );
+        } else {
+          console.log('Unable to update posting', error);
+          Alert.alert('Error', 'Unable to update posting. Please try again.');
+        }
+      });
+  };
 
   useEffect(() => {
     if (refresh || profileRefresh) {
