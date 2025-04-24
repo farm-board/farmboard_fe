@@ -40,7 +40,24 @@ export default function EmployeeProfileEditMarketplaceContactInfo() {
       setEditProfileRefresh(true);
       setUserName(data.name);
     } catch (error) {
-      console.log('Unable to register user', error);
+      if (
+        error.response &&
+        error.response.status === 422 &&
+        Array.isArray(error.response.data?.errors)
+      ) {
+        const messages = error.response.data.errors;
+        const containsProfanity = messages.some(m =>
+          m.toLowerCase().includes('prohibited word')
+        );
+  
+        Alert.alert(
+          containsProfanity ? 'Prohibited Language' : 'Validation Error',
+          messages[0]           
+        );
+      } else {
+        console.error('There was an error updating the reference:', error);
+        Alert.alert('Error', 'Unable to update reference. Please try again.');
+      }
     }
   }
 

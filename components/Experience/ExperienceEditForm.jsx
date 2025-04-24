@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { Text, View, TouchableOpacity, StyleSheet } from 'react-native';
+import { Text, View, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import axios from 'axios';
 import KeyboardAvoidingContainer from "../Containers/KeyboardAvoidingContainer";
@@ -40,16 +40,37 @@ export default function ExperienceEditForm() {
 
   const handleSubmit = async () => {
     try {
-      const response = await axios.put(`${baseUrl}/api/v1/users/${currentUser.id}/employees/experiences/${experienceId}`, { experience: data });
-      // Clear the cache and wait for it to complete
+      const response = await axios.put(
+        `${baseUrl}/api/v1/users/${currentUser.id}/employees/experiences/${experienceId}`,
+        { experience: data }       // keep Rails’ expected nesting
+      );
+  
+      // ---- success ----
       await AsyncStorage.removeItem('experiences');
       console.log('Cleared experiences data from cache');
       setProfileRefresh(true);
-      setEditProfileRefresh(true); 
+      setEditProfileRefresh(true);
+  
     } catch (error) {
-      console.error('There was an error updating the experience:', error);
+      // ---- validation / profanity errors ----
+      const errors = error.response?.data?.errors;               // array or string
+  
+      if (error.response?.status === 422 && errors) {
+        const messages = Array.isArray(errors) ? errors : [errors];
+        const containsProfanity = messages.some(m =>
+          String(m).toLowerCase().includes('prohibited word')
+        );
+  
+        Alert.alert(
+          containsProfanity ? 'Prohibited Language' : 'Validation Error',
+          messages[0] 
+        );
+      } else {
+        console.error('There was an error updating the experience:', error);
+        Alert.alert('Error', 'Unable to update experience. Please try again.');
+      }
     }
-  }
+  };
 
   const fetchExperienceData = async () => {
     try {

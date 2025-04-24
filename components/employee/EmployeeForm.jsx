@@ -78,7 +78,24 @@ export default function EmployeeForm() {
           setSetupComplete(true);
         })
         .catch(error => {
-          console.log('Unable to register user', error);
+          if (
+            error.response &&
+            error.response.status === 422 &&
+            Array.isArray(error.response.data?.errors)
+          ) {
+            const messages = error.response.data.errors;
+            const containsProfanity = messages.some(m =>
+              m.toLowerCase().includes('prohibited word')
+            );
+    
+            Alert.alert(
+              containsProfanity ? 'Prohibited Language' : 'Validation Error',
+              messages[0],            // or messages.join('\n') for all
+            );
+          } else {
+            console.log('Unable to create profile', error);
+            Alert.alert('Error', 'Unable to create your profile. Please try again.');
+          }
         });
     }
   };

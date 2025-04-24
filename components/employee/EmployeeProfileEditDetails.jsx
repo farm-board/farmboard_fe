@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
-import { Text, View, TouchableOpacity, StyleSheet } from 'react-native';
+import { Text, View, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { UserContext } from '../../contexts/UserContext';
 import axios from 'axios';
@@ -55,19 +55,54 @@ export default function EmployeeProfileEditDetails() {
   const navigation = useNavigation();
   const { currentUser, setUserFirstName, setUserLastName, editProfileRefresh, setEditProfileRefresh, profileRefresh, setProfileRefresh } = useContext(UserContext);
 
+  const validateForm = () => {
+    const missingFields = [];
+    if (!data.first_name) missingFields.push('First Name');
+    if (!data.last_name) missingFields.push('Last Name');
+    if (!data.city) missingFields.push('City');
+    if (!data.state) missingFields.push('State');
+    if (!data.zip_code) missingFields.push('Zip Code');
+    if (!data.phone && !data.email) missingFields.push('Phone or Email');
+
+    if (missingFields.length > 0) {
+      Alert.alert('Missing Fields', `Please fill out the following fields: ${missingFields.join(', ')} to create a profile`);
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async () => {
-    try {
-      await axios.put(`${baseUrl}/api/v1/users/${currentUser.id}/employees`, { employee: data });
-      console.log('Updated employee data');
-      // Clear the cache and wait for it to complete
-      await AsyncStorage.removeItem('employee');
-      console.log('Cleared employee data from cache');
-      setProfileRefresh(true);
-      setEditProfileRefresh(true);
-      setUserFirstName(data.first_name);
-      setUserLastName(data.last_name);
-    } catch (error) {
-      console.log('Unable to register user', error);
+    if (validateForm()) {
+      try {
+        await axios.put(`${baseUrl}/api/v1/users/${currentUser.id}/employees`, { employee: data });
+        console.log('Updated employee data');
+        // Clear the cache and wait for it to complete
+        await AsyncStorage.removeItem('employee');
+        console.log('Cleared employee data from cache');
+        setProfileRefresh(true);
+        setEditProfileRefresh(true);
+        setUserFirstName(data.first_name);
+        setUserLastName(data.last_name);
+      } catch (error) {
+        if (
+          error.response &&
+          error.response.status === 422 &&
+          Array.isArray(error.response.data?.errors)
+        ) {
+          const messages = error.response.data.errors;
+          const containsProfanity = messages.some(m =>
+            m.toLowerCase().includes('prohibited word')
+          );
+    
+          Alert.alert(
+            containsProfanity ? 'Prohibited Language' : 'Validation Error',
+            messages[0]           
+          );
+        } else {
+          console.error('There was an error updating the profle:', error);
+          Alert.alert('Error', 'Unable to update profile. Please try again.');
+        }
+      }
     }
   }
 
@@ -173,6 +208,7 @@ export default function EmployeeProfileEditDetails() {
             icon="longitude"
             label="Zip Code:"
             keyboardType="numeric"
+            maxLength={5}
             value={data.zip_code}
             labelStyle={{ fontSize: 18, color: 'white' }}
             onChangeText={(text) => {

@@ -1,8 +1,8 @@
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import * as React from 'react';
-import { useEffect } from 'react';
+import { useEffect, useRef, useContext } from 'react';
 import * as Linking from 'expo-linking';
-import { TouchableOpacity } from 'react-native';
+import { TouchableOpacity, AppState } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -12,7 +12,6 @@ import SetupScreen from './screens/SetupScreen';
 import HomeScreen from './screens/HomeScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import { UserContext, UserProvider } from './contexts/UserContext';
-import { useContext } from 'react';
 import ProfileEditScreen from './screens/ProfileEditScreen';
 import FarmProfileEditDetailsScreen from './screens/FarmProfileEditDetailsScreen';
 import FarmProfileEditMarketplaceContactInfoScreen from './screens/FarmProfileEditMarketplaceContactInfoScreen';
@@ -37,7 +36,7 @@ import MarketplaceViewProfileScreen from './screens/MarketplaceViewProfileScreen
 import ForgotPasswordScreen from './screens/ForgotPasswordScreen.jsx';
 import ResetPasswordScreen from './screens/ResetPasswordScreen.jsx';
 import CustomDrawerContent from './navigation/CustomDrawerContent';
-import mobileAds, { TestIds } from 'react-native-google-mobile-ads';
+import mobileAds from 'react-native-google-mobile-ads';
 import { requestTrackingPermissionsAsync } from 'expo-tracking-transparency';
 
 const Stack = createNativeStackNavigator();
@@ -714,29 +713,36 @@ function DrawerNavigator() {
 function App() {
   const { currentUser, setDeviceId } = useContext(UserContext);
 
+  const appState = useRef(AppState.currentState);
+  const hasRequestedRef = useRef(false);
+  
   useEffect(() => {
-    const initializeAds = async () => {
-      console.log('Starting useEffect');
-  
-      try {
-        // Step 1: Request tracking permissions
-        const { status: trackingStatus } = await requestTrackingPermissionsAsync();
-        console.log('Tracking status:', trackingStatus);
-  
-        if (trackingStatus !== 'granted') {
-          console.log('Tracking permissions not granted');
-        }
-  
-        // Step 2: Initialize mobile ads
-        await mobileAds().initialize();
+    mobileAds()
+      .initialize()
+      .then(() => {
         console.log('Ads initialized');
+      })
+      .catch(err => console.log(err));
+  }, []);
 
-      } catch (error) {
-        console.log('Error in initializing ads:', error);
+  useEffect(() => {
+    const handleAppStateChange = async (nextAppState) => {
+      const wasInBackgroundOrInactive = appState.current.match(/inactive|background/);
+  
+      if (wasInBackgroundOrInactive && nextAppState === 'active' && !hasRequestedRef.current) {
+        hasRequestedRef.current = true;
+        try {
+          const { status } = await requestTrackingPermissionsAsync();
+          console.log('Tracking status:', status);
+        } catch (error) {
+          console.log('Error requesting permissions:', error);
+        }
       }
+      appState.current = nextAppState;
     };
   
-    initializeAds();
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    return () => subscription.remove();
   }, []);
   
   const linking = {

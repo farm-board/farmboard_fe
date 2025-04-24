@@ -118,8 +118,24 @@ export default function FarmProfileEditPostings() {
         setProfileRefresh(true);
       })
       .catch(error => {
-        console.log('Unable to edit posting', error);
-        Alert.alert('Error', 'Unable to edit posting. Please try again.');
+        if (
+          error.response &&
+          error.response.status === 422 &&
+          Array.isArray(error.response.data?.errors)
+        ) {
+          const messages = error.response.data.errors;
+          const containsProfanity = messages.some(m =>
+            m.toLowerCase().includes('prohibited word')
+          );
+  
+          Alert.alert(
+            containsProfanity ? 'Prohibited Language' : 'Validation Error',
+            messages[0],            // or messages.join('\n') for all
+          );
+        } else {
+          console.log('Unable to update posting', error);
+          Alert.alert('Error', 'Unable to update posting. Please try again.');
+        }
       });
   }
 
