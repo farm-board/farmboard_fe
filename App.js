@@ -36,7 +36,7 @@ import MarketplaceViewProfileScreen from './screens/MarketplaceViewProfileScreen
 import ForgotPasswordScreen from './screens/ForgotPasswordScreen.jsx';
 import ResetPasswordScreen from './screens/ResetPasswordScreen.jsx';
 import CustomDrawerContent from './navigation/CustomDrawerContent';
-import mobileAds, { TestIds } from 'react-native-google-mobile-ads';
+import mobileAds from 'react-native-google-mobile-ads';
 import { requestTrackingPermissionsAsync } from 'expo-tracking-transparency';
 
 const Stack = createNativeStackNavigator();
@@ -715,31 +715,32 @@ function App() {
 
   const appState = useRef(AppState.currentState);
   const hasRequestedRef = useRef(false);
+  
+  useEffect(() => {
+    mobileAds()
+      .initialize()
+      .then(() => {
+        console.log('Ads initialized');
+      })
+      .catch(err => console.log(err));
+  }, []);
 
   useEffect(() => {
     const handleAppStateChange = async (nextAppState) => {
-      const wasInBackgroundOrInactive = 
-        appState.current.match(/inactive|background/);
-
+      const wasInBackgroundOrInactive = appState.current.match(/inactive|background/);
+  
       if (wasInBackgroundOrInactive && nextAppState === 'active' && !hasRequestedRef.current) {
+        hasRequestedRef.current = true;
         try {
-          hasRequestedRef.current = true; 
-          // 1. Request tracking permissions
           const { status } = await requestTrackingPermissionsAsync();
           console.log('Tracking status:', status);
-
-          // 2. Initialize ads
-          await mobileAds().initialize();
-          console.log('Ads initialized');
         } catch (error) {
           console.log('Error requesting permissions:', error);
         }
       }
-
-      // Update the ref to the new app state
       appState.current = nextAppState;
     };
-
+  
     const subscription = AppState.addEventListener('change', handleAppStateChange);
     return () => subscription.remove();
   }, []);
