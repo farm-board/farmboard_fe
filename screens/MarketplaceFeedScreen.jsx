@@ -400,24 +400,26 @@ const handleEmail = () => {
     }
   };
 
-  useFocusEffect(
-    React.useCallback(() => {
-      console.log('Screen focused, resetting adShown');
-      setAdShown(false); // Reset adShown when the screen is focused
-      // Run handleAdShow immediately when screen is focused
-      handleAdShow();
-    }, [loaded]) // Add loaded to dependencies
-  );
+  // Uncomment this if you want to show the full screen ad when the screen is focused
 
-  useEffect(() => {
-    if (!adShown) {
-      const timeoutId = setTimeout(() => {
-        handleAdShow();
-      }, 1000); // Check once after 1 second
+  // useFocusEffect(
+  //   React.useCallback(() => {
+  //     console.log('Screen focused, resetting adShown');
+  //     setAdShown(false); // Reset adShown when the screen is focused
+  //     // Run handleAdShow immediately when screen is focused
+  //     handleAdShow();
+  //   }, [loaded]) // Add loaded to dependencies
+  // );
 
-      return () => clearTimeout(timeoutId); // Cleanup the timeout on unmount
-    }
-  }, [loaded, adShown]); // Run when `loaded` or `adShown` changes
+  // useEffect(() => {
+  //   if (!adShown) {
+  //     const timeoutId = setTimeout(() => {
+  //       handleAdShow();
+  //     }, 1000); // Check once after 1 second
+
+  //     return () => clearTimeout(timeoutId); // Cleanup the timeout on unmount
+  //   }
+  // }, [loaded, adShown]); // Run when `loaded` or `adShown` changes
 
   useEffect(() => {
     if (!currentUser && !hasShownNoUserModal) {
@@ -574,7 +576,7 @@ const handleEmail = () => {
   
   return (
     <View style={styles.container}>
-      <InlineAd />
+      {/* <InlineAd /> */}
       <View style={styles.itemRow3}>
         {currentUser ?
         <TouchableOpacity style={styles.addPostingButton} onPress={handleManagePostingsRedirect}>

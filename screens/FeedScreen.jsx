@@ -305,24 +305,26 @@ const FeedScreen = () => {
     }
   };
 
-  useFocusEffect(
-    React.useCallback(() => {
-      console.log('Screen focused, resetting adShown');
-      setAdShown(false); // Reset adShown when the screen is focused
-      // Run handleAdShow immediately when screen is focused
-      handleAdShow();
-    }, [loaded]) // Add loaded to dependencies
-  );
+  // uncomment the below code to show full screen ad when the screen is focused
 
-  useEffect(() => {
-    if (!adShown) {
-      const timeoutId = setTimeout(() => {
-        handleAdShow();
-      }, 1000); // Check once after 1 second
+  // useFocusEffect(
+  //   React.useCallback(() => {
+  //     console.log('Screen focused, resetting adShown');
+  //     setAdShown(false); // Reset adShown when the screen is focused
+  //     // Run handleAdShow immediately when screen is focused
+  //     handleAdShow();
+  //   }, [loaded]) // Add loaded to dependencies
+  // );
 
-      return () => clearTimeout(timeoutId); // Cleanup the timeout on unmount
-    }
-  }, [loaded, adShown]); // Run when `loaded` or `adShown` changes
+  // useEffect(() => {
+  //   if (!adShown) {
+  //     const timeoutId = setTimeout(() => {
+  //       handleAdShow();
+  //     }, 1000); 
+
+  //     return () => clearTimeout(timeoutId);
+  //   }
+  // }, [loaded, adShown]); 
 
   useEffect(() => {
     if (!currentUser && !hasShownNoUserModal) {
@@ -552,7 +554,7 @@ const FeedScreen = () => {
 
   return (
     <View style={styles.container}>
-      <InlineAd />
+      {/* <InlineAd /> */}
       <Text style={styles.TopHeading}>Job Postings</Text>
       <View style={styles.searchContainer}>
         <TextInput
@@ -886,7 +888,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#3A4D39',
     paddingHorizontal: 20,
-    paddingBottom: 20,
   },
   heading: {
     fontSize: 24,
@@ -1144,7 +1145,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   postingsContainer: {
-    marginBottom: 170,
+    marginBottom: 140,
   },
   nativeAdContainer: {
     marginVertical: 10,

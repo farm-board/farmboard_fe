@@ -28,7 +28,7 @@ export default function FarmProfileAddPostings() {
   const [accommodationData, setAccommodationData] = useState({});
   
   const durationList = ['Full-Time', 'Part-Time', 'Seasonal', 'Contract'];
-  const paymentTypeList = ['Hourly', 'Salary'];
+  const paymentTypeList = ['Hourly', 'Daily', 'Weeky', 'Monthly', 'Salary'];
 
   const navigation = useNavigation();
   const route = useRoute();
@@ -146,7 +146,7 @@ export default function FarmProfileAddPostings() {
         <Animated.View entering={FadeInDown.duration(1000).springify()} style={styles.inputContainer}>
           <StyledTextInput
             placeholder="Job Title"
-            icon="account-outline"
+            icon="clipboard-edit-outline"
             label="Job Title:"
             maxLength={45}
             labelStyle={{ fontSize: 18, color: 'white' }}
@@ -157,7 +157,7 @@ export default function FarmProfileAddPostings() {
           <Animated.View entering={FadeInDown.delay(200).duration(1000).springify()} style={styles.inputContainerPayment}>
             <StyledTextInput
               placeholder="Amount"
-              icon="city-variant-outline"
+              icon="currency-usd"
               label="Payment Amount:"
               labelStyle={{ fontSize: 18, color: 'white' }}
               keyboardType="numeric"

@@ -2,7 +2,7 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import * as React from 'react';
 import { useEffect, useRef, useContext } from 'react';
 import * as Linking from 'expo-linking';
-import { TouchableOpacity, AppState } from 'react-native';
+import { TouchableOpacity, AppState, Text } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -709,6 +709,21 @@ function DrawerNavigator() {
   );
 };
 
+const linking = {
+  prefixes: [
+    'farmboard://',
+    'https://farmboard.farmspheredynamics.com',
+  ],
+  config: {
+    screens: {
+      ResetPassword: {
+        path: '--/password/edit',
+        parse: { token: (t) => t },   // gives you route.params.token
+      },
+    },
+  },
+};
+
 
 function App() {
   const { currentUser, setDeviceId } = useContext(UserContext);
@@ -744,22 +759,9 @@ function App() {
     const subscription = AppState.addEventListener('change', handleAppStateChange);
     return () => subscription.remove();
   }, []);
-  
-  const linking = {
-    prefixes: [
-      'farmboard://', 
-      'https://farmboard.farmspheredynamics.com'
-    ],
-    config: {
-      screens: {
-        ResetPassword: '--/password/edit',
-      },
-    },
-  };
-
 
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking} fallback={<Text>Loading…</Text>}>
       {currentUser ? (
         // Logged-in users get the main drawer that has "Home" or "Manage Postings" etc.
         <DrawerNavigator />
